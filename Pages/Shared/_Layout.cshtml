@@ -1,0 +1,239 @@
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+@using System.IO
+@inject IWebHostEnvironment WebHostEnvironment
+@{
+    var username = HttpContextAccessor.HttpContext?.Session.GetString("Username") ?? string.Empty;
+    @* var requestPath = HttpContextAccessor.HttpContext?.Request.Path.Value?.ToLowerInvariant() ?? string.Empty; *@
+    var rawRequestPath = HttpContextAccessor.HttpContext?.Request.Path.Value?.ToLowerInvariant() ?? string.Empty;
+    var requestPath = rawRequestPath;
+    if (rawRequestPath.Length > 1 && rawRequestPath.EndsWith("/"))
+    {
+        requestPath = rawRequestPath.TrimEnd('/');
+    }
+    var navbarPathsForHeader = new[] {
+"/",
+"/index"
+};
+    var showHeader = navbarPathsForHeader.Contains(requestPath);
+}
+<!DOCTYPE html>
+<html lang="vi" data-bs-theme="light">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] | BusTicket</title>
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-4Q6Gf2aSP4eDXB8Miphtr37CMZZQ5oXLH2yaXMJ2w8e2ZtHTl7GptT4jmndRuHDT" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/css/_home.css" asp-append-version="true" />
+    <link rel="icon" href="/images/logo5.png" type="image/png" />
+</head>
+
+<body class="@ViewData["BodyClass"]">
+    <nav>
+        <div class="left">
+            <div class="logo">
+                <a asp-page="/Index">
+                    <img src="/images/LogoAndSlogan2.png">
+                </a>
+            </div>
+            <div class="links">
+                <a href="/Index" class="@((requestPath == "/" || requestPath == "/index") ? "active" : "")">Trang
+                    chủ</a>
+                <a href="/Home/Schedule/Index" class="@(requestPath.StartsWith("/home/schedule") ? "active" : "")">Lịch
+                    trình</a>
+                <a href="/Home/ManageBooking/Index"
+                    class="@(requestPath.StartsWith("/home/managebooking") ? "active" : "")">Tra cứu vé</a>
+                <a href="/Home/Posts/Index" class="@(requestPath.StartsWith("/home/posts") ? "active" : "")">Tin tức</a>
+                <a href="/Home/AboutUs/Index" class="@(requestPath.StartsWith("/home/aboutus") ? "active" : "")">Về
+                    Chúng tôi</a>
+                <a href="/Home/ContactUs/Index"
+                    class="@(requestPath.StartsWith("/home/contactus") ? "active" : "")">Liên hệ Chúng tôi</a>
+            </div>
+        </div>
+        <div class="buttons">
+            <a href="#">
+                @* <i class="bx bx-support" title="Hỗ trợ"></i>  *@
+                Hỗ trợ
+            </a>
+
+            @if (string.IsNullOrEmpty(username))
+            {
+                <a href="/Account/Login/Login" title="Đăng nhập"
+                    style="background-color: #fff; color: #1976D2; border-radius: 12px;">
+                    @* <i class="bx bx-user"></i>  *@
+                    Đăng nhập
+                </a>
+            }
+            else
+            {
+                <a href="/ForCustomer/Notifications/Index"
+                    style="position: relative; text-decoration:none; color: #1976D2; display: inline-flex; align-items: center; gap: 1rem; padding: 10px 10px;"
+                    title="Thông báo">
+                    <i class="bx bx-bell" style="font-size: 24px;"></i>
+                </a>
+                <div class="dropdown"
+                    style="display: inline-flex; align-items: center; vertical-align: middle; background-color: #1976D2;">
+                    <a href="#" class="dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false"
+                        title="Tài khoản của tôi"
+                        style="text-decoration: none; color: #1976D2; display: inline-flex; align-items: center; gap: 0.5rem; padding: 10px 0px 10px 15px;">
+
+
+                        <i class='bx bx-user' style="font-size: 24px; margin-right: 8px;"></i>
+                        @* <span style="margin-right: 5px;">@username</span> *@
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end">
+                        <li>
+                            <h6 class="dropdown-header" style="font-size: 1.3rem;">Tài khoản của: @username</h6>
+                        </li>
+                        <li><a class="dropdown-item" href="/ForCustomer/MyAccount/Index" style="background-color: white;"><i
+                                    class='bx bxs-user-detail'></i>Thông tin cá nhân</a></li>
+                        <li><a class="dropdown-item" href="/ForCustomer/MyOrders/Index" style="background-color: white;"><i
+                                    class='bx bxs-receipt'></i>Đơn hàng của tôi</a></li>
+                        <li><a class="dropdown-item" href="/ForCustomer/MyReviews/Index" style="background-color: white;"><i
+                                    class='bx bxs-message-square-dots'></i>Nhận xét chuyến đi</a></li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li>
+                            <form asp-page="/Account/Logout/Index" method="post" style="margin:0;">
+                                <button type="submit" class="dropdown-item"
+                                    style="width: 100%; text-align: center; background-color: white; font-size: 1.5rem; color: red;">
+                                    <i class='bx bx-log-out-circle'></i> Đăng xuất
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            }
+        </div>
+    </nav>
+
+    @if (showHeader)
+    {
+        <header>
+            <div class="info">
+                @if (string.IsNullOrEmpty(username))
+                {
+                    <h1>Chào Mừng Đến Với BusTicket - Đặt Vé Xe Khách Tiện Lợi Dễ Dàng</h1>
+                    <p>Vui Lòng Đăng Nhập Để Sử Dụng Toàn Bộ Chức Năng Của Trang Web</p>
+                }
+                else
+                {
+                    <h1>Xin Chào, @username</h1>
+                    <p>Cùng Nhau Làm Nên Những Chuyến Đi Thú Vị Nhé!</p>
+                }
+            </div>
+            <div class="search-trip-panel" style="margin-bottom: 80px;">
+                @await Component.InvokeAsync("SearchTripPanel")
+            </div>
+        </header>
+    }
+    <main>
+        @RenderBody()
+    </main>
+    <div id="chatbot-btn" title="Trò chuyện với AI">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" alt="Chatbot" />
+    </div>
+    <div id="chatbot-box">
+        <div id="chatbot-header">
+            <span><img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" style="width: 24px;height: 24px;">
+                Hỗ trợ AI</span>
+            <button id="chatbot-close">&times;</button>
+        </div>
+        <div id="chatbot-faq">
+            <button>Cách đặt vé online?</button>
+            <button>Hủy vé như thế nào?</button>
+            <button>Làm thế nào để thanh toán?</button>
+            <button>Liên hệ tổng đài?</button>
+        </div>
+        <div id="chat"></div>
+        <div id="chatbot-input-area">
+            <input id="userInput" type="text" placeholder="Đặt câu hỏi cho AI..." autocomplete="off" />
+            <button id="chatbot-send-btn">&#9658;</button>
+        </div>
+    </div>
+    <footer>
+        <section class="columns">
+            <div>
+                <img src="/images/LogoAndSlogan.png" alt="Logo&Slogan" style="margin-bottom: 5px;">
+                <p>Địa chỉ: <a href="#" class="normal">Số 123 Mã Lò, Bình Trị Đông A, Bình Tân, Tp. HCM</a></p>
+                <p>Email: <a href="#" class="email-footer">hotro@busticket.vn</a></p>
+                <p>Điện thoại: <a href="#" class="normal">0393 999 999</a></p>
+            </div>
+            <div>
+                <h2>Tuyến đường</h2>
+                <ul class="footer-links">
+                    <li><a asp-page="#">Sài Gòn - Huế</a></li>
+                    <li><a asp-page="#">Sài Gòn - Đà Nẵng</a></li>
+                    <li><a asp-page="#">Sài Gòn - Nha Trang</a></li>
+                    <li><a asp-page="#">Sài Gòn - Phan Thiết</a></li>
+                    <li><a asp-page="#">Hà Nội - Huế</a></li>
+                    <li><a asp-page="#">Hải Phòng - Hà Nội</a></li>
+                    <li><a asp-page="#">Vinh - Hà Nội</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2>Nhà xe đối tác</h2>
+                <ul class="footer-links">
+                    <li><a asp-page="#">Phương Trang FUTA Busline</a></li>
+                    <li><a asp-page="#">Xe Thanh Danh</a></li>
+                    <li><a asp-page="#">Xe Long Vân Limousine</a></li>
+                    <li><a asp-page="#">Xe Thành Tâm</a></li>
+                    <li><a asp-page="#">Xe Phương Liên</a></li>
+                    <li><a asp-page="#">Xe Minh Trí</a></li>
+                    <li><a asp-page="#">Xe Liên Hưng</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2>Bến xe hợp tác</h2>
+                <ul class="footer-links">
+                    <li><a asp-page="#">Bến xe Nước Ngầm</a></li>
+                    <li><a asp-page="#">Bến xe Miền Tây</a></li>
+                    <li><a asp-page="#">Bến xe Miền Đông</a></li>
+                    <li><a asp-page="#">Bến xe Trung tâm Đà Nẵng</a></li>
+                    <li><a asp-page="#">Bến xe Mỹ Đình</a></li>
+                    <li><a asp-page="#">Bến xe An Sương</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2>Hỗ trợ khách hàng</h2>
+                <ul class="footer-links">
+                    <li><a asp-page="/Home/BookingGuide/Index">Hướng dẫn đặt vé</a></li>
+                    <li><a asp-page="/Home/ManageBooking/Index">Tra cứu vé</a></li>
+                    <li><a asp-page="/HelpCenter">Trung tâm trợ giúp</a></li>
+                </ul>
+            </div>
+            <div>
+                <h2>Về Chúng tôi</h2>
+                <ul class="footer-links">
+                    <li><a asp-page="/Home/AboutUs/Index">Giới thiệu</a></li>
+                    <li><a asp-page="/Account/DriverRegister/Index">Tuyển dụng</a></li>
+                    <li><a asp-page="/Home/ContactUs/Index">Liên hệ</a></li>
+                    <li><a asp-page="/Privacy">Chính sách bảo mật</a></li>
+                </ul>
+            </div>
+        </section>
+    </footer>
+    <div class="copyright-BT">
+        <p>© @DateTime.Now.Year | Bản quyền thuộc về StackSurfers | Chịu trách nhiệm sản xuất: Huỳnh Ngọc Quí - Vương
+            Khánh Nhân - Trần Diệu Vỹ</p>
+    </div>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+        integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO"
+        crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <script src="~/js/chatbot.js" asp-append-version="true"></script>
+    @RenderSection("Scripts", required: false)
+</body>
+
+</html>

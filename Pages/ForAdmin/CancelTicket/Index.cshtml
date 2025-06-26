@@ -1,0 +1,132 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.CancelManage.IndexModel
+@{
+    Layout="_AdminLayout";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>Duyệt Yêu cầu Hủy vé</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>
+            /
+            <li><a asp-page="./Index" class="active" style="text-decoration: none;">Hủy vé</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">@TempData["SuccessMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">@TempData["ErrorMessage"]<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-journal-check bx'></i>
+            <h3>Yêu cầu hủy vé đang chờ duyệt (@Model.PendingCancellations.Count)</h3>
+        </div>
+        @if (Model.PendingCancellations.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã YC</th>
+                        <th>Vé #</th>
+                        <th>Khách hàng</th>
+                        <th>Chuyến</th>
+                        <th>Khởi hành</th>
+                        <th>Lý do hủy</th>
+                        <th>Ngày YC</th>
+                        <th>Giá vé</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var req in Model.PendingCancellations)
+                    {
+                        <tr>
+                            <td>@req.CancellationId</td>
+                            <td>@req.TicketId</td>
+                            <td>@req.CustomerName</td>
+                            <td>@req.RouteName</td>
+                            <td>@req.DepartureTime.ToString("dd/MM/yy HH:mm")</td>
+                            <td>@req.CustomerReason</td>
+                            <td>@req.RequestedAt.ToString("dd/MM/yy HH:mm")</td>
+                            <td>@req.TicketPrice.ToString("N0")đ</td>
+                            <td>
+                                <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#processCancellationModal"
+                                        data-cancellation-id="@req.CancellationId"
+                                        data-ticket-id="@req.TicketId"
+                                        data-customer-name="@req.CustomerName"
+                                        data-customer-reason="@req.CustomerReason">
+                                    Xử lý
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="text-center p-3">Không có yêu cầu hủy vé nào đang chờ duyệt.</p>
+        }
+    </div>
+</div>
+
+<!-- Process Cancellation Modal -->
+<div class="modal fade" id="processCancellationModal" tabindex="-1" aria-labelledby="processCancellationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="ProcessRequest">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="processCancellationModalLabel">Xử lý Yêu cầu Hủy vé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Yêu cầu hủy vé #<strong id="modalTicketId"></strong> của khách hàng <strong id="modalCustomerName"></strong>.</p>
+                    <p>Lý do khách hàng cung cấp: <em id="modalCustomerReason"></em></p>
+                    <input type="hidden" asp-for="AdminAction.CancellationId" id="modalCancellationId" />
+                    <div class="mb-3">
+                        <label asp-for="AdminAction.AdminNotes" class="form-label">Ghi chú / Lý do từ chối (nếu có):</label>
+                        <textarea asp-for="AdminAction.AdminNotes" class="form-control" rows="3"></textarea>
+                        <span asp-validation-for="AdminAction.AdminNotes" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" asp-for="AdminAction.Action" value="Reject" class="btn btn-danger">Từ chối</button>
+                    <button type="submit" asp-for="AdminAction.Action" value="Approve" class="btn btn-success">Duyệt Hủy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var processModal = document.getElementById('processCancellationModal');
+            if (processModal) {
+                processModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var cancellationId = button.getAttribute('data-cancellation-id');
+                    var ticketId = button.getAttribute('data-ticket-id');
+                    var customerName = button.getAttribute('data-customer-name');
+                    var customerReason = button.getAttribute('data-customer-reason');
+
+                    processModal.querySelector('#modalCancellationId').value = cancellationId;
+                    processModal.querySelector('#modalTicketId').textContent = ticketId;
+                    processModal.querySelector('#modalCustomerName').textContent = customerName;
+                    processModal.querySelector('#modalCustomerReason').textContent = customerReason;
+                    processModal.querySelector('textarea[name="AdminAction.AdminNotes"]').value = ''; // Clear notes
+                });
+            }
+        });
+    </script>
+}

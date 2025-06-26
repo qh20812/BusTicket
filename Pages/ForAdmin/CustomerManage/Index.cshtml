@@ -1,0 +1,159 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.CustomerManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+}
+<div class="header">
+    <div class="left">
+        <h1>Quản lý khách hàng</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a asp-page="./Index" class="active" style="text-decoration: none;">Khách hàng</a>
+            </li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+            <div class="header">
+            <i class='bi bi-person-fill-gear bx'></i>  
+            <h3>Danh sách khách hàng </h3>
+            <i class="bx bx-filter" id="filter-icon" style="cursor:pointer;" title="Sắp xếp theo tên"></i>
+            <form id="filter-form" method="get" style="display: none;">
+                <input type="hidden" name="SortName" id="SortNameInput" value="@Model.SortName"/>
+                <input type="hidden" name="SearchName" value="@Model.SearchName"/>
+            </form>
+            <div style="position:relative; display:inline-block;">
+                <i class="bx bx-search" id="search-icon" style="cursor:pointer;"></i>
+                <div class="search-panel" style="display:none;">
+                    <form method="get">
+                        <input type="text" name="SearchName" placeholder="Nhập tên khách hàng..." value="@Model.SearchName"/>
+                        <button type="submit">Tìm</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="truncate" title="Số thứ tự">STT</th>
+                    <th class="truncate" title="Mã khách hàng">Mã KH</th>
+                    <th class="truncate" title="Họ tên">Họ tên</th>
+                    <th class="truncate" title="Email">Email</th>
+                    <th class="truncate" title="Số điện thoại">SĐT</th>
+                    <th class="truncate" title="Ngày đăng ký">Ngày đăng ký</th>
+                    <th class="truncate" title="Thao tác">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Customers != null && Model.Customers.Any())
+                {
+                    var stt = 1;
+                    @foreach(var customer in Model.Customers)
+                    {
+                        <tr>
+                            <td class="truncate" title="@(stt++)">@(stt++)</td>
+                            <td class="truncate" title="@(customer.UserId)">@customer.UserId</td>
+                            <td class="truncate" title="@(string.IsNullOrEmpty(customer.Fullname)?"Chưa cung cấp":customer.Fullname)">@(string.IsNullOrEmpty(customer.Fullname) ? "Chưa cung cấp": customer.Fullname)</td>
+                            <td class="truncate" title="@(string.IsNullOrEmpty(customer.Email) ? "Chưa cung cấp" : customer.Email)">@(string.IsNullOrEmpty(customer.Email) ? "Chưa cung cấp" : customer.Email)</td>
+                            <td class="truncate" title="@(string.IsNullOrEmpty(customer.Phone) ? "Chưa cung cấp" : customer.Phone)">@(string.IsNullOrEmpty(customer.Phone) ? "Chưa cung cấp" : customer.Phone)</td>
+                            <td class="truncate" title="@(customer.CreatedAt.ToString("dd/MM/yyyy"))">@customer.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="truncate">
+                                <a asp-page="./Edit" asp-route-id="@customer.UserId" class="btn btn-sm btn-primary">Sửa</a>
+                                @if (customer.IsActive)
+                                {
+                                    <form method="post" asp-page-handler="Block" asp-route-id="@customer.UserId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn chặn khách hàng này không?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Chặn</button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-page-handler="Unblock" asp-route-id="@customer.UserId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn mở chặn khách hàng này không?');">
+                                        <button type="submit" class="btn btn-sm btn-success">Mở chặn</button>
+                                    </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center">Không tìm thấy khách hàng nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchIcon = document.getElementById('search-icon');
+    const searchPanel = document.querySelector('.search-panel');
+
+    if (searchIcon && searchPanel) {
+        searchIcon.onclick = function (event) {
+            event.stopPropagation(); 
+            searchPanel.style.display = (searchPanel.style.display === 'none' ? 'block' : 'none');
+        };
+        document.addEventListener('click', function (e) {
+            if (searchPanel.style.display === 'block' && !searchPanel.contains(e.target) && e.target !== searchIcon) {
+                searchPanel.style.display = 'none';
+            }
+        });
+    }
+    const filterIcon = document.getElementById('filter-icon');
+    const filterForm = document.getElementById('filter-form');
+    const sortNameInput = document.getElementById('SortNameInput'); 
+
+    if (filterIcon && filterForm && sortNameInput) {
+        let sortStates = ["", "az", "za"];
+        let currentSortValue = sortNameInput.value || ""; 
+        let sortIndex = sortStates.indexOf(currentSortValue);
+        if (sortIndex === -1) sortIndex = 0; 
+
+        filterIcon.onclick = function () {
+            sortIndex = (sortIndex + 1) % sortStates.length;
+            sortNameInput.value = sortStates[sortIndex];
+            filterForm.submit();
+        };
+    }
+    const alerts = document.querySelectorAll('.alert-dismissible.fade.show');
+    alerts.forEach(function(alert) {
+        setTimeout(function() {
+            if (bootstrap && bootstrap.Alert) {
+                const alertInstance = bootstrap.Alert.getInstance(alert);
+                if (alertInstance) {
+                    alertInstance.close();
+                }
+            } else { 
+                alert.style.display = 'none';
+            }
+        }, 10000); 
+    });
+});
+</script>

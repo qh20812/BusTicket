@@ -1,0 +1,68 @@
+@page
+@model BusTicketSystem.Pages.Home.ManageBooking.IndexModel
+@{
+    Layout="_Layout";
+    ViewData["Title"]="Tra Cứu Vé";
+}
+
+<div class="manage-booking-container">
+    <div class="form-manage-booking-container">
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <div class="form-group-manage-booking">
+                <input asp-for="PhoneNumber" class="input-phone" placeholder="Số điện thoại" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn-manage-booking">
+                <i class="bi bi-search"></i>Tra Cứu Vé
+            </button>
+        </form>
+    </div>
+    @if(Model.SearchPerformed){
+        if(Model.Tickets !=null && Model.Tickets.Any()){
+            <div class="search-results-container">
+                <h3 class="result-title">Kết quả tra cứu cho: <span class="fw-bold text-primary">@Model.PhoneNumber</span></h3>
+                <div class="table-search-results">
+                    <table class="table table-hover booking-results-table">
+                        <thead>
+                            <tr>
+                                <th>Mã Vé</th>
+                                <th>Hành Khách</th>
+                                <th>Tuyến Đường</th>
+                                <th>Khởi Hành</th>
+                                <th>Trạng Thái</th>
+                                <th class="text-center">Chi Tiết</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var ticket in Model.Tickets)
+                            {
+                                <tr>
+                                    <td data-label="Mã Vé:">@ticket.TicketId</td>
+                                    <td data-label="Hành Khách:">@(ticket.User?.Fullname ?? "N/A")</td>
+                                    <td data-label="Tuyến Đường:">@ticket.Trip?.Route?.Departure - @ticket.Trip?.Route?.Destination</td>
+                                    <td data-label="Khởi Hành:">@(ticket.Trip?.DepartureTime.ToString("dd/MM/yyyy HH:mm") ?? "N/A")</td>
+                                    <td data-label="Trạng Thái:"><span class="ticket-status status-@(ticket.Status.ToString().Replace(" ","-").ToLower())">@ticket.Status</span></td>
+                                    <td data-label="Chi Tiết:" class="text-center">
+                                        @* <a asp-page="/Home/BookingDetails" asp-route-ticketId="@ticket.TicketId" class="btn btn-sm btn-outline-primary view-details-btn"> *@
+                                        <a asp-page="/ForCustomer/TicketInvoice/Index" asp-route-orderId="@ticket.OrderId" class="btn btn-sm btn-outline-primary view-details-btn">
+                                            <i class="bi bi-receipt-cutoff"></i> Xem Hóa Đơn
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning text-center mt-4 no-results-found">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Không tìm thấy vé nào được đặt với số điện thoại <strong>@Model.PhoneNumber</strong>.
+                Vui lòng kiểm tra lại số điện thoại hoặc <a asp-page="/Contact" class="alert-link">liên hệ hỗ trợ</a>.
+            </div>
+        }
+    }
+</div>

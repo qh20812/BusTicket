@@ -1,0 +1,144 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.OrderManage.IndexModel
+@{
+    Layout="_PartnerLayout"; // Assuming you have a _PartnerLayout.cshtml
+    ViewData["Title"]="Quản lý Đơn hàng";
+}
+<div class="header">
+    <div class="left">
+        <h1>Quản lý đơn hàng</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>
+            /
+            <li><a asp-page="/ForPartner/OrderManage/Index" class="active" style="text-decoration: none;">Đơn hàng</a></li>
+        </ul>
+    </div>
+    @* <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a> *@
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-receipt'></i>
+            <h3>Danh sách Đơn hàng (@Model.OrdersDisplay.Count)</h3>
+        </div>
+
+        <!-- Filter and Search Form -->
+        <form method="get" class="mb-3 p-3 border rounded bg-light">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label asp-for="SearchTerm" class="form-label visually-hidden">Tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Mã đơn, tên KH, email, mã vé..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FilterStatus" class="form-label visually-hidden">Trạng thái</label>
+                    <select asp-for="FilterStatus" asp-items="Model.Statuses" class="form-select form-select-sm">
+                        <option value="">Tất cả trạng thái</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SortOrder" class="form-label visually-hidden">Sắp xếp</label>
+                    <select asp-for="SortOrder" class="form-select form-select-sm">
+                        <option value="date_desc">Ngày đặt (Mới nhất)</option>
+                        <option value="date_asc">Ngày đặt (Cũ nhất)</option>
+                        <option value="total_desc">Tổng tiền (Cao nhất)</option>
+                        <option value="total_asc">Tổng tiền (Thấp nhất)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>
+                </div>
+            </div>
+        </form>
+
+        @if (Model.OrdersDisplay.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã Đơn</th>
+                        <th>Khách hàng</th>
+                        <th>Ngày đặt</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Số vé</th>
+                        <th>Chuyến đi đầu tiên (của nhà xe)</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var order in Model.OrdersDisplay)
+                    {
+                        <tr>
+                            <td class="truncate" title="@order.OrderId">@order.OrderId</td>
+                            <td class="truncate" title="@order.CustomerName">
+                                @(order.CustomerName)
+                                <br />
+                                <small class="text-muted">@order.CustomerEmail</small>
+                            </td>
+                            <td class="truncate" title="@order.OrderDate">@order.OrderDate.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="truncate" title="@order.TotalAmountDisplay">@order.TotalAmountDisplay</td>
+                            <td class="truncate-status" title="@order.StatusDisplayName"><span class="status @order.StatusCssClass">@order.StatusDisplayName</span></td>
+                            <td class="truncate" title="@order.TicketCountForPartner">@order.TicketCountForPartner</td>
+                            <td class="truncate" title="@order.FirstTripInfoForPartner">@(order.FirstTripInfoForPartner)</td>
+                            <td>
+                                <a asp-page="./TicketInfo" asp-route-orderId="@order.OrderId" class="btn btn-sm btn-outline-info" title="Xem chi tiết đơn hàng">
+                                    <i class="bi bi-eye"></i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Không có đơn hàng nào phù hợp.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Tự động ẩn thông báo TempData sau 7 giây
+        document.addEventListener('DOMContentLoaded', function () {
+            const alerts = document.querySelectorAll('.alert-dismissible.fade.show[role="alert"]');
+            alerts.forEach(function (alert) {
+                setTimeout(function () {
+                    if (bootstrap && bootstrap.Alert) {
+                        const alertInstance = bootstrap.Alert.getInstance(alert);
+                        if (alertInstance) {
+                            alertInstance.close();
+                        }
+                    } else {
+                        alert.style.display = 'none';
+                    }
+                }, 7000);
+            });
+        });
+    </script>
+}

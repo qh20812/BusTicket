@@ -1,0 +1,339 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.DriverManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Nhân sự";
+}
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a href="/ForAdmin/DriverManage/Index" class="active" style="text-decoration: none;">Nhân sự</a>
+            </li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i> Tải CSV
+</a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi:</strong> @TempData["ActionError"]
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<!-- Khu vực tìm kiếm và filter chung -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="header" style="background-color: transparent; padding: 0; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div> <!-- Để trống cho cân đối hoặc thêm tiêu đề nếu muốn --> </div>
+            <div>
+                <i class="bx bx-filter" id="filter-driver-icon" style="cursor:pointer; font-size: 1.5rem; margin-right: 10px;" title="Sắp xếp theo tên"></i>
+                <form id="filter-form-driver" method="get" style="display: none;">
+                    <input type="hidden" name="SortName" id="SortNameDriverInput" value="@Model.SortName" />
+                    <input type="hidden" name="SearchName" value="@Model.SearchName" />
+                </form>
+                <div style="position:relative; display:inline-block;">
+                    <i class="bx bx-search" id="search-driver-icon" style="cursor:pointer; font-size: 1.5rem;"></i>
+                    <div class="search-driver-panel" style="display:none; position: absolute; top: 100%; right: 0; background-color: white; border: 1px solid #ccc; padding: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <form method="get">
+                            <input type="text" name="SearchName" placeholder="Nhập tên tài xế..." value="@Model.SearchName" class="form-control mb-2" />
+                            <button type="submit" class="btn btn-primary btn-sm">Tìm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Tab Hồ sơ ứng tuyển -->
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-file-earmark-person bx'></i>
+            <h3>Hồ sơ ứng tuyển (@Model.PendingApplications.Count)</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Họ tên</th>
+                    <th>Email</th>
+                    <th>SĐT</th>
+                    <th>Bằng lái</th>
+                    <th>Ngày nộp</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PendingApplications.Any())
+                {
+                    var stt = 1;
+                    @foreach (var app in Model.PendingApplications)
+                    {
+                        <tr>
+                            <td class="truncate" title="@(stt++)">@(stt++)</td>
+                            <td class="truncate" title="@app.Fullname">@app.Fullname</td>
+                            <td class="truncate" title="@(app.Email??"N/A")">@(app.Email ?? "N/A")</td>
+                            <td class="truncate" title="@(app.Phone??"N/A")">@(app.Phone ?? "N/A")</td>
+                            <td class="truncate" title="@app.LicenseNumber">@app.LicenseNumber</td>
+                            <td class="truncate" title="@app.CreatedAt.ToString("dd/MM/yyyy")">@app.CreatedAt.ToString("dd/MM/yyyy")</td>
+                            <td class="truncate-status" title="@app.StatusDisplayName"><span class="status @app.Status.ToString().ToLower()">@app.StatusDisplayName</span></td>
+                            <td>
+                                @if (app.Status == BusTicketSystem.Models.DriverStatus.PendingApproval)
+                                {
+                                    <form method="post" asp-page-handler="Review" asp-route-id="@app.DriverId" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-info">Nhận hồ sơ</button>
+                                    </form>
+                                }
+                                @if (app.Status == BusTicketSystem.Models.DriverStatus.UnderReview)
+                                {
+                                    <form method="post" asp-page-handler="Approve" asp-route-id="@app.DriverId" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-success">Tuyển dụng</button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-warning btn-action-modal"
+                                            data-bs-toggle="modal" data-bs-target="#driverActionModal"
+                                            data-driver-id="@app.DriverId" data-driver-name="@app.Fullname" data-action-type="Reject" data-modal-title="Từ chối hồ sơ">
+                                        Từ chối
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td></td>
+                        <td colspan="8" class="text-center">Không có hồ sơ ứng tuyển nào.</td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Tab Tài xế chính thức -->
+<div class="bottom-data mt-4">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-person-check bx'></i>
+            <h3>Tài xế chính thức (@Model.OfficialDrivers.Count)</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th class="truncate">STT</th>
+                    <th class="truncate">Mã TX</th>
+                    <th class="truncate" title="Họ tên">Họ tên</th>
+                    <th class="truncate">SĐT</th>
+                    <th class="truncate" title="Bằng lái">Bằng lái</th>
+                    <th class="truncate" title="Ngày tham gia">Ngày tham gia</th>
+                    <th class="truncate" title="Trạng thái">Trạng thái</th>
+                    <th class="truncate" title="Thao tác">Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.OfficialDrivers.Any())
+                {
+                    var stt = 1;
+                    @foreach (var driver in Model.OfficialDrivers)
+                    {
+                        <tr>
+                            <td class="truncate">@(stt++)</td>
+                            <td class="truncate">@driver.DriverId</td>
+                            <td class="truncate" title="@driver.Fullname">@driver.Fullname</td>
+                            <td class="truncate" title="@driver.Phone">@(driver.Phone ?? "N/A")</td>
+                            <td class="truncate" title="@driver.LicenseNumber">@driver.LicenseNumber</td>
+                            <td class="truncate" title="@driver.JoinedDate">@(driver.JoinedDate.HasValue ? driver.JoinedDate.Value.ToString("dd/MM/yyyy") : "Chưa cập nhật")</td>
+                            <td class="truncate" title="@driver.StatusDisplayName">
+                                <span class="status @driver.Status.ToString().ToLower()">@driver.StatusDisplayName</span>
+                                @if(driver.Status == BusTicketSystem.Models.DriverStatus.Terminated || driver.Status == BusTicketSystem.Models.DriverStatus.Rejected)
+                                {
+                                    @if (!string.IsNullOrEmpty(driver.TerminationReason))
+                                    {
+                                        <i class="bx bx-info-circle" title="Lý do: @driver.TerminationReason" style="cursor:help; color: #0d6efd; margin-left: 5px;"></i>
+                                    }
+                                }
+                            </td>
+                            <td class="truncate">
+                                <a asp-page="./Edit" asp-route-id="@driver.DriverId" class="btn btn-sm btn-primary @(driver.Status == BusTicketSystem.Models.DriverStatus.Terminated || driver.Status == BusTicketSystem.Models.DriverStatus.Rejected || driver.Status == BusTicketSystem.Models.DriverStatus.Resigned ? "disabled" : "")">Sửa</a>
+                                @if (driver.Status == BusTicketSystem.Models.DriverStatus.Active || driver.Status == BusTicketSystem.Models.DriverStatus.OnLeave)
+                                {
+                                    <button type="button" class="btn btn-sm btn-danger btn-action-modal"
+                                            data-bs-toggle="modal" data-bs-target="#driverActionModal"
+                                            data-driver-id="@driver.DriverId" data-driver-name="@driver.Fullname" data-action-type="Terminate" data-modal-title="Sa thải tài xế">
+                                        Sa thải
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr><td colspan="8" class="text-center">Không có tài xế chính thức nào.</td></tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Modal Chung cho Sa thải / Từ chối -->
+<div class="modal fade" id="driverActionModal" tabindex="-1" aria-labelledby="driverActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="ProcessAction" id="driverActionForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="driverActionModalLabel">Xác nhận hành động</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn <strong id="actionNameModal"></strong> tài xế/hồ sơ <strong id="driverNameToActionModal"></strong>?</p>
+                    <input type="hidden" asp-for="DriverActionInput.DriverIdToAction" id="driverIdToActionInputModal" />
+                    <input type="hidden" asp-for="DriverActionInput.ActionType" id="actionTypeInputModal" />
+                    <div class="mb-3">
+                        <label asp-for="DriverActionInput.Reason" class="form-label fw-bold">Lý do:</label>
+                        <textarea asp-for="DriverActionInput.Reason" class="form-control" rows="4" placeholder="Nhập lý do (bắt buộc, tối thiểu 10 ký tự)"></textarea>
+                        <span asp-validation-for="DriverActionInput.Reason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                    <button type="submit" class="btn btn-danger" id="confirmActionButton">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchDriverIcon = document.getElementById('search-driver-icon');
+        const searchDriverPanel = document.querySelector('.search-driver-panel');
+        if (searchDriverIcon && searchDriverPanel) {
+            searchDriverIcon.onclick = function (event) {
+                event.stopPropagation();
+                searchDriverPanel.style.display = (searchDriverPanel.style.display === 'none' ? 'block' : 'none');
+            };
+            document.addEventListener('click', function (e) {
+                if (searchDriverPanel.style.display === 'block' && !searchDriverPanel.contains(e.target) && e.target !== searchDriverIcon) {
+                    searchDriverPanel.style.display = 'none';
+                }
+            });
+        }
+
+        const filterDriverIcon = document.getElementById('filter-driver-icon');
+        const filterDriverForm = document.getElementById('filter-form-driver');
+        const sortNameDriverInput = document.getElementById('SortNameDriverInput');
+        if (filterDriverIcon && filterDriverForm && sortNameDriverInput) {
+            let sortStatesDriver = ["", "az", "za"];
+            let currentSortValueDriver = sortNameDriverInput.value || "";
+            let sortIndexDriver = sortStatesDriver.indexOf(currentSortValueDriver);
+            if (sortIndexDriver === -1) sortIndexDriver = 0;
+            filterDriverIcon.onclick = function () {
+                sortIndexDriver = (sortIndexDriver + 1) % sortStatesDriver.length;
+                sortNameDriverInput.value = sortStatesDriver[sortIndexDriver];
+                filterDriverForm.submit();
+            };
+        }
+        var actionModalElement = document.getElementById('driverActionModal');
+        if (actionModalElement) {
+            var actionModal = new bootstrap.Modal(actionModalElement);
+            actionModalElement.addEventListener('show.bs.modal', function (event) {
+                var button = event.relatedTarget;
+                var driverId = button.getAttribute('data-driver-id');
+                var driverName = button.getAttribute('data-driver-name');
+                var actionType = button.getAttribute('data-action-type'); // "Reject" or "Terminate"
+                var modalTitle = button.getAttribute('data-modal-title');
+
+                actionModalElement.querySelector('#driverActionModalLabel').textContent = modalTitle;
+                actionModalElement.querySelector('#driverNameToActionModal').textContent = driverName;
+                actionModalElement.querySelector('#driverIdToActionInputModal').value = driverId;
+                actionModalElement.querySelector('#actionTypeInputModal').value = actionType;
+                actionModalElement.querySelector('#actionNameModal').textContent = (actionType === "Reject" ? "từ chối" : "sa thải");
+                
+                var confirmButton = actionModalElement.querySelector('#confirmActionButton');
+                confirmButton.className = 'btn'; // Reset class
+                confirmButton.classList.add(actionType === "Reject" ? 'btn-warning' : 'btn-danger');
+                confirmButton.textContent = (actionType === "Reject" ? 'Xác nhận Từ chối' : 'Xác nhận Sa thải');
+                var reasonTextarea = actionModalElement.querySelector('textarea[name="DriverActionInput.Reason"]');
+                if (reasonTextarea) {
+                    reasonTextarea.value = '';
+                }
+                var reasonValidationSpan = actionModalElement.querySelector('span[data-valmsg-for="DriverActionInput.Reason"]');
+                if (reasonValidationSpan) {
+                    reasonValidationSpan.textContent = ''; 
+                    reasonValidationSpan.classList.remove('field-validation-error'); 
+                    reasonValidationSpan.classList.add('field-validation-valid'); 
+                }
+            });
+
+
+            var driverIdOnError = '@(TempData["ShowActionModalOnError"] as string)';
+            var actionTypeOnError = '@(TempData["ActionTypeOnError"] as string)';
+
+            if (driverIdOnError && driverIdOnError !== '' && actionTypeOnError && actionTypeOnError !== '') {
+                var driverNameOnError = "ID " + driverIdOnError; 
+                var buttonForErrorDriver = document.querySelector(`.btn-action-modal[data-driver-id="${driverIdOnError}"][data-action-type="${actionTypeOnError}"]`);
+                if(buttonForErrorDriver){
+                    driverNameOnError = buttonForErrorDriver.getAttribute('data-driver-name');
+                    actionModalElement.querySelector('#driverActionModalLabel').textContent = buttonForErrorDriver.getAttribute('data-modal-title');
+                } else {
+                     actionModalElement.querySelector('#driverActionModalLabel').textContent = (actionTypeOnError === "Reject" ? "Từ chối hồ sơ" : "Sa thải tài xế");
+                }
+                
+                actionModalElement.querySelector('#driverNameToActionModal').textContent = driverNameOnError;
+                actionModalElement.querySelector('#driverIdToActionInputModal').value = driverIdOnError;
+                actionModalElement.querySelector('#actionTypeInputModal').value = actionTypeOnError;
+                actionModalElement.querySelector('#actionNameModal').textContent = (actionTypeOnError === "Reject" ? "từ chối" : "sa thải");
+
+                var confirmButton = actionModalElement.querySelector('#confirmActionButton');
+                confirmButton.className = 'btn'; // Reset class
+                confirmButton.classList.add(actionTypeOnError === "Reject" ? 'btn-warning' : 'btn-danger');
+                confirmButton.textContent = (actionTypeOnError === "Reject" ? 'Xác nhận Từ chối' : 'Xác nhận Sa thải');
+                actionModal.show();
+            }
+        }
+        const tempAlerts = document.querySelectorAll('.alert-dismissible.fade.show[role="alert"]');
+        tempAlerts.forEach(function(alert) {
+            setTimeout(function() {
+                if (bootstrap && bootstrap.Alert) {
+                    const alertInstance = bootstrap.Alert.getInstance(alert);
+                    if (alertInstance) {
+                        alertInstance.close();
+                    }
+                } else { 
+                    alert.style.display = 'none';
+                }
+            }, 10000); 
+        }
+    });
+    </script>
+}

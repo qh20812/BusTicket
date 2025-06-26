@@ -1,0 +1,119 @@
+@model BusTicketSystem.Pages.ViewComponents.SearchTripPanelViewModel
+
+<form method="get" class="search-form-container" asp-page="/Home/Schedule/Index">
+    <div class="search-form-group">
+        <label for="departure">Nơi đi</label>
+        <div class="input-with-icon">
+            <i class="bi bi-record-circle-fill"></i>
+            <input list="departure-options" id="departure" name="Departure" class="destination-input" placeholder="Nhập điểm đi" value="@Model.Departure">
+        </div>
+        <button type="button" class="clear-button" onclick="clearInput('departure')">
+            x
+        </button>
+        <datalist id="departure-options">
+            @foreach(var location in Model.DepartureLocations)
+            {
+                <option value="@location.Trim()">@location.Trim()</option>
+            }
+        </datalist>
+    </div>
+    <button type="button" class="swap-button" onclick="swapLocations()">
+        <i class="bi bi-arrow-left-right"></i>
+    </button>
+    <div class="search-form-group">
+        <label for="destination">Nơi đến</label>
+        <div class="input-with-icon">
+            <i class="bi bi-geo-alt-fill"></i>
+            <input list="destination-options" id="destination" name="Destination" class="destination-input" placeholder="Nhập điểm đến" value="@Model.Destination">
+        </div>
+        <button type="button" class="clear-button" onclick="clearInput('destination')">
+            x
+        </button>
+        <datalist id="destination-options">
+            @foreach(var location in Model.DestinationLocations)
+            {
+                <option value="@location.Trim()">@location.Trim()</option>
+            }
+        </datalist>
+    </div>
+    <div class="search-form-group">
+        <label for="departureDate">Ngày khởi hành</label>
+        <input type="date" id="departure-date" name="date" class="date-input" value="@Model.DepartureDate?.ToString("yyyy-MM-dd")">
+    </div>
+    <div class="search-form-group" id="return-date-group">
+        <label for="returnDate">Ngày về (khứ hồi)</label>
+        <input type="date" id="return-date" name="returnDateStr" class="date-input" value="@Model.ReturnDate?.ToString("yyyy-MM-dd")">
+    </div>
+    <div class="search-form-group">
+        <label for="ticket-quantity">Số lượng vé</label>
+        <select id="ticket-quantity" class="ticket-select">
+            @for(int i = 1; i <= 5; i++)
+            {
+                if (Model.Quantity == i)
+                {
+                    <option value="@i" selected>@i vé</option>
+                }
+                else
+                {
+                    <option value="@i">@i vé</option>
+                }
+            }
+        </select>
+        <input type="hidden" name="Quantity" id="hidden-ticket-quantity" value="@Model.Quantity"/>
+    </div>
+    <input type="hidden" name="TripType" id="hidden-trip-type" value="@(Model.TripType ?? "one-way")">
+    <button type="submit" class="submit-button">Tìm chuyến</button>
+</form>
+
+<script>
+    function swapLocations() {
+        const departure = document.getElementById('departure');
+        const destination = document.getElementById('destination');
+        const temp = departure.value;
+        departure.value = destination.value;
+        destination.value = temp;
+        updateClearButtons();
+    }
+
+    function clearInput(inputId) {
+        const input = document.getElementById(inputId);
+        input.value = '';
+        updateClearButtons();
+    }
+
+    function updateClearButtons() {
+        const inputs = ['departure', 'destination'];
+        inputs.forEach(id => {
+            const input = document.getElementById(id);
+            const formGroup = input.parentElement;
+            if (input.value) {
+                formGroup.classList.add('has-content');
+            } else {
+                formGroup.classList.remove('has-content');
+            }
+        });
+    }
+
+    function updateTripTypeBasedOnReturnDate() {
+        const returnDateInput = document.getElementById('return-date');
+        const hiddenTripType = document.getElementById('hidden-trip-type');
+        console.log('Return Date:',returnDateInput.value,'Trip Type:',hiddenTripType.value)
+        if (returnDateInput.value) {
+            hiddenTripType.value = 'round-trip';
+            returnDateInput.setAttribute('required', 'required');
+        } else {
+            hiddenTripType.value = 'one-way';
+            returnDateInput.removeAttribute('required');
+        }
+    }
+
+    document.getElementById('departure').addEventListener('input', updateClearButtons);
+    document.getElementById('destination').addEventListener('input', updateClearButtons);
+    document.getElementById('ticket-quantity').addEventListener('change', function(){
+        document.getElementById('hidden-ticket-quantity').value = this.value;
+    });
+    document.getElementById('return-date').addEventListener('change', updateTripTypeBasedOnReturnDate);
+
+    updateTripTypeBasedOnReturnDate();
+    updateClearButtons();
+</script>

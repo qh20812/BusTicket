@@ -1,0 +1,261 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.TripManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Chuyến đi";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>
+            /
+            <li><a asp-page="/ForAdmin/TripManage/Index" class="active" style="text-decoration: none;">Chuyến đi</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi:</strong> @TempData["ActionError"]
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-signpost-split bx'></i>
+            <h3>Danh sách Chuyến đi (@Model.Trips.Count)</h3>
+            <div class="ms-auto d-flex align-items-center">
+                <a asp-page="./Edit" class="btn btn-primary btn-sm me-2">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm mới Chuyến đi
+                </a>
+            </div>
+        </div>
+
+        <!-- Filter and Search Form -->
+        <form method="get" class="mb-3 p-3 border rounded bg-light">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label asp-for="SearchTerm" class="form-label visually-hidden">Tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Lộ trình, biển số, tài xế..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="FilterStatus" class="form-label visually-hidden">Trạng thái</label>
+                    <select asp-for="FilterStatus" asp-items="Html.GetEnumSelectList<BusTicketSystem.Models.TripStatus>()" class="form-select form-select-sm">
+                        <option value="">Tất cả trạng thái</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SortOrder" class="form-label visually-hidden">Sắp xếp</label>
+                    <select asp-for="SortOrder" class="form-select form-select-sm">
+                        <option value="departure_desc">Khởi hành (Mới nhất)</option>
+                        <option value="departure_asc">Khởi hành (Cũ nhất)</option>
+                        <option value="price_asc">Giá (Tăng dần)</option>
+                        <option value="price_desc">Giá (Giảm dần)</option>
+                        <option value="status_asc">Trạng thái (A-Z)</option>
+                        <option value="status_desc">Trạng thái (Z-A)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>
+                </div>
+            </div>
+        </form>
+
+        @if (Model.Trips.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Lộ trình</th>
+                        <th>Xe</th>
+                        <th>Tài xế</th>
+                        <th>
+                            <a asp-page="./Index" asp-route-SortOrder="@(Model.SortOrder == "departure_asc" ? "departure_desc" : "departure_asc")"
+                               asp-all-route-data='new Dictionary<string, string> { { "SearchTerm", Model.SearchTerm ?? "" }, { "FilterStatus", Model.FilterStatus?.ToString() ?? "" } }'
+                               class="text-decoration-none text-in-a">
+                                Khởi hành
+                                @if (Model.SortOrder == "departure_asc")
+                                {<i class='bx bx-sort-up color-in-i'></i>}
+                                else if (Model.SortOrder == "departure_desc")
+                                {<i class='bx bx-sort-down color-in-i'></i>}
+                                else
+                                {<i class='bx bx-sort-alt-2 text-muted color-in-i'></i>}
+                            </a>
+                        </th>
+                        <th>
+                            <a asp-page="./Index" asp-route-SortOrder="@(Model.SortOrder == "price_asc" ? "price_desc" : "price_asc")"
+                               asp-all-route-data='new Dictionary<string, string> { { "SearchTerm", Model.SearchTerm ?? "" }, { "FilterStatus", Model.FilterStatus?.ToString() ?? "" } }'
+                               class="text-decoration-none text-in-a">
+                                Giá vé
+                                @if (Model.SortOrder == "price_asc")
+                                {<i class='bx bx-sort-up color-in-i'></i>}
+                                else if (Model.SortOrder == "price_desc")
+                                {<i class='bx bx-sort-down color-in-i'></i>}
+                                else
+                                {<i class='bx bx-sort-alt-2 text-muted color-in-i'></i>}
+                            </a>
+                        </th>
+                        <th>Ghế trống</th>
+                        <th>
+                            <a asp-page="./Index" asp-route-SortOrder="@(Model.SortOrder == "status_asc" ? "status_desc" : "status_asc")"
+                               asp-all-route-data='new Dictionary<string, string> { { "SearchTerm", Model.SearchTerm ?? "" }, { "FilterStatus", Model.FilterStatus?.ToString() ?? "" } }'
+                               class="text-decoration-none  text-in-a">
+                                Trạng thái
+                                @if (Model.SortOrder == "status_asc")
+                                {<i class='bx bx-sort-up color-in-i'></i>}
+                                else if (Model.SortOrder == "status_desc")
+                                {<i class='bx bx-sort-down color-in-i'></i>}
+                                else
+                                {<i class='bx bx-sort-alt-2 text-muted color-in-i'></i>}
+                            </a>
+                        </th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var trip in Model.Trips)
+                    {
+                        <tr>
+                            <td class="truncate" title="@trip.TripId">@trip.TripId</td>
+                            <td class="truncate" title="@trip.RouteName">@trip.RouteName</td>
+                            <td class="truncate" title="@trip.BusInfo">@trip.BusInfo</td>
+                            <td class="truncate" title="@trip.DriverName">@trip.DriverName</td>
+                            <td class="truncate" title="@trip.DepartureTime.ToString("dd/MM/yy HH:mm")">@trip.DepartureTime.ToString("dd/MM/yy HH:mm")</td>
+                            <td class="truncate" title="@trip.Price.ToString("N0")đ">@trip.Price.ToString("N0")đ</td>
+                            <td class="truncate" title="@trip.AvailableSeats">@trip.AvailableSeats</td>
+                            <td class="truncate-status" title="@trip.StatusDisplayName">
+                                <span class="status @trip.Status.ToString().ToLower()">@trip.StatusDisplayName</span>
+                                @if(trip.Status == BusTicketSystem.Models.TripStatus.Cancelled && !string.IsNullOrEmpty(trip.CancellationReason))
+                                {
+                                    <i class="bx bx-info-circle" title="Lý do hủy: @trip.CancellationReason" style="cursor:help; color: #dc3545; margin-left: 5px;"></i>
+                                }
+                            </td>
+                            <td style="display: flex; align-items: center;">
+                                <a asp-page="./Edit" asp-route-id="@trip.TripId" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="bi bi-pencil-square"></i></a>
+                                @if (trip.CanCancel)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-warning btn-action-modal"
+                                            data-bs-toggle="modal" data-bs-target="#tripActionModal"
+                                            data-trip-id="@trip.TripId" data-route-name="@trip.RouteName" data-action-type="Cancel" data-modal-title="Hủy chuyến đi">
+                                        <i class="bi bi-calendar-x"></i>
+                                    </button>
+                                }
+                                @* @if (trip.CanCompleteManually)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-success btn-action-modal"
+                                            data-bs-toggle="modal" data-bs-target="#tripActionModal"
+                                            data-trip-id="@trip.TripId" data-route-name="@trip.RouteName" data-action-type="Complete" data-modal-title="Hoàn thành chuyến đi" title="Hoàn thành chuyến đi">
+                                        <i class="bi bi-calendar-check"></i>
+                                    </button>
+                                } *@
+                                @if (trip.CanDelete)
+                                {
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@trip.TripId" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa chuyến đi ID @trip.TripId (@trip.RouteName) không? Hành động này không thể hoàn tác.');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
+                                    </form>
+                                }
+                                <button type="button" class="btn btn-sm btn-outline-info view-trip-map-btn" data-bs-toggle="modal" data-bs-target="#tripMapModal" data-trip-id="@trip.TripId" title="Xem lộ trình trên bản đồ"><i class="bi bi-geo-alt"></i></button>
+                                <a asp-page="./RouteMap" asp-route-tripId="@trip.TripId" class="btn btn-sm btn-outline-secondary" title="Xem chi tiết điểm dừng"><i class="bi bi-signpost-2"></i></a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Không có chuyến đi nào phù hợp.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="modal fade" id="tripActionModal" tabindex="-1" aria-labelledby="tripActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="ProcessAction" id="tripActionForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="tripActionModalLabel">Xác nhận hành động</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn <strong id="actionNameModal"></strong> chuyến đi <strong id="routeNameToActionModal"></strong> (ID: <span id="tripIdToActionTextModal"></span>)?</p>
+                    <input type="hidden" asp-for="TripActionInput.TripIdAction" id="tripIdToActionInputModal" />
+                    <input type="hidden" asp-for="TripActionInput.ActionType" id="actionTypeInputModal" />
+                    <div class="mb-3" id="cancellationReasonGroup" style="display:none;">
+                        <label asp-for="TripActionInput.CancellationReason" class="form-label fw-bold">Lý do hủy (bắt buộc):</label>
+                        <textarea asp-for="TripActionInput.CancellationReason" class="form-control" rows="3" placeholder="Nhập lý do hủy chuyến..."></textarea>
+                        <span asp-validation-for="TripActionInput.CancellationReason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn" id="confirmActionButton">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="tripMapModal" tabindex="-1" aria-labelledby="tripMapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="tripMapModalLabel">Lộ trình Chuyến đi</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="tripMapContainer" style="height: 500px; width: 100%; border-radius: 8px;">
+                </div>
+                <div id="tripRouteInfo" class="mt-2">
+                    <p><strong>Khoảng cách:</strong> <span id="mapDistance">N/A</span></p>
+                    <p><strong>Thời gian dự kiến:</strong> <span id="mapDuration">N/A</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="~/js/admin/tripManageIndex.js"></script>
+    <script>
+        var tripIdActionOnError = "@(TempData["ShowActionModalOnError"] as string)";
+        var actionTypeOnError = "@(TempData["ActionTypeOnError"] as string)";
+        document.addEventListener('DOMContentLoaded', function () {
+            // JavaScript for tripActionModal remains
+        });
+    </script>
+}

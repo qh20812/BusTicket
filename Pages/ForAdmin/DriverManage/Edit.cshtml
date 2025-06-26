@@ -1,0 +1,118 @@
+@page "{id:int?}"
+@model BusTicketSystem.Pages.ForAdmin.DriverManage.EditModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chỉnh sửa Thông tin Tài xế";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a href="/ForAdmin/DriverManage/Index" style="text-decoration: none;">Nhân sự</a>
+            </li>/
+            <li>
+                <a href="#" class="active" style="text-decoration: none;">Chỉnh sửa</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-pencil-square bx'></i>
+            <h3>Thông tin Tài xế: @Model.DriverInput.Fullname</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="DriverInput.DriverId" />
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Fullname" class="form-label"></label>
+                        <input asp-for="DriverInput.Fullname" class="form-control" />
+                        <span asp-validation-for="DriverInput.Fullname" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Email" class="form-label"></label>
+                        <input asp-for="DriverInput.Email" class="form-control" />
+                        <span asp-validation-for="DriverInput.Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Phone" class="form-label"></label>
+                        <input asp-for="DriverInput.Phone" class="form-control" />
+                        <span asp-validation-for="DriverInput.Phone" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.LicenseNumber" class="form-label"></label>
+                        <input asp-for="DriverInput.LicenseNumber" class="form-control" />
+                        <span asp-validation-for="DriverInput.LicenseNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.DateOfBirth" class="form-label"></label>
+                        <input asp-for="DriverInput.DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DriverInput.DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Address" class="form-label"></label>
+                        <input asp-for="DriverInput.Address" class="form-control" />
+                        <span asp-validation-for="DriverInput.Address" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Status" class="form-label"></label>
+                        <select asp-for="DriverInput.Status" asp-items="Html.GetEnumSelectList<BusTicketSystem.Models.DriverStatus>()" class="form-select">
+                            <option value="">-- Chọn trạng thái --</option>
+                        </select>
+                        <span asp-validation-for="DriverInput.Status" class="text-danger"></span>
+                    </div>
+                </div>
+                @* <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.CompanyId" class="form-label"></label>
+                        <select asp-for="DriverInput.CompanyId" asp-items="Model.Companies" class="form-select">
+                            <option value="">-- Chọn công ty (nếu có) --</option>
+                        </select>
+                        <span asp-validation-for="DriverInput.CompanyId" class="text-danger"></span>
+                    </div>
+                </div> *@
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

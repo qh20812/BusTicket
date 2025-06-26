@@ -1,0 +1,142 @@
+@page
+@using BusTicketSystem.Models
+@using BusTicketSystem.Extensions
+@model BusTicketSystem.Pages.ForAdmin.Posts.IndexModel
+@{
+    Layout="_AdminLayout";
+    ViewData["Title"]="Quản lý Bài đăng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>Quản lý bài đăng</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a asp-page="/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>
+            <li>/</li>
+            <li>
+                <a asp-page="./Index" class="active" style="text-decoration: none;">Bài đăng</a>
+            </li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <h3>Danh sách bài đăng</h3>
+        </div>
+        <div class="table-responsive">
+            <table>
+                <thead>
+                    <tr>
+                        <th class="truncate">STT</th>
+                        <th class="truncate" title="Tiêu đề">Tiêu đề</th>
+                        <th class="truncate" title="Danh mục">Danh mục</th>
+                        <th class="truncate" title="Trạng thái">Trạng thái</th>
+                        <th class="truncate" title="Người đăng">Người đăng</th>
+                        <th class="truncate" title="Ngày tạo">Ngày tạo</th>
+                        <th class="truncate" title="Hành động">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.Posts != null && Model.Posts.Any())
+                    {
+                        int index = 0;
+                        foreach (var post in Model.Posts)
+                        {
+                            index++;
+                            <tr>
+                                <td class="truncate" title="@index">@index</td>
+                                <td class="truncate" title="@post.Title">@post.Title</td>
+                                <td class="truncate" title="@post.Category.GetDisplayName()">@post.Category.GetDisplayName()</td>
+                                <td class="truncate" >
+                                    @{
+                                        var statusClass = "";
+                                        switch (post.Status) // Assuming PostStatus is an enum
+                                        {
+                                            case PostStatus.Published: statusClass = "completed"; break;
+                                            case PostStatus.Draft: statusClass = "process"; break;
+                                            case PostStatus.Archived: statusClass = "cancelled"; break;
+                                            // Add other cases as needed from your PostStatus enum
+                                            default: statusClass = "pending"; break; 
+                                        }
+                                    }
+                                    <span class="status @statusClass">@post.Status.GetDisplayName()</span>
+                                </td>
+                                <td class="truncate">@(post.User?.Fullname ?? "N/A")</td>
+                                <td class="truncate">@post.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</td>
+                                <td class="truncate">
+                                    <a asp-page="./Edit" asp-route-id="@post.PostId" class="btn btn-sm btn-primary">Sửa</a>
+                                    <form method="post" asp-page-handler="Delete" asp-route-id="@post.PostId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa bài @post.Title không?');">
+                                        <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="7" class="text-center">Không có bài đăng nào.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-data mt-4">
+    <div class="orders">
+        <div class="header">
+            <h3>Tạo bài đăng mới</h3>
+        </div>
+        <form method="post"> <!-- OnPostAsync will handle this by default -->
+            @Html.AntiForgeryToken()
+            <div class="form-group mb-3">
+                <label asp-for="Post.Title" class="form-label"></label>
+                <input asp-for="Post.Title" class="form-control" />
+                <span asp-validation-for="Post.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Content" class="form-label"></label>
+                <textarea asp-for="Post.Content" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="Post.Content" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Category" class="form-label"></label>
+                <select asp-for="Post.Category" class="form-control form-select" asp-items="Html.GetEnumSelectList<PostCategory>()"></select>
+                <span asp-validation-for="Post.Category" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Status" class="form-label"></label>
+                <select asp-for="Post.Status" class="form-control form-select" asp-items="Html.GetEnumSelectList<PostStatus>()"></select>
+                <span asp-validation-for="Post.Status" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.ImageUrl" class="form-label">Đường dẫn hình ảnh (URL)</label>
+                <input asp-for="Post.ImageUrl" class="form-control" />
+                <span asp-validation-for="Post.ImageUrl" class="text-danger"></span>
+            </div>
+
+            <div class="mt-3">
+                <button type="submit" class="btn btn-primary">Tạo</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

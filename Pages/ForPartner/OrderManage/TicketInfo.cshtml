@@ -1,0 +1,82 @@
+@page "{orderId:int}"
+@model BusTicketSystem.Pages.ForPartner.OrderManage.TicketInfoModel
+@{
+    Layout = "_PartnerLayout"; // Assuming you have a _PartnerLayout.cshtml
+    ViewData["Title"] = "Chi tiết Đơn hàng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"] #@Model.Order?.OrderId</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="/ForPartner/OrderManage/Index" style="text-decoration: none;">Đơn hàng</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Chi tiết Đơn hàng</a></li>
+        </ul>
+    </div>
+    <div class="ms-auto">
+        <a asp-page="./Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left-circle me-1"></i> Quay lại danh sách
+        </a>
+    </div>
+</div>
+
+@if (Model.Order != null && Model.PartnerTickets.Any())
+{
+    <div class="bottom-data">
+        <div class="orders">
+            <div class="header">
+                <i class='bx bx-detail'></i>
+                <h3>Thông tin Đơn hàng #@Model.Order.OrderId (Phần của Nhà xe)</h3>
+            </div>
+            <div class="card-body p-3">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h5>Thông tin Khách hàng</h5>
+                        @if (Model.Order.User != null)
+                        {
+                            <p><strong>Tên:</strong> @Model.Order.User.Fullname</p>
+                            <p><strong>Email:</strong> @Model.Order.User.Email</p>
+                            <p><strong>Điện thoại:</strong> @(Model.Order.User.Phone ?? "N/A")</p>
+                        }
+                        else
+                        {
+                            <p><strong>Email Khách:</strong> @(Model.Order.GuestEmail ?? "N/A")</p>
+                            <p><strong>Điện thoại Khách:</strong> @(Model.Order.GuestPhone ?? "N/A")</p>
+                        }
+                    </div>
+                    <div class="col-md-6">
+                        <h5>Thông tin Chung Đơn hàng</h5>
+                        <p><strong>Trạng thái đơn hàng:</strong> <span class="status @Model.Order.Status.ToString().ToLower()">@Model.OrderStatusDisplay</span></p>
+                        <p><strong>Ngày tạo đơn:</strong> @Model.Order.CreatedAt.ToString("dd/MM/yyyy HH:mm")</p>
+                        <p><strong>Tổng tiền đơn hàng:</strong> @Model.Order.TotalAmount.ToString("N0") VND</p>
+                        @if (Model.Order.Promotion != null)
+                        {
+                            <p><strong>Khuyến mãi áp dụng:</strong> @Model.Order.Promotion.Description (@Model.Order.Promotion.Code)</p>
+                        }
+                    </div>
+                </div>
+
+                <h5 class="mt-4">Chi tiết Vé (của Nhà xe)</h5>
+                <ul class="list-group mb-3">
+                    @foreach (var ticket in Model.PartnerTickets)
+                    {
+                        <li class="list-group-item">
+                            Vé #@ticket.TicketId: Ghế <strong>@ticket.SeatNumber</strong> - Chuyến đi: <strong>@ticket.Trip?.Route?.Departure → @ticket.Trip?.Route?.Destination</strong> (@ticket.Trip?.DepartureTime.ToString("dd/MM/yyyy HH:mm")) - Giá vé: @ticket.Price.ToString("N0") VND - Trạng thái vé: @ticket.Status
+                        </li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning text-center" role="alert">
+        Không tìm thấy thông tin đơn hàng hoặc đơn hàng này không có vé nào thuộc nhà xe của bạn.
+    </div>
+}
+
+@section Scripts {
+    @* Thêm bất kỳ script cần thiết nào ở đây *@
+}

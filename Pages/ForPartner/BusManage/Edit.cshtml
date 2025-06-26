@@ -1,0 +1,95 @@
+@page "{id:int?}"
+@model BusTicketSystem.Pages.ForPartner.BusManage.EditModel
+@using BusTicketSystem.Models // For BusStatus enum
+@{
+    Layout = "_PartnerLayout"; // Assuming you have a _PartnerLayout
+    ViewData["Title"] = Model.BusInput.BusId == 0 ? "Yêu cầu thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a href="/ForPartner/BusManage/Index" style="text-decoration: none;">Phương tiện</a>
+            </li>/
+            <li>
+                <a href="#" class="active" style="text-decoration: none;">@(Model.BusInput.BusId == 0 ? "Thêm mới" : "Chỉnh sửa")</a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-pencil-square bx'></i>
+            <h3>@(Model.BusInput.BusId == 0 ? "Thông tin Xe buýt mới (Chờ duyệt)" : $"Thông tin Xe buýt: {Model.BusInput.LicensePlate}")</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="BusInput.BusId" />
+            <input type="hidden" asp-for="BusInput.CompanyId" /> @* CompanyId is set by partner context *@
+
+            <div class="alert alert-info">
+                Xe thuộc công ty: <strong>@Model.PartnerCompanyName</strong>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="BusInput.LicensePlate" class="form-label"></label>
+                        <input asp-for="BusInput.LicensePlate" class="form-control" />
+                        <span asp-validation-for="BusInput.LicensePlate" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="BusInput.BusType" class="form-label"></label>
+                        <input asp-for="BusInput.BusType" class="form-control" />
+                        <span asp-validation-for="BusInput.BusType" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="BusInput.Capacity" class="form-label"></label>
+                        <input asp-for="BusInput.Capacity" class="form-control" type="number" min="1" />
+                        <span asp-validation-for="BusInput.Capacity" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="BusInput.Status" class="form-label"></label>
+                        @if (Model.BusInput.BusId == 0 || Model.BusInput.Status == BusStatus.PendingApproval || Model.BusInput.Status == BusStatus.Rejected)
+                        {
+                            <input asp-for="BusInput.Status" class="form-control" readonly value="@Model.BusInput.Status.ToString()" />
+                            <span class="form-text">Trạng thái này sẽ được quản trị viên xem xét.</span>
+                             <input type="hidden" asp-for="BusInput.Status" /> @* Ensure value is posted back *@
+                        }
+                        else
+                        {
+                            <select asp-for="BusInput.Status" asp-items="Html.GetEnumSelectList<BusStatus>().Where(i => i.Value != BusStatus.PendingApproval.ToString() && i.Value != BusStatus.Rejected.ToString())" class="form-select"></select>
+                        }
+                        <span asp-validation-for="BusInput.Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">@(Model.BusInput.BusId == 0 ? "Gửi yêu cầu" : "Lưu thay đổi")</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

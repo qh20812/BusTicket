@@ -1,0 +1,132 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.Notifications.IndexModel
+@{
+    Layout = "_PartnerLayout";
+    ViewData["Title"] = "Trung tâm Thông báo";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Thông báo</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-bell'></i>
+            <h3>Danh sách Thông báo (@Model.Notifications.Count)</h3>
+            <div class="ms-auto d-flex align-items-center">
+                @if (Model.Notifications.Any(n => !n.IsRead))
+                {
+                    <form method="post" asp-page-handler="MarkAllAsRead" class="me-2">
+                        <button type="submit" class="btn btn-sm btn-outline-info" title="Đánh dấu tất cả đã đọc">
+                            <i class="bi bi-check2-all"></i> Đánh dấu tất cả đã đọc
+                        </button>
+                    </form>
+                }
+                @if (Model.Notifications.Any())
+                {
+                    <form method="post" asp-page-handler="DeleteAllRead" onsubmit="return confirm('Bạn có chắc muốn xóa tất cả thông báo ĐÃ ĐỌC không?');">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa tất cả thông báo đã đọc">
+                            <i class="bi bi-trash3"></i> Xóa tất cả đã đọc
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
+
+        @if (Model.Notifications.Any())
+        {
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th style="width: 55%;">Nội dung</th>
+                        <th style="width: 15%;">Thời gian</th>
+                        <th style="width: 10%;">Trạng thái</th>
+                        <th style="width: 15%;">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        var counter = 1;
+                    }
+                    @foreach (var notification in Model.Notifications.OrderByDescending(n => n.CreatedAt))
+                    {
+                        <tr class="@(notification.IsRead ? "" : "fw-bold")">
+                            <td>@(counter++)</td>
+                            <td>
+                                <i class="@(notification.IconCssClass ?? "bi bi-info-circle") me-2"></i>
+                                @if (!string.IsNullOrEmpty(notification.TargetUrl))
+                                {
+                                    <a href="@notification.TargetUrl" class="text-decoration-none">@notification.Message</a>
+                                }
+                                else
+                                {
+                                    @notification.Message
+                                }
+                            </td>
+                            <td>@notification.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (notification.IsRead)
+                                {
+                                    <span class="badge bg-secondary">Đã đọc</span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-primary">Mới</span>
+                                }
+                            </td>
+                            <td>
+                                @if (!notification.IsRead)
+                                {
+                                    <form method="post" asp-page-handler="MarkAsRead" asp-route-id="@notification.NotificationId" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Đánh dấu đã đọc">
+                                            <i class="bi bi-check-lg"></i>
+                                        </button>
+                                    </form>
+                                }
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@notification.NotificationId" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa thông báo này?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa thông báo">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Không có thông báo nào.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+    </script>
+}

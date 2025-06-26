@@ -1,0 +1,46 @@
+@model List<BusTicketSystem.Pages.ForCustomer.MyOrders.TicketViewModel>
+@using BusTicketSystem.Models
+
+<div class="list-group">
+    @foreach (var ticket in Model)
+    {
+        <div class="list-group-item list-group-item-action flex-column align-items-start mb-2 shadow-sm">
+            <div class="d-flex w-100 justify-content-between">
+                <h5 class="mb-1">Vé #@ticket.TicketId - @ticket.RouteName</h5>
+                <small>Ngày đặt: @ticket.DepartureTime.ToString("dd/MM/yyyy")</small>
+            </div>
+            <p class="mb-1">
+                Khởi hành: <strong>@ticket.DepartureTime.ToString("HH:mm dd/MM/yyyy")</strong><br />
+                Ghế: <strong>@ticket.SeatNumber</strong> - Giá: <strong>@ticket.Price.ToString("N0") VND</strong>
+            </p>
+            <div class="d-flex w-100 justify-content-between align-items-center">
+                <small>Trạng thái vé: <span class="badge bg-info">@ticket.StatusDisplayName</span></small>
+                <div>
+                    @if (ticket.CanCancel && !ticket.IsCancellationPending)
+                    {
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-bs-toggle="modal" data-bs-target="#cancelTicketModal"
+                                data-ticket-id="@ticket.TicketId" data-ticket-info="#@ticket.TicketId (@ticket.RouteName)">
+                            Yêu cầu hủy vé
+                        </button>
+                    }
+                    else if (ticket.IsCancellationPending)
+                    {
+                        <span class="badge bg-warning text-dark">Đang chờ duyệt hủy</span>
+                    }
+                    else if (ticket.Status == TicketStatus.Cancelled)
+                    {
+                        <span class="badge bg-danger">Đã hủy</span>
+                    }
+                     else if (ticket.Status == TicketStatus.Used || (ticket.DepartureTime < DateTime.UtcNow && ticket.Status == TicketStatus.Booked))
+                    {
+                        <span class="badge bg-success">Đã hoàn thành</span>
+                    }
+                    else if (!ticket.CanCancel && ticket.Status == TicketStatus.Booked && ticket.DepartureTime > DateTime.UtcNow)
+                    {
+                         <span class="badge bg-secondary">Không thể hủy</span>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+</div>

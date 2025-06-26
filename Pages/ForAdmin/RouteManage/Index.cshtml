@@ -1,0 +1,202 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.RouteManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Lộ trình";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Lộ trình</a></li>
+        </ul>
+    </div>
+    <a asp-page="./Edit" class="report" style="text-decoration: none;">
+        <i class='bx bx-plus-circle'></i>
+        <span>Thêm Lộ trình</span>
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid && ViewData.ModelState.ContainsKey("RouteActionInput.RejectionReason"))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi:</strong> @TempData["ActionError"]
+        <ul><li>@ViewData.ModelState["RouteActionInput.RejectionReason"].Errors.FirstOrDefault()?.ErrorMessage</li></ul>
+        @Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-list-ul'></i>
+            <h3>Danh sách Lộ trình</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Điểm đi</th>
+                    <th>Điểm đến</th>
+                    <th>Khoảng cách (km)</th>
+                    <th>Thời gian ước tính</th>
+                    <th>Trạng thái</th>
+                    <th>Nhà xe đề xuất</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Routes.Any())
+                {
+                    @foreach (var item in Model.Routes)
+                    {
+                        <tr>
+                            <td>@item.RouteId</td>
+                            <td>@Html.DisplayFor(modelItem => item.Departure)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Destination)</td>
+                            <td>@(item.Distance.HasValue ? item.Distance.Value.ToString("N1") : "N/A")</td>
+                            <td>@(item.EstimatedDuration.HasValue ? item.EstimatedDuration.Value.ToString(@"hh\h\ mm\m") : "N/A")</td>
+                            <td class="truncate-status">
+                                <span class="status @item.Status.ToString().ToLower()">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </span>
+                            </td>
+                            <td>@(item.ProposedByCompany?.CompanyName ?? "N/A")</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@item.RouteId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                <form asp-page-handler="Delete" asp-route-id="@item.RouteId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lộ trình này? Hành động này không thể hoàn tác.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center">Chưa có lộ trình nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Section for Pending Approval Routes -->
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-hourglass-split'></i>
+            <h3>Yêu cầu Lộ trình Chờ Duyệt (@Model.PendingApprovalRoutes.Count)</h3>
+        </div>
+
+        @if (Model.PendingApprovalRoutes.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Điểm đi</th>
+                        <th>Điểm đến</th>
+                        <th>Nhà xe đề xuất</th>
+                        <th>ID Nhà xe</th>
+                        <th>Ngày gửi</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var route in Model.PendingApprovalRoutes)
+                    {
+                        <tr>
+                            <td>@route.RouteId</td>
+                            <td>@Html.DisplayFor(modelItem => route.Departure)</td>
+                            <td>@Html.DisplayFor(modelItem => route.Destination)</td>
+                            <td>@(route.ProposedByCompany?.CompanyName ?? "N/A")</td>
+                            <td>@(route.ProposedByCompanyId?.ToString() ?? "N/A")</td>
+                            <td>@route.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@route.RouteId" class="btn btn-sm btn-outline-info" title="Xem chi tiết & Quyết định"><i class="bi bi-eye"></i> Xem & Quyết định</a>
+                                
+                                <form method="post" asp-page-handler="ApproveRoute" asp-route-id="@route.RouteId" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn DUYỆT lộ trình ID @route.RouteId (@route.Departure - @route.Destination) không?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt nhanh"><i class="bi bi-check-lg"></i> Duyệt</button>
+                                </form>
+                                
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-reject-route-modal"
+                                        data-bs-toggle="modal" data-bs-target="#rejectRouteModal"
+                                        data-route-id="@route.RouteId" data-route-name="@(route.Departure + " → " + route.Destination)"
+                                        title="Từ chối">
+                                    <i class="bi bi-x-lg"></i> Từ chối
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Không có yêu cầu lộ trình nào đang chờ duyệt.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal for Rejecting Route -->
+<div class="modal fade" id="rejectRouteModal" tabindex="-1" aria-labelledby="rejectRouteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="RejectRoute" id="rejectRouteForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectRouteModalLabel">Từ chối Lộ trình</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn từ chối lộ trình <strong id="routeNameForRejectModal"></strong> (ID: <span id="routeIdForRejectTextModal"></span>)?</p>
+                    <input type="hidden" asp-for="RouteActionInput.RouteIdToAction" id="routeIdToRejectInputModal" />
+                    <div class="mb-3">
+                        <label asp-for="RouteActionInput.RejectionReason" class="form-label fw-bold">Lý do từ chối (bắt buộc):</label>
+                        <textarea asp-for="RouteActionInput.RejectionReason" class="form-control" rows="3" placeholder="Nhập lý do từ chối..."></textarea>
+                        <span asp-validation-for="RouteActionInput.RejectionReason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        var routeIdToRejectOnError = "@(TempData["ShowRejectRouteModalOnError"] as string)";
+        document.addEventListener('DOMContentLoaded', function () {
+            // For Reject Route Modal (Copied from TripManage/Index.cshtml and adapted)
+            const rejectRouteModalElement = document.getElementById('rejectRouteModal');
+            if (rejectRouteModalElement) {
+                rejectRouteModalElement.addEventListener('show.bs.modal', function (event) { const button = event.relatedTarget; if (!button) return; const routeId = button.getAttribute('data-route-id'); const routeName = button.getAttribute('data-route-name'); const modalTitle = rejectRouteModalElement.querySelector('.modal-title'); const routeNameSpan = rejectRouteModalElement.querySelector('#routeNameForRejectModal'); const routeIdTextSpan = rejectRouteModalElement.querySelector('#routeIdForRejectTextModal'); const routeIdInput = rejectRouteModalElement.querySelector('#routeIdToRejectInputModal'); const reasonTextarea = rejectRouteModalElement.querySelector('#RouteActionInput_RejectionReason'); const reasonValidationSpan = rejectRouteModalElement.querySelector('span[data-valmsg-for="RouteActionInput.RejectionReason"]'); if (modalTitle) modalTitle.textContent = 'Từ chối Lộ trình: ' + routeName; if (routeNameSpan) routeNameSpan.textContent = routeName; if (routeIdTextSpan) routeIdTextSpan.textContent = routeId; if (routeIdInput) routeIdInput.value = routeId; if (reasonTextarea) { reasonTextarea.value = ''; reasonTextarea.classList.remove('is-invalid', 'input-validation-error'); } if (reasonValidationSpan) reasonValidationSpan.textContent = ''; });
+                if (routeIdToRejectOnError) { const rejectModalInstance = new bootstrap.Modal(rejectRouteModalElement); const routeIdInput = rejectRouteModalElement.querySelector('#routeIdToRejectInputModal'); if (routeIdInput) routeIdInput.value = routeIdToRejectOnError; rejectModalInstance.show(); }
+            }
+        });
+    </script>
+}

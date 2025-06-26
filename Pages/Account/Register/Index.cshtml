@@ -1,0 +1,73 @@
+@page
+@model BusTicketSystem.Pages.RegisterModel
+@{
+    Layout = "_formlayout";
+    ViewData["Title"] = "Tạo tài khoản";
+}
+<div class="form-container sign-in">
+    <form method="post">
+        <h1>Tạo tài khoản</h1>
+        <div class="social-icons">
+            <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+        <span>hoặc sử dụng email của bạn để đăng ký</span>
+        @if(!string.IsNullOrEmpty(Model.ErrorMessage)){
+            <div class="alert alert-danger" style="margin: 10px 0;">@Model.ErrorMessage</div>
+        }
+        
+        <input asp-for="Input.Username" type="text" placeholder="Tên đăng nhập"/>
+        <span asp-validation-for="Input.Username" class="text-danger"></span>
+        <input asp-for="Input.Email" type="text" placeholder="Email"/>
+        <span asp-validation-for="Input.Email" class="text-danger"></span>
+        <div class="password-container">
+            <input asp-for="Input.Password" type="password" placeholder="Mật khẩu" id="passwordInputRegister"/>
+            <i class="fa-solid fa-eye-slash" id="togglePasswordRegister"></i>
+        </div>
+        <span asp-validation-for="Input.Password" class="text-danger"></span>
+        <button>Đăng ký</button>
+    </form>
+</div>
+<div class="toggle-container">
+    <div class="toggle">
+        <div class="toggle-panel toggle-right">
+            <h1>Mừng Trở Lại!</h1>
+            <p>Nhập thông tin cá nhân để sử dụng toàn bộ tính năng của chúng tôi</p>
+            <button class="hidden" id="login">Đăng nhập</button>
+            <button class="hidden" id="home">Trang chủ</button>
+        </div>
+    </div>
+</div>
+@section Scripts{
+    <partial name="_ValidationScriptsPartial"/>
+    <script>
+        document.getElementById('login').onclick=function(){
+            window.location.href='/Account/Login/Login';
+        };
+        document.getElementById('home').onclick=function(){
+            window.location.href='/';
+        };
+
+
+        // Script để toggle hiển thị mật khẩu
+        const togglePasswordRegister = document.querySelector('#togglePasswordRegister');
+        const passwordInputRegister = document.querySelector('#passwordInputRegister');
+
+        if (togglePasswordRegister && passwordInputRegister) {
+            togglePasswordRegister.addEventListener('click', function (e) {
+                // toggle the type attribute
+                const type = passwordInputRegister.getAttribute('type') === 'password' ? 'text' : 'password';
+                passwordInputRegister.setAttribute('type', type);
+
+                // toggle the eye slash icon
+                if (this.classList.contains('fa-eye-slash')) {
+                    this.classList.remove('fa-eye-slash');
+                    this.classList.add('fa-eye');
+                } else {
+                    this.classList.remove('fa-eye');
+                    this.classList.add('fa-eye-slash');
+                }
+            });
+        }
+    </script>
+}

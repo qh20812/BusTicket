@@ -1,0 +1,60 @@
+@page
+@model BusTicketSystem.Pages.Home.Posts.IndexModel
+@using BusTicketSystem.Extensions
+@{
+    Layout = "_Layout";
+    ViewData["BodyClass"]="posts-page";
+    ViewData["Title"] = "Bài Viết - Tin Tức";
+}
+
+<div class="container mt-4 mb-5">
+    <h1 class="mb-4 text-center" id="latestPosts">Tin Tức & Bài Viết Mới Nhất</h1>
+
+    @if (Model.Posts != null && Model.Posts.Any())
+    {
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 post-grid">
+            @foreach (var post in Model.Posts)
+            {
+                <div class="col">
+                    <a asp-page="./Details" asp-route-id="@post.PostId" class="post-card-link" style="text-decoration: none; color: inherit;">
+                        <div class="card h-100 post-card">
+                            @if (!string.IsNullOrEmpty(post.ImageUrl))
+                            {
+                                <img src="@post.ImageUrl" class="card-img-top post-card-image" alt="@post.Title">
+                            }
+                            else
+                            {
+                                <div class="post-card-placeholder-image">
+                                    <span>Không có ảnh</span>
+                                </div>
+                            }
+                            <div class="card-body post-card-content">
+                                <h5 class="card-title post-card-title">@post.Title</h5>
+                                <p class="card-text post-card-category">
+                                    <span class="badge bg-secondary">@post.Category.GetDisplayName()</span>
+                                </p>
+                                @* 
+                                // Nếu muốn hiển thị một đoạn tóm tắt nội dung:
+                                string summary = post.Content.Length > 100 ? post.Content.Substring(0, 100) + "..." : post.Content;
+                                <p class="card-text post-card-summary">@Html.Raw(summary)</p> 
+                                *@
+                            </div>
+                            <div class="card-footer post-card-footer">
+                                <small class="text-muted post-card-date">
+                                    Đăng ngày: @post.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
+                                    @* @if(post.User != null) { <span> bởi @post.User.Fullname</span> } *@
+                                </small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="text-center">
+            <p>Hiện tại chưa có bài viết nào.</p>
+        </div>
+    }
+</div>

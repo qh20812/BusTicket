@@ -1,0 +1,102 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.RouteManage.IndexModel
+@using System.Reflection
+@using System.ComponentModel.DataAnnotations
+@{
+    Layout="_PartnerLayout";
+    ViewData["Title"]="Quản lý Lộ trình Đề xuất";
+    Func<Enum,string> GetEnumDisplayName=(enumValue)=>{
+        return enumValue.GetType().GetMember(enumValue.ToString()).First().GetCustomAttribute<DisplayAttribute>()?.GetName()??enumValue.ToString();
+        };
+}
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForPartner/Dashboard/Index" style="text-decoration: none;">Bảng điều khiển</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Lộ trình của tôi</a></li>
+        </ul>
+    </div>
+    <a asp-page="./Edit" class="report">
+        <i class='bx bx-plus-circle'></i>
+        <span>Đề xuất Lộ trình Mới</span>
+    </a>
+</div>
+
+@if (!string.IsNullOrEmpty(Model.SuccessMessage))
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @Model.SuccessMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @Model.ErrorMessage
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-list-ul'></i>
+            <h3>Danh sách Lộ trình Đã Đề xuất (@Model.PartnerRoutes.Count)</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Điểm đi</th>
+                    <th>Điểm đến</th>
+                    <th>Trạng thái</th>
+                    <th>Cập nhật lần cuối</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.PartnerRoutes.Any())
+                {
+                    @foreach (var item in Model.PartnerRoutes)
+                    {
+                        <tr>
+                            <td class="truncate" title="@item.RouteId">@item.RouteId</td>
+                            <td class="truncate" title="@Html.DisplayFor(modelItem => item.Departure)">@Html.DisplayFor(modelItem => item.Departure)</td>
+                            <td class="truncate" title="@Html.DisplayFor(modelItem => item.Destination)">@Html.DisplayFor(modelItem => item.Destination)</td>
+                            <td class="truncate-status" title="@GetEnumDisplayName(item.Status)">
+                                <span class="status @item.Status.ToString().ToLower()">
+                                    @GetEnumDisplayName(item.Status)
+                                </span>
+                            </td>
+                            <td class="truncate" title="@item.UpdatedAt.ToString("dd/MM/yyyy HH:mm")">@item.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (item.Status == Models.RouteStatus.PendingApproval || item.Status == Models.RouteStatus.Rejected)
+                                {
+                                    <a asp-page="./Edit" asp-route-id="@item.RouteId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa & Gửi lại</a>
+                                    <form asp-page-handler="Delete" asp-route-id="@item.RouteId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa đề xuất lộ trình này?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
+                                    </form>
+                                }
+                                else if (item.Status == Models.RouteStatus.Approved)
+                                {
+                                    <span class="text-success"><i class="bi bi-check-circle-fill"></i> Đã duyệt</span>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">Không có hành động</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="6" class="text-center">Bạn chưa đề xuất lộ trình nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

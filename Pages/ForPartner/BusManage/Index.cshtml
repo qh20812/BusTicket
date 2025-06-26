@@ -1,0 +1,114 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.BusManage.IndexModel
+@using BusTicketSystem.Models
+@{
+    Layout = "_PartnerLayout"; // Assuming you have a _PartnerLayout
+    ViewData["Title"] = "Quản lý Phương tiện";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a href="/ForPartner/BusManage/Index" class="active" style="text-decoration: none;">Phương tiện</a>
+            </li>
+        </ul>
+    </div>
+    @* CSV Download can be added later if needed *@
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-bus-front bx'></i>
+            <h3>Danh sách Xe buýt (@Model.Buses.Count)</h3>
+            <div style="display: flex; align-items: center;">
+                <a asp-page="./Edit" class="btn btn-primary btn-sm me-2" style="text-decoration: none;">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm mới Xe
+                </a>
+                @* Search functionality can be added similar to admin page *@
+                 <div style="position:relative; display:inline-block;">
+                    <i class="bx bx-search" id="search-bus-icon" style="cursor:pointer; font-size: 1.5rem;"></i>
+                    <div class="search-bus-panel" style="display:none; position: absolute; top: 100%; right: 0; background-color: white; border: 1px solid #ccc; padding: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <form method="get">
+                            <input type="text" name="SearchTerm" placeholder="Biển số hoặc loại xe..." value="@Model.SearchTerm" class="form-control mb-2" />
+                            <button type="submit" class="btn btn-primary btn-sm">Tìm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã xe</th>
+                    <th>Biển số</th>
+                    <th>Loại xe</th>
+                    <th>Sức chứa</th>
+                    <th>Trạng thái</th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Buses != null && Model.Buses.Any())
+                {
+                    var stt = 1;
+                    @foreach(var bus in Model.Buses)
+                    {
+                        <tr>
+                            <td class="truncate" title="@stt">@(stt++)</td>
+                            <td class="truncate" title="@bus.BusId">@bus.BusId</td>
+                            <td class="truncate" title="@bus.LicensePlate">@bus.LicensePlate</td>
+                            <td class="truncate" title="@bus.BusType">@bus.BusType</td>
+                            <td class="truncate" title="@bus.Capacity">@bus.Capacity</td>
+                            <td class="truncate-status" title="@bus.StatusDisplayName" style="width: fit-content; justify-content: center; align-items: center;"><span class="status @bus.Status.ToString().ToLower()" style="justify-self: center; text-align: center;">@bus.StatusDisplayName</span></td>
+                            <td class="truncate" title="@bus.CreatedAt">@bus.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="truncate" title="@bus.UpdatedAt">@bus.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@bus.BusId" class="btn btn-sm btn-outline-primary">Sửa</a>
+                                @if(bus.Status != BusStatus.PendingApproval && bus.Status != BusStatus.Rejected) // Example: Can't delete if pending or rejected
+                                {
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@bus.BusId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa xe có biển số @bus.LicensePlate không?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">Xóa</button>
+                                </form>
+                                }
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="9" class="text-center">Không tìm thấy xe buýt nào thuộc công ty của bạn.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

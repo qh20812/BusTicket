@@ -1,0 +1,102 @@
+@page "{id:int?}"
+@model BusTicketSystem.Pages.ForAdmin.RouteManage.EditModel
+@{
+    Layout = "_AdminLayout";
+    // ViewData["Title"] được set trong OnGetAsync
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="/ForAdmin/RouteManage/Index" style="text-decoration: none;">Lộ trình</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">@(Model.RouteInput.RouteId == 0 ? "Thêm mới" : "Chỉnh sửa")</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-signpost-split bx'></i>
+            <h3>@(Model.RouteInput.RouteId == 0 ? "Thông tin Lộ trình mới" : $"Chỉnh sửa Lộ trình ID: {Model.RouteInput.RouteId}")</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="RouteInput.RouteId" />
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.Departure" class="form-label"></label>
+                    <input asp-for="RouteInput.Departure" class="form-control" required>
+                    <span asp-validation-for="RouteInput.Departure" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.Destination" class="form-label"></label>
+                    <input asp-for="RouteInput.Destination" class="form-control" required>
+                    <span asp-validation-for="RouteInput.Destination" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="RouteInput.OriginAddress" class="form-label"></label>
+                <input asp-for="RouteInput.OriginAddress" class="form-control">
+                <span asp-validation-for="RouteInput.OriginAddress" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="RouteInput.DestinationAddress" class="form-label"></label>
+                <input asp-for="RouteInput.DestinationAddress" class="form-control">
+                <span asp-validation-for="RouteInput.DestinationAddress" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.OriginCoordinates" class="form-label"></label>
+                    <input asp-for="RouteInput.OriginCoordinates" class="form-control" placeholder="Ví dụ: 10.7769,106.6954">
+                    <span asp-validation-for="RouteInput.OriginCoordinates" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.DestinationCoordinates" class="form-label"></label>
+                    <input asp-for="RouteInput.DestinationCoordinates" class="form-control" placeholder="Ví dụ: 20.8562,106.6822">
+                    <span asp-validation-for="RouteInput.DestinationCoordinates" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.Distance" class="form-label"></label>
+                    <input asp-for="RouteInput.Distance" type="number" step="0.1" class="form-control" min="0">
+                    <span asp-validation-for="RouteInput.Distance" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.EstimatedDuration" class="form-label"></label>
+                    <input asp-for="RouteInput.EstimatedDuration" class="form-control" placeholder="Ví dụ: 02:30">
+                    <span asp-validation-for="RouteInput.EstimatedDuration" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.Status" class="form-label"></label>
+                    <select asp-for="RouteInput.Status" asp-items="Html.GetEnumSelectList<BusTicketSystem.Models.RouteStatus>()" class="form-select"></select>
+                    <span asp-validation-for="RouteInput.Status" class="text-danger"></span>
+                </div>
+                @* Thêm dropdown chọn Nhà xe  *@
+                @* <div class="col-md-6 mb-3">
+                    <label asp-for="RouteInput.ProposedByCompanyId" class="form-label"></label>
+                    <select asp-for="RouteInput.ProposedByCompanyId" asp-items="Model.Companies" class="form-select">
+                        <option value="">-- Không chọn --</option>
+                    </select>
+                    <span asp-validation-for="RouteInput.ProposedByCompanyId" class="text-danger"></span>
+                </div> *@
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Lưu Lộ trình</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

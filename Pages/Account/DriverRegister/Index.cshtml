@@ -1,0 +1,76 @@
+@page
+@model BusTicketSystem.Pages.Account.DriverRegister.IndexModel
+@{
+    Layout = "_FormLayout"; // Thay đổi layout
+    ViewData["Title"] = "Đăng ký Đối tác Tài xế";
+}
+
+<div class="form-container sign-in">
+    <form method="post">
+        <h1>@ViewData["Title"]</h1>
+        <div class="social-icons">
+            <a href="#" class="icon"><i class="fa-brands fa-google-plus-g"></i></a>
+            <a href="#" class="icon"><i class="fa-brands fa-facebook-f"></i></a>
+        </div>
+        <span>hoặc điền thông tin của bạn vào biểu mẫu dưới đây</span>
+
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success" style="margin: 10px 0; padding: 10px; font-size: 0.9em;">@TempData["SuccessMessage"]</div>
+        }
+        @if (!ViewData.ModelState.IsValid && ViewData.ModelState[string.Empty] != null)
+        {
+            @foreach (var error in ViewData.ModelState[string.Empty].Errors)
+            {
+                <div class="alert alert-danger" style="margin: 10px 0; padding: 10px; font-size: 0.9em;">@error.ErrorMessage</div>
+            }
+        }
+        <div asp-validation-summary="ModelOnly" class="text-danger" style="margin-bottom: 10px; font-size: 0.9em;"></div>
+
+        <input asp-for="Input.Fullname" placeholder="Họ và tên đầy đủ" />
+        <span asp-validation-for="Input.Fullname" class="text-danger" style="font-size: 0.8em; display: block; margin-top: -10px; margin-bottom:5px;"></span>
+
+        <input asp-for="Input.Email" type="email" placeholder="Email (ví dụ: driver@example.com)" />
+        <span asp-validation-for="Input.Email" class="text-danger" style="font-size: 0.8em; display: block; margin-top: -10px; margin-bottom:5px;"></span>
+
+        <input asp-for="Input.Phone" type="tel" placeholder="Số điện thoại (ví dụ: 09xxxxxxxx)" />
+        <span asp-validation-for="Input.Phone" class="text-danger" style="font-size: 0.8em; display: block; margin-top: -10px; margin-bottom:5px;"></span>
+
+        <input asp-for="Input.LicenseNumber" placeholder="Số bằng lái (CMTND/CCCD)" />
+        <span asp-validation-for="Input.LicenseNumber" class="text-danger" style="font-size: 0.8em; display: block; margin-top: -10px; margin-bottom:5px;"></span>
+
+        <label asp-for="Input.DateOfBirth" style="font-size:0.9em; margin-top: 5px; display:block; text-align:left; width:100%; padding-left:10px;">Ngày sinh:</label>
+        <input asp-for="Input.DateOfBirth" type="date" style="margin-bottom: 0px;" />
+        <span asp-validation-for="Input.DateOfBirth" class="text-danger" style="font-size: 0.8em; display: block; margin-top: 0px; margin-bottom:5px;"></span>
+
+        <textarea asp-for="Input.Address" placeholder="Địa chỉ thường trú" rows="3" style="background-color: #eee; border: none; margin: 8px 0; padding: 10px 15px; font-size: 13px; border-radius: 8px; width: 100%; outline: none;"></textarea>
+        <span asp-validation-for="Input.Address" class="text-danger" style="font-size: 0.8em; display: block; margin-top: -5px; margin-bottom:10px;"></span>
+
+        <button type="submit" style="margin-top:10px;">Gửi Đơn Đăng ký</button>
+    </form>
+</div>
+
+<div class="toggle-container">
+    <div class="toggle">
+        <div class="toggle-panel toggle-right">
+            <h1>Chào mừng bạn!</h1>
+            <p>Trở thành đối tác tài xế của chúng tôi để có cơ hội việc làm hấp dẫn và đóng góp vào mạng lưới vận chuyển.</p>
+            <button class="hidden" id="home">Trang chủ</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const mainContainer = document.getElementById('container');
+            if (mainContainer) {
+                mainContainer.classList.add('partnerregis-wider-form');
+            }
+        });
+        document.getElementById('home').addEventListener('click',function(){
+            window.location.href='/';
+        });
+    </script>
+}

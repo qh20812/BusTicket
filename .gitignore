@@ -1,0 +1,40 @@
+# Dependencies
+**/[Bb]in/
+**/[Oo]bj/
+
+# User-specific files
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Build results
+[Bb]uild/
+[Rr]elease/
+[Dd]ebug/
+
+# Rider
+.idea/
+
+# VS Code
+.vscode/
+
+# Secrets - Rất quan trọng để không đưa lên repository công khai
+appsettings.Development.json
+secrets.json
+user-secrets/
+
+# Environment files
+.env
+
+# Log files
+*.log
+
+# NuGet packages folder - thường không cần commit
+packages/
+**/packages/
+
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log

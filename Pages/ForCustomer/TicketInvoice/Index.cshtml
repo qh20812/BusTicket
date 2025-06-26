@@ -1,0 +1,182 @@
+@page
+@model BusTicketSystem.Pages.ForCustomer.TicketInvoice.IndexModel
+@using BusTicketSystem.Models
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Thông tin Hóa đơn";
+}
+<div class="container-ticket">
+    <div class="block-title">
+        <h1 class="title-ticket">Thông tin Mua vé</h1>
+    </div>
+    @if (!string.IsNullOrEmpty(Model.InfoMessage))
+    {
+        <div class="alert alert-info mx-3 mt-3" role="alert">
+            @Model.InfoMessage
+        </div>
+    }
+    @if (Model.Order != null)
+    {
+        <div class="card-ticket">
+            <div class="card-body-ticket">
+                <div>
+                    <div class="content-ticket-info">
+                        @if (Model.Order.User != null)
+                        {
+                            <div style="display: flex; flex-direction: row; align-items: baseline;">
+                                <div class="ti-ticket">
+                                    <p>Họ và tên:</p>
+                                    <p>Số điện thoại:</p>
+                            </div>
+                                <div class="body-ticket">
+                                    <p>@Model.Order.User.Fullname</p>
+                                    <p>@Model.Order.User.Phone</p>
+                                    <p>@Model.Order.User.Email</p>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div style="display: flex; flex-direction: row; align-items: baseline;">
+                                <div class="ti-ticket">
+                                    <p>Số điện thoại:</p>
+                                    <p>Email:</p>
+                                </div>
+                                <div class="body-ticket">
+                                    <p>@Model.Order.GuestPhone</p>
+                                    <p>@Model.Order.GuestEmail</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                    <div class="content-ticket-info-2">
+                        <div style="display: flex; flex-direction: row; align-items: baseline;">
+                            <div class="ti-ticket" style="padding-right: 14px;">
+                                <p>Tổng giá vé:</p>
+                                <p>PTTT:</p>
+                                <p>Trạng thái:</p>
+                            </div>
+                            <div class="body-ticket">
+                                <p>@Model.Order.TotalAmount.ToString("N0")đ</p>
+                                <p>
+                                    @{
+                                        var successfulPayment = Model.Order.Payments?.FirstOrDefault(p => p.Status == PaymentStatus.Success);
+                                        if (successfulPayment != null)
+                                        {
+                                            @successfulPayment.PaymentGateway.ToString()
+                                        }
+                                        else
+                                        {
+                                            <span style="color: #FBC02D;">N/A</span>
+                                        }
+                                    }
+                                </p>
+                                @if(Model.Order.Status == OrderStatus.Pending){
+                                    <p style="color: #FBC02D;">Chờ thanh toán</p>
+                                }
+                                else if(Model.Order.Status== OrderStatus.Paid){
+                                    <p style="color: green;">Thành công</p>
+                                }
+                                else if(Model.Order.Status== OrderStatus.Cancelled){
+                                    <p style="color: red;">Đã hủy</p>
+                                }
+                                else if(Model.Order.Status== OrderStatus.Refunded){
+                                    <p style="color: blue;">Đã hoàn tiền</p>
+                                }
+                            </div>
+                        </div>
+                        @if (Model.Order.OrderTickets.Any()){
+                            <div class="container-invoice">
+                                <div class="header-invoice">
+                                    <div class="icon-invoice">
+                                        <i class="bi bi-download"></i>
+                                    </div>
+                                    <div class="icon-invoice">
+                                        <i class="bi bi-share-fill"></i>
+                                    </div>
+                                </div>
+                            <div class="qr--invoice">
+                                @* chứa mã qr code của vé *@
+                            </div>
+                            <div class="boydy-invoice">
+                                <div class="invoice-row">
+                                    <p class="label-item">Mã đặt vé</p>
+                                    <p class="value-item">@Model.Order.OrderId</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Lộ trình</p>
+                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Departure - @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Destination</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Thời gian khởi hành</p>
+                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy")</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Số ghế</p>
+                                    <p class="value-item">
+                                        @if (Model.Order.OrderTickets != null && Model.Order.OrderTickets.Any())
+                                        {
+                                            @string.Join(", ", Model.Order.OrderTickets.Select(ot => ot.Ticket?.SeatNumber).Where(sn => !string.IsNullOrEmpty(sn)))
+                                        }
+                                        else { @("N/A") }
+                                    </p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Điểm lên xe</p>
+                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Quý khách vui lòng có mặt tại Bến xe <span style="font-weight: bold;">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress</span> <span style="color: rgb(214, 2, 2);">Trước @(Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy"))</span> để kiểm tra thông tin trước khi lên xe.</p>
+                                    <p class="value-item"></p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Điểm trả khách</p>
+                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.DestinationAddress</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Giá vé</p>
+                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Price.ToString("N0")đ</p>
+                                </div>
+                                <div class="invoice-row">
+                                    <p class="label-item">Biển số xe</p>
+                                    <p class="value-item">@(Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Bus?.LicensePlate ?? "Đang cập nhật")</p>
+                                </div>
+                            </div>
+                            </div>
+                            <div class="ticket-end">
+                                <p>Mang mã vé đến bến xe để đổi vé lên xe trước giờ khởi hành ít nhất 60 phút.</p>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">Không có vé nào trong hóa đơn này.</p>
+                        }
+                    </div>
+                </div>
+                <div class="ticket-actions-footer">
+                    <div class="btn-ticket-back">
+                        <a asp-page="/Home/Schedule/Index">Quay lại tìm chuyến</a>
+                    </div>
+                    @if (Model.Order.Status == BusTicketSystem.Models.OrderStatus.Pending)
+                    {
+                        <div class="btn-payment">
+                            <a asp-page="/ForCustomer/Payment/Index" asp-route-orderId="@Model.Order.OrderId"
+                                class="btn-payment-continue"><i class='bx bx-credit-card' style="padding-right: 5px;"></i> Tiến hành Thanh toán</a>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-warning text-center" role="alert">
+            Không tìm thấy thông tin hóa đơn.
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    @* Thêm bất kỳ script cần thiết nào ở đây, ví dụ: cho tích hợp thanh toán sau này *@
+}

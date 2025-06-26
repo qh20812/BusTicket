@@ -1,0 +1,345 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.BusManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Phương tiện";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a>
+            </li>/
+            <li>
+                <a href="/ForAdmin/BusManage/Index" class="active" style="text-decoration: none;">Phương tiện</a>
+            </li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if(TempData["WarningMessage"]!=null){
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+        @TempData["WarningMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-bus-front bx-flashing' style="color: #ffc107;"></i> <!-- Using Bootstrap warning color -->
+            <h3>Yêu cầu Duyệt Xe (@Model.PendingApprovalBuses.Count)</h3>
+        </div>
+
+        @if (Model.PendingApprovalBuses.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>STT</th>
+                        <th>Biển số</th>
+                        <th>Loại xe</th>
+                        <th>Sức chứa</th>
+                        <th>Công ty</th>
+                        <th>Ngày gửi</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{ var sttPending = 1; }
+                    @foreach (var bus in Model.PendingApprovalBuses)
+                    {
+                        <tr>
+                            <td>@(sttPending++)</td>
+                            <td class="truncate" title="@bus.LicensePlate">@bus.LicensePlate</td>
+                            <td class="truncate" title="@bus.BusType">@bus.BusType</td>
+                            <td class="truncate" title="@bus.Capacity">@bus.Capacity</td>
+                            <td class="truncate" title="@bus.CompanyName">@(bus.CompanyName ?? "N/A")</td>
+                            <td class="truncate" title="@bus.CreatedAt">@bus.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <form method="post" asp-page-handler="ApproveBus" asp-route-id="@bus.BusId" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn DUYỆT xe @bus.LicensePlate không?');">
+                                    <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt xe"><i class="bi bi-check-lg"></i> Duyệt</button>
+                                </form>
+
+                                <button type="button" class="btn btn-sm btn-outline-danger btn-reject-bus-modal"
+                                        data-bs-toggle="modal" data-bs-target="#rejectBusModal"
+                                        data-bus-id="@bus.BusId" data-bus-license="@bus.LicensePlate"
+                                        title="Từ chối xe">
+                                    <i class="bi bi-x-lg"></i> Từ chối
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Không có yêu cầu duyệt xe nào.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-bus-front bx'></i>
+            <h3>Danh sách Xe buýt (@Model.Buses.Count)</h3>
+            <div style="display: flex; align-items: center;">
+                @* Nút thêm mới *@
+                <a asp-page="./Edit" class="btn btn-primary btn-sm me-2" style="text-decoration: none;">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm mới
+                </a>
+
+                @* Filter/Sort Icon *@
+                <i class="bx bx-filter" id="filter-bus-icon" style="cursor:pointer; font-size: 1.5rem; margin-right: 10px;" title="Sắp xếp"></i>
+                <form id="filter-form-bus" method="get" style="display: none;">
+                    <input type="hidden" name="SortOrder" id="SortOrderBusInput" value="@Model.SortOrder" />
+                    <input type="hidden" name="SearchTerm" value="@Model.SearchTerm" />
+                </form>
+
+                @* Search Icon and Panel *@
+                <div style="position:relative; display:inline-block;">
+                    <i class="bx bx-search" id="search-bus-icon" style="cursor:pointer; font-size: 1.5rem;"></i>
+                    <div class="search-bus-panel" style="display:none; position: absolute; top: 100%; right: 0; background-color: white; border: 1px solid #ccc; padding: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                        <form method="get">
+                            <input type="text" name="SearchTerm" placeholder="Biển số hoặc loại xe..." value="@Model.SearchTerm" class="form-control mb-2" />
+                            <button type="submit" class="btn btn-primary btn-sm">Tìm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Mã xe</th>
+                    <th>Biển số</th>
+                    <th>Loại xe</th>
+                    <th>Sức chứa</th>
+                    <th>
+                        <a href="/ForAdmin/BusCompanyManage/Index" class="sort-link company-title" data-sort-value="company">Công ty</a>
+                        <i class="sort-icon bx bx-sort-down" data-sort-value="company"></i>
+                    <th>Trạng thái</th>
+                    </th>
+                    <th>Ngày tạo</th>
+                    <th>Ngày cập nhật</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Buses != null && Model.Buses.Any())
+                {
+                    var stt = 1;
+                    @foreach(var bus in Model.Buses)
+                    {
+                        <tr>
+                            <td>@(stt++)</td>
+                            <td class="truncate" title="@bus.BusId">@bus.BusId</td>
+                            <td class="truncate" title="@bus.LicensePlate">@bus.LicensePlate</td>
+                            <td class="truncate" title="@bus.BusType">@bus.BusType</td>
+                            <td class="truncate" title="@bus.Capacity">@bus.Capacity</td>
+                            <td class="truncate" title="@bus.CompanyName">@(bus.CompanyName ?? "Bus Ticket")</td>
+                            <td class="truncate-status" title="@bus.StatusDisplayName">
+                                <span class="status @bus.StatusCssClass">@bus.StatusDisplayName</span>
+                            </td>
+                            <td class="truncate" title="@bus.CreatedAt">@bus.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td class="truncate" title="@bus.UpdatedAt">@bus.UpdatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@bus.BusId" class="btn btn-sm btn-primary">Sửa</a>
+                                <form method="post" asp-page-handler="Delete" asp-route-id="@bus.BusId" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn xóa xe có biển số @bus.LicensePlate không?');">
+                                    <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="10" class="text-center">Không tìm thấy xe buýt nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<!-- Section for Pending Approval Buses -->
+
+<div class="modal fade" id="rejectBusModal" tabindex="-1" aria-labelledby="rejectBusModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="RejectBus" id="rejectBusForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectBusModalLabel">Từ chối Xe buýt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn từ chối xe có biển số <strong id="busLicenseForRejectModal"></strong> (ID: <span id="busIdForRejectTextModal"></span>)?</p>
+                    <input type="hidden" asp-for="BusActionInput.BusIdToAction" id="busIdToRejectInputModal" />
+                    <div class="mb-3">
+                        <label asp-for="BusActionInput.RejectionReason" class="form-label fw-bold">Lý do từ chối (bắt buộc):</label>
+                        <textarea asp-for="BusActionInput.RejectionReason" class="form-control" rows="3" placeholder="Nhập lý do từ chối..."></textarea>
+                        <span asp-validation-for="BusActionInput.RejectionReason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger">Xác nhận Từ chối</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Logic cho search icon và panel
+            const searchBusIcon = document.getElementById('search-bus-icon');
+            const searchBusPanel = document.querySelector('.search-bus-panel');
+
+            if (searchBusIcon && searchBusPanel) {
+                searchBusIcon.onclick = function (event) {
+                    event.stopPropagation(); // Ngăn sự kiện click lan ra document
+                    searchBusPanel.style.display = (searchBusPanel.style.display === 'none' ? 'block' : 'none');
+                };
+
+                // Đóng panel khi click ra ngoài
+                document.addEventListener('click', function (e) {
+                    // Kiểm tra xem click có nằm ngoài searchPanel và searchIcon không
+                    if (searchBusPanel.style.display === 'block' && !searchBusPanel.contains(e.target) && e.target !== searchBusIcon) {
+                        searchBusPanel.style.display = 'none';
+                    }
+                });
+            }
+
+            // Logic cho filter/sort icon và link
+            const filterBusIcon = document.getElementById('filter-bus-icon');
+            const filterFormBus = document.getElementById('filter-form-bus');
+            const sortOrderBusInput = document.getElementById('SortOrderBusInput');
+            const sortLinks = document.querySelectorAll('.sort-link');
+            const sortIcons = document.querySelectorAll('.sort-icon');
+            const currentSortOrder = sortOrderBusInput.value;
+
+            // Cập nhật icon sắp xếp ban đầu
+            sortIcons.forEach(icon => {
+                const sortValue = icon.getAttribute('data-sort-value');
+                if (currentSortOrder === sortValue) {
+                    icon.classList.remove('bx-sort-down');
+                    icon.classList.add('bx-sort-up');
+                } else if (currentSortOrder === sortValue + '_desc') {
+                     icon.classList.remove('bx-sort-down');
+                     icon.classList.add('bx-sort-down'); // Giữ nguyên hoặc đổi icon nếu có icon riêng cho desc
+                } else {
+                     icon.classList.remove('bx-sort-up');
+                     icon.classList.add('bx-sort-down');
+                }
+                 icon.style.display = 'none'; // Mặc định ẩn icon
+            });
+
+             // Hiển thị icon cho cột đang được sắp xếp
+             if (currentSortOrder) {
+                 const baseSortValue = currentSortOrder.replace('_desc', '');
+                 const activeIcon = document.querySelector(`.sort-icon[data-sort-value="${baseSortValue}"]`);
+                 if (activeIcon) {
+                     activeIcon.style.display = 'inline-block';
+                     if (currentSortOrder.endsWith('_desc')) {
+                         activeIcon.classList.remove('bx-sort-up');
+                         activeIcon.classList.add('bx-sort-down');
+                     } else {
+                         activeIcon.classList.remove('bx-sort-down');
+                         activeIcon.classList.add('bx-sort-up');
+                     }
+                 }
+             }
+
+            // Xử lý click vào link sắp xếp
+            sortLinks.forEach(link => {
+                link.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const sortValue = this.getAttribute('data-sort-value');
+                    let nextSortOrder = sortValue; // Mặc định là ASC
+
+                    // Nếu đang sắp xếp theo cột này, chuyển đổi giữa ASC và DESC
+                    if (currentSortOrder === sortValue) {
+                        nextSortOrder = sortValue + '_desc';
+                    } else if (currentSortOrder === sortValue + '_desc') {
+                         nextSortOrder = ""; // Quay về mặc định (theo ngày tạo)
+                    }
+
+                    sortOrderBusInput.value = nextSortOrder;
+                    filterFormBus.submit();
+                });
+            });
+
+            // Tự động ẩn thông báo TempData sau 10 giây
+            const tempAlerts = document.querySelectorAll('.alert-dismissible.fade.show[role="alert"]');
+            tempAlerts.forEach(function(alert) {
+                setTimeout(function() {
+                    if (bootstrap && bootstrap.Alert) {
+                        const alertInstance = bootstrap.Alert.getInstance(alert);
+                        if (alertInstance) {
+                            alertInstance.close();
+                        }
+                    } else {
+                        alert.style.display = 'none';
+                    }
+                }, 10000); // 10000 milliseconds = 10 giây
+            });
+            const rejectBusModalElement =document.getElementById('rejectBusModal');
+            var busIdToRejectOnError = "@(TempData["ShowRejectBusModalOnError"] as string)";
+
+            if (rejectBusModalElement) {
+                rejectBusModalElement.addEventListener('show.bs.modal', function (event) {
+                    const button = event.relatedTarget;
+                    if (!button) return; // Modal triggered programmatically
+
+                    const busId = button.getAttribute('data-bus-id');
+                    const busLicense = button.getAttribute('data-bus-license');
+
+                    const modalTitle = rejectBusModalElement.querySelector('.modal-title');
+                    const busLicenseSpan = rejectBusModalElement.querySelector('#busLicenseForRejectModal');
+                    const busIdTextSpan = rejectBusModalElement.querySelector('#busIdForRejectTextModal');
+                    const busIdInput = rejectBusModalElement.querySelector('#busIdToRejectInputModal');
+                    const reasonTextarea = rejectBusModalElement.querySelector('textarea[name="BusActionInput.RejectionReason"]');
+                    const reasonValidationSpan = rejectBusModalElement.querySelector('span[data-valmsg-for="BusActionInput.RejectionReason"]');
+
+                    if (modalTitle) modalTitle.textContent = 'Từ chối Xe: ' + busLicense;
+                    if (busLicenseSpan) busLicenseSpan.textContent = busLicense;
+                    if (busIdTextSpan) busIdTextSpan.textContent = busId;
+                    if (busIdInput) busIdInput.value = busId;
+                    if (reasonTextarea) reasonTextarea.value = ''; // Clear previous reason
+                    if (reasonValidationSpan) reasonValidationSpan.textContent = ''; // Clear previous validation message
+                });
+                if(busIdToRejectOnError){
+                    const rejectModalInstance = new bootstrap.Modal(rejectBusModalElement); 
+                    const busIdInput = rejectBusModalElement.querySelector('#busIdToRejectInputModal'); 
+                    if (busIdInput) busIdInput.value = busIdToRejectOnError; rejectModalInstance.show();
+                }
+            }
+        });
+    </script>
+}

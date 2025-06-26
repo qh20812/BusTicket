@@ -1,0 +1,106 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.Dashboard.IndexModel
+@{
+    Layout = "_PartnerLayout";
+    ViewData["Title"] = "Tổng Quan Đối tác";
+}
+
+@if (!string.IsNullOrEmpty(Model.ErrorMessage))
+{
+    <div class="alert alert-danger" role="alert">
+        @Model.ErrorMessage
+    </div>
+}
+
+<div class="header">
+    <div class="left">
+        <h1>Tổng quan Nhà xe</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="#" style="text-decoration: none;">
+                    Nhà xe
+                </a>
+            </li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Tổng quan</a></li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a>
+</div>
+
+<ul class="insights">
+    <li>
+        <i class="bx bx-calendar-check"></i>
+        <span class="info">
+            <h3>
+                @Model.PaidTicketCount
+            </h3>
+            <p>Vé đã bán (Thành công)</p>
+        </span>
+    </li>
+    <li>
+        <i class="bi bi-x-square bx"></i>
+        <span class="info">
+            <h3>
+                @Model.CancelledTicketCount
+            </h3>
+            <p>Vé đã hủy</p>
+        </span>
+    </li>
+    <li>
+        <i class="bx bx-line-chart"></i>
+        <span class="info">
+            <h3>
+                @Model.TotalTicketCount.ToString("N0")
+            </h3>
+            <p>Tổng lượt đặt vé</p>
+        </span>
+    </li>
+    <li>
+        <i class="bi bi-cash-coin bx"></i>
+        <span class="info">
+            <h3>
+                VND @Model.TotalAmount.ToString("N0")
+            </h3>
+            <p>Tổng doanh thu</p>
+        </span>
+    </li>
+</ul>
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class="bx bx-receipt"></i>
+            <h3>Đơn đặt vé gần đây (của Nhà xe)</h3>
+            @* Search and filter can be added here if needed, similar to Admin dashboard *@
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Mã vé</th>
+                    <th>Mã đơn</th>
+                    <th>Tên khách hàng</th>
+                    <th>Ngày đặt vé</th>
+                    <th>Trạng thái</th>
+                    <th>Phương thức thanh toán</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var order in Model.Orders)
+                {
+                    <tr>
+                        <td class="truncate" title="@order.User?.UserId">@(order.User?.UserId.ToString() ?? "N/A")</td>
+                        <td class="truncate" title="@order.OrderTickets?.FirstOrDefault()?.TicketId">@(order.OrderTickets?.FirstOrDefault()?.TicketId != null ? order.OrderTickets.FirstOrDefault().TicketId.ToString() : "N/A")</td>
+                        <td class="truncate" title="@order.OrderId">@order.OrderId</td>
+                        <td class="truncate" title="@order.User?.Fullname ?? order.GuestEmail">@(order.User?.Fullname ?? order.GuestEmail ?? "Khách vãng lai")</td>
+                        <td class="truncate" title="@order.CreatedAt">@order.CreatedAt.ToString("dd-MM-yyyy")</td>
+                        <td class="truncate-status"><span class="status @order.Status.ToString().ToLower()">@order.StatusVietnamese</span></td>
+                        <td class="truncate" title="@order.PaymentMethod">@(order.PaymentMethod ?? "N/A")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

@@ -1,0 +1,65 @@
+@page
+@model BusTicketSystem.Pages.Home.ContactUs.IndexModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Liên Hệ Chúng Tôi";
+}
+<div class="contact-container">
+    <div class="contact-info">
+        <h1 class="contact-title">Liên hệ chúng tôi</h1>
+        <h2>BusTicket</h2>
+        <div class="contact-infomation">
+            <p>Địa chỉ: <strong>Số 123 Mã Lò, Bình Trị Đông A, Bình Tân, Tp. HCM</strong></p>
+            <p>Website: <strong><a href="#" class="contact-links">https://busticket.vn</a></strong></p>
+            <p>Email: <strong><a href="#" class="contact-links">hotro@busticket.vn</a></strong></p>
+            <p>Điện thoại: <strong>0393 999 999</strong></p>
+        </div>
+    </div>
+
+    <div class="contact-form">
+        <div class="contact-title-block" style="width: 100%;">
+            <i class="bi bi-envelope-arrow-up"></i>
+            <h2 class="contact-title-form">Gửi tin nhắn cho chúng tôi</h2>
+        </div>
+        <form method="post" style="width: 100%;">
+            @if (Model.SuccessMessage != null)
+            {
+                <div class="alert alert-success">@Model.SuccessMessage</div>
+            }
+            @if (Model.ErrorMessage != null)
+            {
+                <div class="alert alert-danger">@Model.ErrorMessage</div>
+            }
+            <div class="contact-ipt-row" style="width: 100%; gap: 25px;">
+                <div class="contact-ipt" style="width: 100%;">
+                    <input asp-for="Input.SenderName" class="contact-input" placeholder="Họ và tên" />
+                    <span asp-validation-for="Input.SenderName" class="text-danger"></span>
+                </div>
+                <div class="contact-ipt" style="width: 100%;">
+                    <input asp-for="Input.SenderPhone" class="contact-input" placeholder="Số điện thoại" />
+                    <span asp-validation-for="Input.SenderPhone" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="contact-ipt-row" style="width: 100%; gap: 25px;">
+                <div class="contact-ipt" style="width: 100%;">
+                    <input asp-for="Input.SenderEmail" class="contact-input" placeholder="Email" />
+                    <span asp-validation-for="Input.SenderEmail" class="text-danger"></span>
+                </div>
+
+                <div class="contact-ipt" style="width: 100%;">
+                    <input asp-for="Input.Subject" class="contact-input" placeholder="Chủ đề" />
+                    <span asp-validation-for="Input.Subject" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="contact-ipt" style="width: 105%;">
+                <textarea asp-for="Input.Content" class="contact-textarea" placeholder="Nội dung"></textarea>
+                <span asp-validation-for="Input.Content" class="text-danger"></span>
+            </div>
+            <button class="contact-btn" type="submit" style="align-self: center;">Gửi</button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"></partial>
+}

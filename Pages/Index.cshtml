@@ -1,0 +1,174 @@
+﻿@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Trang Chủ";
+    Layout="_Layout";
+}
+<div class="home-container">
+  @if(Model.PopularTrips.Any()){
+  <div class="separator mt-5">
+    <h2>Chuyến Xe Phổ Biến</h2>
+    <a asp-page="/Home/Schedule/Index">Xem tất cả <i class="bx bx-chevron-right"></i></a>
+  </div>
+  <div class="carousel-container">
+    <div class="popular-trips-carousel">
+      @{
+        var cardColors = new[] { "#FF5733", "#33FF57", "#3357FF", "#FF33F0", "#F0FF33", "#33F0FF" };
+        var cardImages = new[] {
+            "https://picsum.photos/300/200?random=1",
+            "https://picsum.photos/300/200?random=2",
+            "https://picsum.photos/300/200?random=3",
+            "https://picsum.photos/300/200?random=4",
+            "https://picsum.photos/300/200?random=5",
+            "https://picsum.photos/300/200?random=6"
+        };
+        var index = 0;
+      }
+      @foreach(var trip in Model.PopularTrips){
+        var currentColor = cardColors[index % cardColors.Length];
+        var currentImage = cardImages[index % cardImages.Length];
+        index++;
+        <div class="popular-trip-card" style="background-color: @currentColor;">
+          <div class="card-background-visual" style="background-image: url('@currentImage');">
+            <div class="card-overlay"></div>
+          </div>
+          <div class="card-content-wrapper">
+            <div class="top">
+              <div class="info">
+                <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId">@trip.Route.Departure - @trip.Route.Destination</a>
+                <p>Khởi hành: @trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")</p>
+              </div>
+            </div>
+            <div class="bottom">
+              <div class="price">
+                <h5>Giá vé: @trip.Price.ToString("N0") VND</h5>
+              </div>
+              <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId" class="btn btn-primary btn-sm">Xem chi tiết</a>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+    <div class="custom-scrollbar"><div class="custom-scrollbar-thumb"></div></div>
+  </div>
+}
+</div>
+
+
+@section Scripts{
+  <script>
+    document.addEventListener('DOMContentLoaded',function(){
+      const carouselContainer = document.querySelector('.carousel-container');
+      if(carouselContainer){
+        const slider = carouselContainer.querySelector('.popular-trips-carousel');
+        const scrollbar = carouselContainer.querySelector('.custom-scrollbar');
+        const scrollbarThumb = carouselContainer.querySelector('.custom-scrollbar-thumb');
+
+        let isDown =false;
+        let startX;
+        let scrollLeft;
+
+        let isThumbDragging = false;
+        let thumbStartX; // Vị trí chuột X khi bắt đầu kéo thumb
+        let thumbStartLeft; // Vị trí left của thumb (tính bằng pixel) khi bắt đầu kéo
+
+        slider.addEventListener('mousedown',(e)=>{
+          isDown=true;
+          slider.classList.add('active');
+          startX=e.pageX - slider.offsetLeft;
+          scrollLeft=slider.scrollLeft;
+        });
+        slider.addEventListener('mouseleave',()=>{
+            isDown=false;
+            slider.classList.remove('active');
+        });
+        slider.addEventListener('mouseup',()=> {
+            isDown=false;
+            slider.classList.remove('active');
+        });
+
+        slider.addEventListener('mousemove',(e)=>{
+          if(!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - slider.offsetLeft;
+          const walk = (x - startX);
+          slider.scrollLeft = scrollLeft - walk;
+        });
+
+        // Logic kéo thanh cuộn (thumb)
+        scrollbarThumb.addEventListener('mousedown', (e) => {
+            e.preventDefault(); // Ngăn chặn hành vi mặc định của trình duyệt (ví dụ: chọn văn bản)
+            isThumbDragging = true;
+            thumbStartX = e.pageX;
+            thumbStartLeft = scrollbarThumb.offsetLeft; // Lấy vị trí left hiện tại của thumb (pixel)
+            scrollbarThumb.classList.add('active-drag'); // Thêm class để thay đổi con trỏ chuột
+        });
+
+        document.addEventListener('mouseup', () => { // Lắng nghe trên document để xử lý khi kéo ra ngoài thumb
+            isThumbDragging = false;
+            scrollbarThumb.classList.remove('active-drag');
+        });
+
+        document.addEventListener('mousemove', (e) => { // Lắng nghe trên document để xử lý khi kéo ra ngoài thumb
+            if (!isThumbDragging) return;
+            e.preventDefault();
+
+            const deltaX = e.pageX - thumbStartX;
+            let newThumbLeft = thumbStartLeft + deltaX;
+
+            const scrollbarWidth = scrollbar.clientWidth;
+            const thumbWidth = scrollbarThumb.offsetWidth; // Lấy chiều rộng hiện tại của thumb
+            const thumbTrackLength = scrollbarWidth - thumbWidth; // Chiều dài tối đa thumb có thể di chuyển
+
+            // Giới hạn vị trí của thumb trong khoảng [0, thumbTrackLength]
+            newThumbLeft = Math.max(0, Math.min(newThumbLeft, thumbTrackLength));
+
+            // Cập nhật vị trí của thumb
+            scrollbarThumb.style.left = `${newThumbLeft}px`;
+
+            // Tính toán tỷ lệ cuộn dựa trên vị trí mới của thumb
+            const scrollRatio = thumbTrackLength > 0 ? newThumbLeft / thumbTrackLength : 0;
+
+            // Áp dụng tỷ lệ cuộn cho carousel chính
+            const sliderMaxScroll = slider.scrollWidth - slider.clientWidth;
+            slider.scrollLeft = scrollRatio * sliderMaxScroll;
+        });
+
+        function updateScrollbar() {
+            if (!scrollbar || !scrollbarThumb) return;
+
+            const scrollWidth = slider.scrollWidth;
+            const clientWidth = slider.clientWidth;
+            const scrollbarWidth = scrollbar.clientWidth; // Tổng chiều rộng của thanh cuộn
+            
+            // Hiện hoặc ẩn thanh cuộn tùy vào nội dung có tràn ra ngoài không
+            scrollbar.style.display = scrollWidth > clientWidth ? 'block' : 'none';
+
+            if (scrollWidth <= clientWidth) { // Không cần thanh cuộn nếu nội dung không tràn
+                return;
+            }
+
+            // Tính toán chiều rộng của thumb (pixel)
+            const thumbWidth = (clientWidth / scrollWidth) * scrollbarWidth;
+            scrollbarThumb.style.width = `${thumbWidth}px`;
+
+            // Tính toán vị trí của thumb (pixel)
+            const maxScrollLeft = scrollWidth - clientWidth; // Khoảng cách tối đa slider có thể cuộn
+            const thumbTrackLength = scrollbarWidth - thumbWidth; // Khoảng cách tối đa thumb có thể di chuyển
+            
+            // Tỷ lệ cuộn của slider (0 đến 1)
+            const scrollRatio = maxScrollLeft > 0 ? slider.scrollLeft / maxScrollLeft : 0;
+            // Vị trí left của thumb
+            const thumbLeft = scrollRatio * thumbTrackLength;
+
+            scrollbarThumb.style.left = `${thumbLeft}px`;
+        }
+
+        // Cập nhật thanh cuộn khi tải trang, cuộn, hoặc thay đổi kích thước cửa sổ
+        slider.addEventListener('scroll', updateScrollbar);
+        window.addEventListener('resize', updateScrollbar);
+        updateScrollbar();
+      }
+    });
+  </script>
+}

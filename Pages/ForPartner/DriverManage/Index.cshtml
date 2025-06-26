@@ -1,0 +1,151 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.DriverManage.IndexModel
+@{
+    ViewData["Title"] = "Quản lý Tài xế Nhà xe";
+    // Layout is set by _ViewStart.cshtml in ForBusCompany folder
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForBusCompany/Dashboard/Index" style="text-decoration: none;">Bảng điều khiển Nhà xe</a></li>/
+            <li><a asp-page="/ForBusCompany/DriverManage/Index" class="active" style="text-decoration: none;">Tài xế</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi:</strong> @TempData["ActionError"]
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-people bx'></i>
+            <h3>Danh sách Tài xế (@Model.CompanyDrivers.Count)</h3>
+            <div class="ms-auto d-flex align-items-center">
+                 <a asp-page="./Create" class="btn btn-primary btn-sm me-2">
+                    <i class="bi bi-person-plus-fill me-1"></i> Thêm Tài xế mới
+                </a>
+                @* TODO: Add search and filter controls similar to Admin's DriverManage *@
+            </div>
+        </div>
+
+        @if (Model.CompanyDrivers.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Mã tài xế</th>
+                        <th>Họ tên</th>
+                        <th>SĐT</th>
+                        <th>Bằng lái</th>
+                        <th>Ngày tham gia</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var driver in Model.CompanyDrivers)
+                    {
+                        <tr>
+                            <td class="truncate" title="@driver.DriverId">@driver.DriverId</td>
+                            <td class="truncate" title="@driver.Fullname">@driver.Fullname</td>
+                            <td class="truncate" title="@driver.Phone">@(driver.Phone ?? "N/A")</td>
+                            <td class="truncate" title="@driver.LicenseNumber">@driver.LicenseNumber</td>
+                            <td class="truncate" title="@(driver.JoinedDate.HasValue ? driver.JoinedDate.Value.ToString("dd/MM/yyyy") : (driver.CreatedAt.ToString("dd/MM/yyyy")))">@(driver.JoinedDate.HasValue ? driver.JoinedDate.Value.ToString("dd/MM/yyyy") : (driver.CreatedAt.ToString("dd/MM/yyyy")))</td>
+                            <td class="truncate-status">
+                                <span class="status @driver.Status.ToString().ToLower()">@driver.StatusDisplayName</span>
+                                @if(driver.Status == BusTicketSystem.Models.DriverStatus.Terminated && !string.IsNullOrEmpty(driver.TerminationReason))
+                                {
+                                    <i class="bx bx-info-circle" title="Lý do: @driver.TerminationReason" style="cursor:help; color: #dc3545; margin-left: 5px;"></i>
+                                }
+                            </td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@driver.DriverId" class="btn btn-sm btn-outline-primary @(driver.Status == BusTicketSystem.Models.DriverStatus.Terminated || driver.Status == BusTicketSystem.Models.DriverStatus.Resigned ? "disabled" : "")" title="Sửa"><i class="bi bi-pencil-square"></i></a>
+                                @if (driver.Status == BusTicketSystem.Models.DriverStatus.Active || driver.Status == BusTicketSystem.Models.DriverStatus.OnLeave)
+                                {
+                                    <button type="button" class="btn btn-sm btn-outline-danger btn-action-modal"
+                                            data-bs-toggle="modal" data-bs-target="#driverActionModal"
+                                            data-driver-id="@driver.DriverId" data-driver-name="@driver.Fullname" data-action-type="Terminate" data-modal-title="Cho nghỉ việc Tài xế">
+                                        <i class="bi bi-person-dash"></i> Nghỉ việc
+                                    </button>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p>Nhà xe của bạn chưa có tài xế nào hoặc không tìm thấy tài xế phù hợp.</p>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Modal for Terminate Action -->
+<div class="modal fade" id="driverActionModal" tabindex="-1" aria-labelledby="driverActionModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form method="post" asp-page-handler="ProcessAction" id="driverActionForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="driverActionModalLabel">Xác nhận hành động</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn <strong id="actionNameModal"></strong> tài xế <strong id="driverNameToActionModal"></strong> (ID: <span id="driverIdToActionTextModal"></span>)?</p>
+                    <input type="hidden" asp-for="DriverActionInput.DriverIdToAction" id="driverIdToActionInputModal" />
+                    <input type="hidden" asp-for="DriverActionInput.ActionType" id="actionTypeInputModal" />
+                    <div class="mb-3">
+                        <label asp-for="DriverActionInput.Reason" class="form-label fw-bold">Lý do (bắt buộc):</label>
+                        <textarea asp-for="DriverActionInput.Reason" class="form-control" rows="3" placeholder="Nhập lý do..."></textarea>
+                        <span asp-validation-for="DriverActionInput.Reason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy bỏ</button>
+                    <button type="submit" class="btn btn-danger" id="confirmActionButton">Xác nhận</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script src="~/js/admin/driverManageIndexModal.js"></script> @* Assuming similar modal script as admin, adjust path if needed *@
+    <script>
+        // Pass TempData for modal re-opening on error, similar to Admin's DriverManage/Index
+        var driverIdOnError = "@(TempData["ShowActionModalOnError"] as string)";
+        var actionTypeOnError = "@(TempData["ActionTypeOnError"] as string)";
+        // This script would be in driverManageIndexModal.js or similar
+    </script>
+}

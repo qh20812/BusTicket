@@ -1,0 +1,136 @@
+@page
+@model BusTicketSystem.Pages.Account.PartnerRegistration.IndexModel
+@{
+    Layout = "_FormLayout"; 
+    ViewData["Title"] = "Đăng ký Đối tác Nhà xe";
+}
+
+<div class="form-container sign-in">
+    <div class="form-header-static">
+        <h1>@ViewData["Title"]</h1>
+        <span>Vui lòng điền thông tin công ty của bạn để đăng ký</span>
+
+        @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+        {
+            <div class="alert alert-success">@Model.SuccessMessage</div>
+        }
+        @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+        {
+            <div class="alert alert-danger">@Model.ErrorMessage</div>
+        }
+    </div>
+
+    <div class="form-content-scrollable">
+        <form method="post">
+            <input asp-for="Input.CompanyName" type="text" placeholder="Tên công ty" />
+            <span asp-validation-for="Input.CompanyName" class="text-danger"></span>
+
+            <input asp-for="Input.Email" type="email" placeholder="Email công ty" />
+            <span asp-validation-for="Input.Email" class="text-danger"></span>
+
+            <input asp-for="Input.Phone" type="tel" placeholder="Số điện thoại công ty" />
+            <span asp-validation-for="Input.Phone" class="text-danger"></span>
+
+            <input asp-for="Input.Address" type="text" placeholder="Địa chỉ công ty" />
+            <span asp-validation-for="Input.Address" class="text-danger"></span>
+
+            <h5 style="margin-top:15px; margin-bottom:5px; font-weight:normal; font-size: 0.9em;">Thông tin người liên hệ:</h5>
+            <input asp-for="Input.ContactPersonName" type="text" placeholder="Tên người liên hệ" />
+            <span asp-validation-for="Input.ContactPersonName" class="text-danger"></span>
+
+            <input asp-for="Input.ContactPersonEmail" type="email" placeholder="Email người liên hệ" />
+            <span asp-validation-for="Input.ContactPersonEmail" class="text-danger"></span>
+
+            <input asp-for="Input.ContactPersonPhone" type="tel" placeholder="SĐT người liên hệ" />
+            <span asp-validation-for="Input.ContactPersonPhone" class="text-danger"></span>
+
+            <h5 style="margin-top:15px; margin-bottom:5px; font-weight:normal; font-size: 0.9em;">Thông tin tài khoản đối tác:</h5>
+            <input asp-for="Input.Password" type="password" placeholder="Mật khẩu tài khoản" />
+            <span asp-validation-for="Input.Password" class="text-danger"></span>
+
+            <input asp-for="Input.ConfirmPassword" type="password" placeholder="Xác nhận mật khẩu" />
+            <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+
+            <button type="submit">Gửi Yêu cầu</button>
+        </form>
+    </div>
+</div>
+
+<div class="toggle-container">
+    <div class="toggle">
+        <div class="toggle-panel toggle-right">
+            <h1>Chào mừng bạn!</h1>
+            <p>Khám phá thêm nhiều điều thú vị trên trang chủ của chúng tôi.</p>
+            <button class="hidden" id="home">Trang chủ</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Xử lý cho nút "Trang chủ"
+        const goHomeButton = document.getElementById('goHome');
+        if (goHomeButton) {
+            goHomeButton.onclick = function () {
+                window.location.href = '/Index'; // Điều hướng về trang chủ
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded',function(){
+            const mainContainer=document.getElementById('container');
+            if(mainContainer){
+                mainContainer.classList.add('partnerregis-wider-form');
+            }
+        });
+        document.getElementById('home').addEventListener('click',function(){
+            window.location.href='/';
+        });
+    </script>
+    <style>
+        /* CSS để form đăng ký đối tác có thể cuộn được */
+        .partnerregis-wider-form .form-container.sign-in {
+            display: flex;
+            flex-direction: column;
+            height: 100%; /* Đảm bảo .form-container chiếm đủ chiều cao của #container */
+            padding: 0 40px; /* Padding ngang cho toàn bộ nội dung form */
+            /* Ghi đè các style xung đột từ _formlayout.css có thể giới hạn chiều cao của container này */
+            max-height: none; /* Cho phép container sử dụng toàn bộ chiều cao height: 100% */
+            overflow-y: visible; /* Ngăn container này tự cuộn, để .form-content-scrollable xử lý cuộn */
+        }
+
+        .partnerregis-wider-form .form-container.sign-in .form-header-static {
+            flex-shrink: 0; /* Ngăn không cho phần header co lại */
+            text-align: center;
+            padding-top: 20px; /* Khoảng đệm phía trên cho tiêu đề */
+            padding-bottom: 10px; /* Khoảng đệm phía dưới cho tiêu đề */
+        }
+        .partnerregis-wider-form .form-container.sign-in .form-header-static h1{
+            margin-bottom: 8px; /* Điều chỉnh khoảng cách dưới h1 */
+        }
+        .partnerregis-wider-form .form-container.sign-in .form-header-static span{
+            display: inline-block; /* Để margin bottom có tác dụng */
+            margin-bottom: 10px; /* Điều chỉnh khoảng cách dưới span */
+        }
+        .partnerregis-wider-form .form-container.sign-in .form-header-static .alert {
+            margin-top: 10px;
+            margin-bottom: 5px; /* Giảm khoảng cách dưới của alert */
+            /* width: 100%; không cần thiết nếu padding đã được xử lý bởi cha */
+        }
+
+        .partnerregis-wider-form .form-container.sign-in .form-content-scrollable {
+            flex-grow: 1; /* Cho phép phần này mở rộng để lấp đầy không gian còn lại */
+            overflow-y: auto; /* Chỉ phần này có thanh cuộn dọc */
+            direction: rtl; /* Đặt thanh cuộn sang trái */
+            padding-bottom: 20px; /* Khoảng đệm ở cuối vùng cuộn */
+            padding-top: 10px; /* Thêm khoảng đệm ở đầu vùng cuộn để nội dung không bị che */
+        }
+
+        .partnerregis-wider-form .form-container.sign-in .form-content-scrollable form {
+            direction: ltr; /* Đặt lại hướng từ trái sang phải cho nội dung form */
+            height: auto; /* Cho phép form co giãn theo nội dung, ghi đè height: 100% từ _formlayout.css */
+            justify-content: flex-start; /* Căn chỉnh các item con (input) lên đầu form, ghi đè justify-content: center */
+        }
+    </style>
+}
+    </script>

@@ -1,0 +1,134 @@
+﻿@page
+@model BusTicketSystem.Pages.ForAdmin.Message.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Hộp thư";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="./Index" class="active" style="text-decoration: none;">Hộp thư</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    @TempData["SuccessMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    @TempData["ErrorMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+
+<!-- Khu vực tìm kiếm và filter -->
+<div class="row mb-3">
+    <div class="col-md-12">
+        <div class="header" style="background-color: transparent; padding: 0; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+            <div></div>
+            <div>
+                <form method="get" class="d-inline-flex align-items-center" style="gap: 10px;">
+                    <input type="text" name="SearchTerm" value="@Model.SearchTerm" class="form-control form-control-sm" placeholder="Tìm kiếm tên, email, chủ đề..." style="width: 220px;" />
+                    <span asp-validation-for="SearchTerm" class="text-danger" style="font-size: 0.875em;"></span>
+                    <select name="FilterStatus" class="form-select form-select-sm" style="width: 150px;">
+                        <option value="">Tất cả trạng thái</option>
+                        @foreach (var status in Model.Statuses)
+                        {
+                        <option value="@status.Value" selected="@status.Selected">@status.Text</option>
+                        }
+                    </select>
+                    <select name="SortOrder" class="form-select form-select-sm" style="width: 120px;">
+                        <option value="newest" selected="@(Model.SortOrder != "oldest")">Mới nhất</option>
+                        <option value="oldest" selected="@(Model.SortOrder == "oldest")">Cũ nhất</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary btn-sm">Lọc</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-envelope bx'></i>
+            <h3>Danh sách tin nhắn/khiếu nại (@Model.MessagesDisplay.Count)</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Người gửi</th>
+                    <th>Email</th>
+                    <th>Chủ đề</th>
+                    <th>Nội dung</th>
+                    <th>Ngày gửi</th>
+                    <th>Trạng thái</th>
+                    <th>Thao tác</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.MessagesDisplay.Any())
+                {
+                    var stt = 0;
+                @foreach (var msg in Model.MessagesDisplay)
+                    {
+                        stt++;
+                <tr style="cursor:pointer;" onclick="window.location='@Url.Page("./Details", new { id = msg.Id })'">
+                    <td class="truncate" title="@stt">@stt</td>
+                    <td class="truncate" title="@msg.SenderName">@msg.SenderName</td>
+                    <td class="truncate" title="@msg.SenderEmail">@msg.SenderEmail</td>
+                    <td class="truncate" title="@msg.Subject">@msg.Subject</td>
+                    <td title="@msg.ShortContent" class="truncate">@msg.ShortContent</td>
+                    <td class="truncate" title="@msg.SentAt.ToString("dd/MM/yyyy HH:mm")">@msg.SentAt.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td class="truncate-status" title="@msg.StatusDisplayName">
+                        <span class="status @msg.Status.ToString().ToLower()">@msg.StatusDisplayName</span>
+                    </td>
+                    <td>
+                        @if(msg.Status== Models.MessageStatus.Replied){
+                            <form method="post" asp-page-handler="Delete" asp-route-id="@msg.Id" style="display: inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa tin nhắn này?');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        }else{
+                            <form method="post" asp-page-handler="MarkAsRead" asp-route-id="@msg.Id" style="display:inline;">
+                            <button type="submit" class="btn btn-sm btn-success" title="Đánh dấu đã đọc" @(msg.Status == BusTicketSystem.Models.MessageStatus.Read ? "disabled" : "")>
+                                <i class="bi bi-envelope-open"></i>
+                            </button>
+                        </form>
+                        <form method="post" asp-page-handler="Delete" asp-route-id="@msg.Id" style="display:inline;" onsubmit="return confirm('Bạn chắc chắn muốn xóa tin nhắn này?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Xóa">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                        }
+                    </td>
+                </tr>
+                    }
+                }
+                else
+                {
+                <tr>
+                    <td></td>
+                    <td colspan="8" class="text-center">Không có tin nhắn nào.</td>
+                    <td></td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

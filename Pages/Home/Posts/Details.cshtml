@@ -1,0 +1,46 @@
+@page "/bai-viet/{id:int}"
+@model BusTicketSystem.Pages.Home.Posts.DetailsModel
+@using BusTicketSystem.Extensions
+@{
+    Layout = "_Layout"; // Sử dụng layout chung
+    ViewData["Title"] = Model.Post?.Title ?? "Chi tiết bài viết";
+}
+
+@if (Model.Post != null)
+{
+    <div class="container mt-5 mb-5 post-detail-container" style="width: 900px;">
+        <div style="font-family: 'Times New Roman', Times, serif; font-weight: bold; text-align: left; padding-left: 10px; font-size: 3.5rem;">@Model.Post.Title</div>
+        <div class="container-post-smalltitle">
+            
+            <div class="divider"></div>
+            <div class="content-post">
+                <div style="text-align: right;">
+                    @Model.Post.CreatedAt.ToString("dd/MM/yyyy HH:mm")
+                </div>
+                <div style="text-align: left;">
+                    @Model.Post.Category.GetDisplayName()
+                </div>
+            </div>
+            <div class="divider"></div>
+        </div>
+        <div style="padding-left: 10px; padding-right: 10px; font-size: 1.5rem; font-family: 'Times New Roman', Times, serif;">
+            @Model.Post.Content
+        </div>
+        <div>
+
+        </div>
+        <div class="mt-4">
+            <a asp-page="./Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Quay lại danh sách bài viết
+            </a>
+        </div>
+    </div>
+}
+else
+{
+    <div class="container mt-5 text-center">
+        <p>Không tìm thấy bài viết bạn yêu cầu hoặc bài viết này không còn tồn tại.</p>
+        <a asp-page="./Index" class="btn btn-primary">Xem các bài viết khác</a>
+    </div>
+}
+

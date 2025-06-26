@@ -1,0 +1,114 @@
+@page
+@model BusTicketSystem.Pages.HelpCenterModel
+@{
+    ViewData["Title"] = "Trung tâm trợ giúp";
+    Layout = "_Layout";
+}
+<div class="help-container">
+    <main>
+        <section class="faq-section">
+            <h2>Câu hỏi thường gặp</h2>
+            <div class="accordion">
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h3>Làm thế nào để đặt vé xe buýt?</h3>
+                        <i class="bi bi-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>
+                                Để đặt vé, bạn chỉ cần truy cập trang chủ của chúng tôi, nhập điểm đi, điểm đến, và ngày đi. Sau đó, chọn chuyến đi phù hợp, chọn ghế và tiến hành thanh toán. Quá trình này rất nhanh chóng và đơn giản!
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h3>Tôi có thể thanh toán bằng những phương thức nào?</h3>
+                        <i class="bi bi-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>
+                                Chúng tôi hỗ trợ nhiều phương thức thanh toán an toàn và tiện lợi, bao gồm:
+                            </p>
+                            <ul>
+                                <li>Thẻ tín dụng/ghi nợ (Visa, Mastercard)</li>
+                                <li>Chuyển khoản ngân hàng</li>
+                                <li>Ví điện tử (Momo, ZaloPay, VNPay)</li>
+                            </ul>
+                            <p>Tất cả các giao dịch đều được mã hóa và bảo mật.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h3>Chính sách hủy vé và hoàn tiền như thế nào?</h3>
+                        <i class="bi bi-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>
+                                Bạn có thể hủy vé trực tuyến thông qua mục "Quản lý đặt vé". Chính sách hoàn tiền phụ thuộc vào thời điểm bạn hủy vé so với giờ khởi hành và quy định của từng nhà xe. Vui lòng đọc kỹ điều khoản và điều kiện khi đặt vé để biết thêm chi tiết.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h3>Làm cách nào để xem lại vé đã đặt?</h3>
+                        <i class="bi bi-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>
+                                Sau khi đặt vé thành công, vé điện tử sẽ được gửi đến email của bạn. Bạn cũng có thể truy cập vào mục "Quản lý đặt vé" trên trang web của chúng tôi, nhập mã đặt chỗ và số điện thoại để xem và tải lại vé của mình bất cứ lúc nào.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                 <div class="accordion-item">
+                    <div class="accordion-header">
+                        <h3>Tôi có cần tạo tài khoản để đặt vé không?</h3>
+                        <i class="bi bi-chevron-down accordion-icon"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <div class="accordion-content-inner">
+                            <p>
+                                Bạn không bắt buộc phải tạo tài khoản để đặt vé. Tuy nhiên, việc tạo tài khoản sẽ giúp bạn quản lý các chuyến đi dễ dàng hơn, lưu lại lịch sử đặt vé và nhận được các ưu đãi đặc biệt dành cho thành viên.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="contact-prompt-section">
+            <h3>Không tìm thấy câu trả lời bạn cần?</h3>
+            <p>Đội ngũ hỗ trợ của chúng tôi luôn sẵn sàng giúp đỡ. Hãy liên hệ với chúng tôi!</p>
+            <a href="/Contact" class="btn btn-contact">Liên hệ chúng tôi</a>
+        </section>
+    </main>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const accordionItems = document.querySelectorAll('.accordion-item');
+
+            accordionItems.forEach(item => {
+                const header = item.querySelector('.accordion-header');
+                header.addEventListener('click', () => {
+                    const currentlyActive = document.querySelector('.accordion-item.active');
+                    if (currentlyActive && currentlyActive !== item) {
+                        currentlyActive.classList.remove('active');
+                    }
+                    
+                    item.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+}

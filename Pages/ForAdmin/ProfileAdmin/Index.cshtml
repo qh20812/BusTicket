@@ -1,0 +1,100 @@
+@page "/ForAdmin/ProfileAdmin"
+@model BusTicketSystem.Pages.ForAdmin.ProfileAdmin.IndexModel
+@{
+    ViewData["Title"] = "Thông tin cá nhân";
+    Layout = "_AdminLayout";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>
+            /
+            <li><a asp-page="/ForAdmin/ProfileAdmin" class="active" style="text-decoration: none;">Thông tin cá nhân</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-person bx'></i>
+            <h3>Chỉnh sửa thông tin cá nhân</h3>
+            
+        </div>
+        <div class="card-body">
+            @if (!string.IsNullOrEmpty(Model.SuccessMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @Model.SuccessMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @Model.ErrorMessage
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            <form method="post">
+                <input type="hidden" asp-for="Profile.UserId" />
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.Username" class="form-label"></label>
+                        <input asp-for="Profile.Username" class="form-control" readonly />
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.Email" class="form-label"></label>
+                        <input asp-for="Profile.Email" class="form-control" />
+                        <span asp-validation-for="Profile.Email" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.Fullname" class="form-label"></label>
+                        <input asp-for="Profile.Fullname" class="form-control" />
+                        <span asp-validation-for="Profile.Fullname" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.Phone" class="form-label"></label>
+                        <input asp-for="Profile.Phone" class="form-control" />
+                        <span asp-validation-for="Profile.Phone" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Profile.Address" class="form-label"></label>
+                    <textarea asp-for="Profile.Address" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Profile.Address" class="text-danger"></span>
+                </div>
+
+                <hr />
+                <h5 class="mt-3">Thay đổi mật khẩu (để trống nếu không muốn thay đổi)</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.NewPassword" class="form-label"></label>
+                        <input asp-for="Profile.NewPassword" type="password" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Profile.NewPassword" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="Profile.ConfirmNewPassword" class="form-label"></label>
+                        <input asp-for="Profile.ConfirmNewPassword" type="password" class="form-control" autocomplete="new-password" />
+                        <span asp-validation-for="Profile.ConfirmNewPassword" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary mt-3">Lưu thay đổi</button>
+                <a href="/ForAdmin/Dashboard/Index" class="btn btn-secondary mt-3">Hủy</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

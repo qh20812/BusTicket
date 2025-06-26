@@ -1,0 +1,157 @@
+@page "{id:int}"
+@model BusTicketSystem.Pages.ForAdmin.Message.DetailsModel
+@using BusTicketSystem.Models
+@using System.ComponentModel.DataAnnotations
+@using System.Reflection
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chi tiết tin nhắn";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="./Index" style="text-decoration: none;">Hộp thư</a></li>/
+            <li><a class="active" style="text-decoration: none;">Chi tiết</a></li>
+        </ul>
+    </div>
+    <a asp-page="./Index" class="report" style="text-decoration: none;">
+        <i class='bi bi-arrow-left-circle'></i>
+        <span>Quay lại danh sách</span>
+    </a>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+    @TempData["SuccessMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    @TempData["ErrorMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+@if (TempData["InfoMessage"] != null)
+{
+<div class="alert alert-info alert-dismissible fade show" role="alert">
+    @TempData["InfoMessage"]
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+
+
+@if (Model.MessageDetail != null)
+{
+<div class="bottom-data">
+    <div class="orders"> <!-- Sử dụng lại class 'orders' cho đồng bộ style, có thể đổi tên nếu cần -->
+        <div class="header">
+            <i class='bi bi-envelope-paper'></i>
+            <h3>Thông tin chi tiết</h3>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-3">ID Tin nhắn:</dt>
+                    <dd class="col-sm-9">@Model.MessageDetail.MessageId</dd>
+
+                    <dt class="col-sm-3">Người gửi:</dt>
+                    <dd class="col-sm-9">@Model.MessageDetail.SenderName</dd>
+
+                    <dt class="col-sm-3">Email người gửi:</dt>
+                    <dd class="col-sm-9">@Model.MessageDetail.SenderEmail</dd>
+
+                    @if (!string.IsNullOrEmpty(Model.MessageDetail.SenderPhone))
+                    {
+                        <dt class="col-sm-3">Số điện thoại:</dt>
+                        <dd class="col-sm-9">@Model.MessageDetail.SenderPhone</dd>
+                    }
+
+                    <dt class="col-sm-3">Chủ đề:</dt>
+                    <dd class="col-sm-9">@Model.MessageDetail.Subject</dd>
+
+                    <dt class="col-sm-3">Ngày gửi:</dt>
+                    <dd class="col-sm-9">@Model.MessageDetail.SentAt.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+
+                    <dt class="col-sm-3">Trạng thái:</dt>
+                    <dd class="col-sm-9">
+                        <span class="status @Model.MessageDetail.Status.ToString().ToLower()">
+                            @{
+                                var field = Model.MessageDetail.Status.GetType().GetField(Model.MessageDetail.Status.ToString());
+                                var displayName = field?.GetCustomAttribute<DisplayAttribute>()?.GetName() ?? Model.MessageDetail.Status.ToString();
+                            }
+                            @displayName
+                        </span>
+                    </dd>
+
+                    <dt class="col-sm-3">Nội dung:</dt>
+                    <dd class="col-sm-9" style="white-space: pre-wrap;">@Model.MessageDetail.Content</dd>
+
+                    @if (Model.MessageDetail.RepliedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Ngày trả lời:</dt>
+                        <dd class="col-sm-9">@Model.MessageDetail.RepliedAt.Value.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                        <dt class="col-sm-3">Người trả lời:</dt>
+                        <dd class="col-sm-9">@(Model.MessageDetail.RepliedByUser?.Fullname ?? Model.MessageDetail.RepliedByUser?.Email ?? "N/A")</dd>
+                    }
+
+                    @if (Model.MessageDetail.ClosedAt.HasValue)
+                    {
+                        <dt class="col-sm-3">Ngày đóng:</dt>
+                        <dd class="col-sm-9">@Model.MessageDetail.ClosedAt.Value.ToString("dd/MM/yyyy HH:mm:ss")</dd>
+                        <dt class="col-sm-3">Người đóng:</dt>
+                        <dd class="col-sm-9">@(Model.MessageDetail.ClosedByUser?.Fullname ?? Model.MessageDetail.ClosedByUser?.Email ?? "N/A")</dd>
+                    }
+                     @if (!string.IsNullOrEmpty(Model.MessageDetail.AdminNotes))
+                    {
+                        <dt class="col-sm-3">Ghi chú của quản trị viên:</dt>
+                        <dd class="col-sm-9" style="white-space: pre-wrap;">@Model.MessageDetail.AdminNotes</dd>
+                    }
+                </dl>
+
+                <hr />
+                <div class="mt-3 d-flex gap-2">
+                    @if (Model.MessageDetail.Status == MessageStatus.Unread)
+                    {
+                        <form method="post" asp-page-handler="MarkAsRead" asp-route-id="@Model.MessageDetail.MessageId">
+                            <button type="submit" class="btn btn-success">
+                                <i class="bi bi-check-circle"></i> Đánh dấu đã đọc
+                            </button>
+                        </form>
+                    }
+                    @if (Model.MessageDetail.Status == MessageStatus.Read || Model.MessageDetail.Status == MessageStatus.Unread)
+                    {
+                        <a asp-page="./Reply" asp-route-id="@Model.MessageDetail.MessageId" class="btn btn-primary">
+                            <i class="bi bi-reply"></i> Trả lời
+                        </a>
+                    }
+                    
+                    <form method="post" asp-page-handler="Delete" asp-route-id="@Model.MessageDetail.MessageId" onsubmit="return confirm('Bạn chắc chắn muốn xóa tin nhắn này?');">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash"></i> Xóa
+                        </button>
+                    </form>
+                    
+                    <a asp-page="./Index" class="btn btn-secondary ms-auto"> @*ms-auto để đẩy nút này về cuối*@
+                        <i class="bi bi-arrow-left"></i> Quay lại
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+}
+else if (TempData["ErrorMessage"] == null) // Chỉ hiển thị nếu chưa có ErrorMessage cụ thể từ OnGetAsync
+{
+<div class="alert alert-warning">Không có dữ liệu tin nhắn để hiển thị.</div>
+}
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,322 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Montserrat', sans-serif;
+}
+
+body{
+    background-color: #c9d6ff;
+    background: linear-gradient(to right, #e2e2e2, #c9d6ff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: 100vh;
+}
+
+.container{
+    background-color: #fff;
+    border-radius: 30px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.35);
+    position: relative;
+    overflow: hidden;
+    width: 768px;
+    max-width: 100%;
+    min-height: 480px;
+}
+
+.container p{
+    font-size: 14px;
+    line-height: 20px;
+    letter-spacing: 0.3px;
+    margin: 20px 0;
+}
+
+.container span{
+    font-size: 12px;
+}
+
+.container a{
+    color: #333;
+    font-size: 13px;
+    text-decoration: none;
+    margin: 15px 0 10px;
+}
+
+.container button{
+    background-color: #1976D2;
+    color: #fff;
+    font-size: 12px;
+    padding: 10px 45px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    margin-top: 10px;
+    cursor: pointer;
+}
+
+.container button.hidden{
+    background-color: transparent;
+    border-color: #fff;
+}
+
+.container form{
+    background-color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 40px;
+    height: 100%;
+}
+
+.container input{
+    background-color: #eee;
+    border: none;
+    margin: 8px 0;
+    padding: 10px 15px;
+    font-size: 13px;
+    border-radius: 8px;
+    width: 100%;
+    outline: none;
+}
+
+.form-container{
+    position: absolute;
+    top: 0;
+    height: 100%;
+    transition: all 0.6s ease-in-out;
+}
+
+.sign-in{
+    left: 0;
+    width: 50%;
+    z-index: 2;
+}
+
+.container.active .sign-in{
+    transform: translateX(100%);
+}
+
+.sign-up{
+    left: 0;
+    width: 50%;
+    opacity: 0;
+    z-index: 1;
+}
+
+.container.active .sign-up{
+    transform: translateX(100%);
+    opacity: 1;
+    z-index: 5;
+    animation: move 0.6s;
+}
+
+@keyframes move{
+    0%, 49.99%{
+        opacity: 0;
+        z-index: 1;
+    }
+    50%, 100%{
+        opacity: 1;
+        z-index: 5;
+    }
+}
+
+.social-icons{
+    margin: 20px 0;
+}
+
+.social-icons a{
+    border: 1px solid #ccc;
+    border-radius: 20%;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    margin: 0 3px;
+    width: 40px;
+    height: 40px;
+}
+
+.toggle-container{
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 50%;
+    height: 100%;
+    overflow: hidden;
+    transition: all 0.6s ease-in-out;
+    border-radius: 150px 0 0 100px;
+    z-index: 1000;
+}
+
+.container.active .toggle-container{
+    transform: translateX(-100%);
+    border-radius: 0 150px 100px 0;
+}
+
+.toggle{
+    background-color: #1976D2;
+    height: 100%;
+    background: linear-gradient(to right, #5c6bc0, #1976D2);
+    color: #fff;
+    position: relative;
+    left: -100%;
+    height: 100%;
+    width: 200%;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.container.active .toggle{
+    transform: translateX(50%);
+}
+
+.toggle-panel{
+    position: absolute;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    padding: 0 30px;
+    text-align: center;
+    top: 0;
+    transform: translateX(0);
+    transition: all 0.6s ease-in-out;
+}
+
+.toggle-left{
+    transform: translateX(-200%);
+}
+
+.container.active .toggle-left{
+    transform: translateX(0);
+}
+
+.toggle-right{
+    right: 0;
+    transform: translateX(0);
+}
+
+.container.active .toggle-right{
+    transform: translateX(200%);
+}
+/* CSS cho password toggle icon */
+.password-container {
+    position: relative; /* Quan trọng: làm cho icon định vị tuyệt đối dựa trên container này */
+    width: 100%; /* Hoặc chiều rộng cụ thể của input cha nếu cần */
+    /* margin-bottom: 15px; */ /* Tùy chỉnh khoảng cách dưới nếu cần, tương tự các input khác */
+}
+
+.password-container input[type="password"],
+.password-container input[type="text"] {
+    width: 100%; /* Input chiếm toàn bộ chiều rộng của container */
+    padding-right: 40px !important; /* Tạo không gian ở cuối input cho icon. Điều chỉnh nếu cần. Thêm !important nếu có style khác ghi đè */
+    box-sizing: border-box; /* Quan trọng: padding không làm tăng kích thước tổng thể của input */
+    /* Giữ hoặc điều chỉnh các style khác của input của bạn (height, border, padding-left, etc.) */
+    /* Ví dụ:
+    height: 40px;
+    padding-left: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    */
+}
+
+.password-container .fa-solid { /* Target icon bên trong password-container */
+    position: absolute; /* Định vị tuyệt đối so với .password-container */
+    top: 50%; /* Căn giữa theo chiều dọc */
+    right: 10px; /* Khoảng cách từ icon đến cạnh phải của container. Điều chỉnh cho phù hợp. */
+    transform: translateY(-50%); /* Tinh chỉnh căn giữa theo chiều dọc */
+    cursor: pointer;
+    color: #757575; /* Màu cho icon, bạn có thể thay đổi */
+    font-size: 16px; /* Kích thước icon, bạn có thể thay đổi */
+}
+
+.password-container .fa-solid:hover {
+    color: #333; /* Màu icon khi di chuột qua */
+}
+
+/* Điều chỉnh span validation message nếu cần */
+/* Ví dụ: nếu span validation nằm ngay sau .password-container */
+/* .form-container .text-danger { */
+    /* margin-top: 5px; */ /* Hoặc bỏ style inline `margin-top: -10px` trên span */
+    /* display: block; */
+/* } */
+#container.partnerregis-wider-form{
+    width: 980px; /* Increased width for more content */
+    min-height: 620px; /* Increased min-height for more fields */
+}
+
+#container.partnerregis-wider-form .form-container.sign-in {
+    width: 60%;
+}
+#container.partnerregis-wider-form .toggle-container {
+    left: 60%;
+    width: 40%; 
+}
+
+#container.partnerregis-wider-form .form-container.sign-in form {
+    padding: 0 50px;
+}
+
+/* Responsive adjustments for the wider partner registration form */
+@media (max-width: 1024px) { /* Adjust breakpoint as needed */
+    .container.partnerregis-wider-form {
+        width: 95%; /* More fluid width */
+        min-height: auto; /* Allow height to adjust based on content */        
+        /* display: flex; /* Consider if stacking is desired */
+        /* flex-direction: column; /* Stack form and toggle panel */
+    }
+
+    /* If stacking on smaller screens: */
+    /*
+    .container.partnerregis-wider-form .form-container.sign-in,
+    .container.partnerregis-wider-form .toggle-container {
+        width: 100%;
+        left: 0;
+        position: relative; 
+        height: auto; 
+        border-radius: 0; 
+    }
+    */
+}
+.partnerregis-wider-form .form-container.sign-in {
+    max-height: 70vh; 
+    overflow-y: auto; 
+}
+
+/* Styles for single form mode */
+.container.single-form-mode {
+    /* Adjust container width for single forms if desired, e.g., make it narrower */
+    width: 500px; /* Default is 768px */
+    /* min-height can remain or be adjusted */
+}
+
+.container.single-form-mode .form-container {
+    /* Override absolute positioning and width for single form display */
+    position: relative; 
+    width: 100%;      
+    height: auto;       
+    top: auto;
+    left: auto;
+    opacity: 1;
+    z-index: 1;
+    transform: none !important; 
+    transition: none !important;
+}
+
+.container.single-form-mode .sign-in, /* Apply to specific form types if they exist */
+.container.single-form-mode .sign-up {
+    width: 100%; /* Ensure full width within the adjusted container */
+}
+
+.container.single-form-mode .toggle-container {
+    display: none; /* Hide the toggle panel as it's not needed */
+}

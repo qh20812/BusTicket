@@ -1,0 +1,131 @@
+@page
+@model BusTicketSystem.Pages.ForCustomer.MyOrders.IndexModel
+@{
+    ViewData["Title"] = "Đơn hàng của tôi";
+    Layout="_AccountInfoLayout";
+}
+
+<div class="container mt-4 mb-5">
+    <h1>@ViewData["Title"]</h1>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["InfoMessage"] != null)
+    {
+        <div class="alert alert-info alert-dismissible fade show" role="alert">
+            @TempData["InfoMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Nav tabs -->
+    <ul class="nav nav-tabs mt-4" id="myOrdersTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="upcoming-tab" data-bs-toggle="tab" data-bs-target="#upcoming" type="button" role="tab" aria-controls="upcoming" aria-selected="true">Vé sắp đi (@Model.UpcomingTickets.Count)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="completed-tab" data-bs-toggle="tab" data-bs-target="#completed" type="button" role="tab" aria-controls="completed" aria-selected="false">Vé đã đi (@Model.CompletedTickets.Count)</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">Vé đã hủy (@Model.CancelledTickets.Count)</button>
+        </li>
+    </ul>
+
+    <!-- Tab panes -->
+    <div class="tab-content" id="myOrdersTabContent">
+        <div class="tab-pane fade show active p-3 border border-top-0" id="upcoming" role="tabpanel" aria-labelledby="upcoming-tab">
+            @if (Model.UpcomingTickets.Any())
+            {
+                @await Html.PartialAsync("_TicketListPartial", Model.UpcomingTickets)
+            }
+            else
+            {
+                <p class="text-center p-3">Bạn không có vé nào sắp đi.</p>
+            }
+        </div>
+        <div class="tab-pane fade p-3 border border-top-0" id="completed" role="tabpanel" aria-labelledby="completed-tab">
+            @if (Model.CompletedTickets.Any())
+            {
+                @await Html.PartialAsync("_TicketListPartial", Model.CompletedTickets)
+            }
+            else
+            {
+                <p class="text-center p-3">Bạn không có vé nào đã hoàn thành.</p>
+            }
+        </div>
+        <div class="tab-pane fade p-3 border border-top-0" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+            @if (Model.CancelledTickets.Any())
+            {
+                @await Html.PartialAsync("_TicketListPartial", Model.CancelledTickets)
+            }
+            else
+            {
+                <p class="text-center p-3">Bạn không có vé nào đã hủy.</p>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Cancellation Modal -->
+<div class="modal fade" id="cancelTicketModal" tabindex="-1" aria-labelledby="cancelTicketModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="post" asp-page-handler="RequestCancellation">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cancelTicketModalLabel">Yêu cầu hủy vé</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Bạn có chắc chắn muốn yêu cầu hủy vé <strong id="ticketIdToCancelDisplay"></strong>?</p>
+                    <input type="hidden" asp-for="CancellationInput.TicketId" id="ticketIdToCancelInput" />
+                    <div class="mb-3">
+                        <label asp-for="CancellationInput.Reason" class="form-label">Lý do hủy vé (bắt buộc):</label>
+                        <textarea asp-for="CancellationInput.Reason" class="form-control" rows="3" required minlength="10"></textarea>
+                        <span asp-validation-for="CancellationInput.Reason" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Không</button>
+                    <button type="submit" class="btn btn-danger">Gửi yêu cầu hủy</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            var cancelTicketModal = document.getElementById('cancelTicketModal');
+            if (cancelTicketModal) {
+                cancelTicketModal.addEventListener('show.bs.modal', function (event) {
+                    var button = event.relatedTarget;
+                    var ticketId = button.getAttribute('data-ticket-id');
+                    var ticketInfo = button.getAttribute('data-ticket-info');
+
+                    var modalTitle = cancelTicketModal.querySelector('.modal-title');
+                    var ticketIdDisplay = cancelTicketModal.querySelector('#ticketIdToCancelDisplay');
+                    var ticketIdInput = cancelTicketModal.querySelector('#ticketIdToCancelInput');
+
+                    modalTitle.textContent = 'Yêu cầu hủy vé: ' + ticketInfo;
+                    ticketIdDisplay.textContent = ticketInfo;
+                    ticketIdInput.value = ticketId;
+                });
+            }
+        });
+    </script>
+}

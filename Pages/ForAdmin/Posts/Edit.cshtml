@@ -1,0 +1,69 @@
+@page "{id:int}"
+@using BusTicketSystem.Models
+@model BusTicketSystem.Pages.ForAdmin.Posts.EditModel
+
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Chỉnh sửa Bài đăng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/Index">Tổng quan</a></li>
+            <li>/</li>
+            <li><a asp-page="./Index">Quản lý Bài đăng</a></li>
+            <li>/</li>
+            <li><a href="#" class="active">Chỉnh sửa</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders"> <!-- Using .orders as a generic content wrapper -->
+        <div class="header">
+            <h3>Thông tin bài đăng</h3>
+        </div>
+        <form method="post">
+            <input type="hidden" asp-for="Post.PostId" />
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Title" class="form-label"></label>
+                <input asp-for="Post.Title" class="form-control" />
+                <span asp-validation-for="Post.Title" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Content" class="form-label"></label>
+                <textarea asp-for="Post.Content" class="form-control" rows="6"></textarea>
+                <span asp-validation-for="Post.Content" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Category" class="form-label"></label>
+                <select asp-for="Post.Category" class="form-control form-select" asp-items="Html.GetEnumSelectList<PostCategory>()"></select>
+                <span asp-validation-for="Post.Category" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.Status" class="form-label"></label>
+                <select asp-for="Post.Status" class="form-control form-select" asp-items="Html.GetEnumSelectList<PostStatus>()"></select>
+                <span asp-validation-for="Post.Status" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="Post.ImageUrl" class="form-label">Đường dẫn hình ảnh (URL)</label>
+                <input asp-for="Post.ImageUrl" class="form-control" />
+                <span asp-validation-for="Post.ImageUrl" class="text-danger"></span>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

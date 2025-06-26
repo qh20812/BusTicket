@@ -1,0 +1,98 @@
+@page "{id:int}"
+@model BusTicketSystem.Pages.ForAdmin.CustomerManage.EditModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản Lý Khách Hàng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>
+            /
+            <li><a asp-page="./Index" style="text-decoration: none;">Khách hàng</a></li>
+            /
+            <li><a asp-page="./Edit" class="active" style="text-decoration: none;">Chỉnh sửa</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-edit-alt'></i>
+            <h3>Thông tin khách hàng: @Model.CustomerInput.Fullname</h3>
+        </div>
+        <form method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="CustomerInput.UserId" />
+            <input type="hidden" asp-for="CustomerInput.PasswordHash" />
+            <input type="hidden" asp-for="CustomerInput.CreatedAt" />
+            <input type="hidden" asp-for="CustomerInput.IsActive" />
+
+
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Fullname" class="form-label"></label>
+                <input asp-for="CustomerInput.Fullname" class="form-control" readonly />
+                <span asp-validation-for="CustomerInput.Fullname" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Email" class="form-label"></label>
+                <input asp-for="CustomerInput.Email" class="form-control" readonly />
+                <span asp-validation-for="CustomerInput.Email" class="text-danger"></span>
+            </div>
+            
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Username" class="form-label"></label>
+                <input asp-for="CustomerInput.Username" class="form-control" readonly />
+                <span asp-validation-for="CustomerInput.Username" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Phone" class="form-label"></label>
+                <input asp-for="CustomerInput.Phone" class="form-control" readonly />
+                <span asp-validation-for="CustomerInput.Phone" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Address" class="form-label"></label>
+                <input asp-for="CustomerInput.Address" class="form-control" readonly />
+                <span asp-validation-for="CustomerInput.Address" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="CustomerInput.Role" class="form-label"></label>
+                <select asp-for="CustomerInput.Role" class="form-select">
+                    <option value="Admin">Admin</option>
+                    <option value="Member">Member</option> 
+                </select>
+                <span asp-validation-for="CustomerInput.Role" class="text-danger"></span>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-success">Lưu thay đổi</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

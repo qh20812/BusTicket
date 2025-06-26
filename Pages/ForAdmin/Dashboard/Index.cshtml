@@ -1,0 +1,153 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.Dashboard.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"]="Tổng Quan";
+}
+<div class="header">
+    <div class="left">
+        <h1>Tổng quan</h1>
+        <ul class="breadcrumb">
+            <li>
+                <a href="#" style="text-decoration: none;">
+                    Quản lý hệ thống
+                </a>
+            </li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Tổng quan</a></li>
+        </ul>
+    </div>
+    <a href="#" class="report" style="text-decoration: none;">
+        <i class="bx bx-cloud-download"></i>
+        <span>Tải CSV</span>
+    </a>
+</div>
+
+<ul class="insights">
+    <li>
+        <i class="bx bx-calendar-check"></i>
+        <span class="info">
+            <h3>
+                @Model.PaidTicketCount
+            </h3>
+            <p>Vé đã thanh toán</p>
+        </span>
+    </li>
+    <li>
+        <i class="bi bi-x-square bx"></i>
+        <span class="info">
+            <h3>
+                @Model.CancelledTicketCount
+            </h3>
+            <p>Vé đã hủy</p>
+        </span>
+    </li>
+    <li>
+        <i class="bx bx-line-chart"></i>
+        <span class="info">
+            <h3>
+                @Model.TotalTicketCount.ToString("N0")
+            </h3>
+            <p>Lượt đặt vé</p>
+        </span>
+    </li>
+    <li>
+        <i class="bi bi-cash-coin bx"></i>
+        <span class="info">
+            <h3>
+                VND @String.Format("{0:N0}",Model.TotalAmount)
+            </h3>
+            <p>Tổng doanh thu</p>
+        </span>
+    </li>
+</ul>
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class="bx bx-receipt"></i>
+            <h3>Đơn đặt vé gần đây</h3>
+            <div style="display: flex; align-items: center; margin-left: auto;">
+                <i class="bx bx-filter" id="filter-icon" style="cursor:pointer; font-size: 1.5rem; margin-right: 10px;" title="Sắp xếp"></i>
+                <form id="filter-form" method="get" style="display: none;">
+                    <input type="hidden" name="SortName" id="SortNameInput" value="@Model.SortName"/>
+                    <input type="hidden" name="SearchName" value="@Model.SearchName"/>
+                </form>
+                <div style="position:relative; display:inline-block;">
+                    <i class="bx bx-search" id="search-icon" style="cursor:pointer; font-size: 1.5rem;"></i>
+                    <div class="search-panel" 
+                         style="display:none; position: absolute; top: 100%; right: 0; background-color: white; border: 1px solid #ccc; padding: 10px; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); min-width: 250px;">
+                        <form method="get">
+                            <input type="text" name="SearchName" placeholder="Nhập tên khách hàng..." value="@Model.SearchName" class="form-control mb-2"/>
+                            <button type="submit" class="btn btn-primary btn-sm">Tìm</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mã KH</th>
+                    <th>Mã vé</th>
+                    <th>Mã đơn</th>
+                    <th>Tên khách hàng</th>
+                    <th>Ngày đặt vé</th>
+                    <th>Trạng thái</th>
+                    <th>Phương thức thanh toán</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach(var order in Model.Orders){
+
+                    <tr>
+                        <td class="truncate" title="@order.UserId">@order.UserId</td>
+                        <td class="truncate">@(order.OrderTickets?.FirstOrDefault()?.TicketId!=null?order.OrderTickets.FirstOrDefault().TicketId.ToString():"N/A")</td>
+                        <td class="truncate" title="@order.OrderId">@order.OrderId</td>
+                        <td class="truncate" title="@(order.User?.Fullname??"Khách vãng lai")">
+                            <p>@(order.User?.Fullname??"Khách vãng lai")</p>
+                        </td>
+                        <td class="truncate" title="@order.CreatedAt.ToString("dd-MM-yyyy")">@order.CreatedAt.ToString("dd-MM-yyyy")</td>
+                        <td class="truncate-status" title="@order.StatusVietnamese">@order.StatusVietnamese</td>
+                        <td class="truncate" title="@(order.PaymentMethod??"N/A")">@(order.PaymentMethod??"N//A")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Logic cho nút filter
+        const filterIcon = document.getElementById('filter-icon');
+        if (filterIcon) {
+            const sortStatesDashboard = ["", "oldest", "az", "za"]; // Mới nhất (default), Cũ nhất, Tên A-Z, Tên Z-A
+            let currentSortValue = "@(Model.SortName ?? "")";
+            let currentSortIndex = sortStatesDashboard.indexOf(currentSortValue);
+            if (currentSortIndex === -1) {
+                currentSortIndex = 0; // Mặc định là trạng thái đầu tiên (Mới nhất)
+            }
+
+            filterIcon.onclick = function () {
+                currentSortIndex = (currentSortIndex + 1) % sortStatesDashboard.length;
+                document.getElementById('SortNameInput').value = sortStatesDashboard[currentSortIndex];
+                document.getElementById('filter-form').submit();
+            };
+        }
+
+        // Logic cho nút search và panel
+        const searchIcon = document.getElementById('search-icon');
+        const searchPanel = document.querySelector('.search-panel');
+
+        if (searchIcon && searchPanel) {
+            searchIcon.onclick = function (event) {
+                event.stopPropagation();
+                searchPanel.style.display = (searchPanel.style.display === 'none' ? 'block' : 'none');
+            };
+
+            document.addEventListener('click', function (e) {
+                if (searchPanel.style.display === 'block' && !searchPanel.contains(e.target) && e.target !== searchIcon) {
+                    searchPanel.style.display = 'none';
+                }
+            });
+        }
+    });
+</script>

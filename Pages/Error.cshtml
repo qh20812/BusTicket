@@ -1,0 +1,91 @@
+﻿@page
+@model ErrorModel
+@{
+    ViewData["Title"] = "Error";
+    Layout=null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@Model.PageTitle -- BusTicketSystem</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" />
+    <style>
+        @* body{
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background-color: #f8f9fa;
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+        .error-container{
+            max-width: 600px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        } *@
+        .frem{
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background: url(/images/error.gif);
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+        .frem p{
+            position: absolute;
+            top: 3rem;
+            font-size: 7rem;
+            color: #00000063;
+        }
+        .frem h2{
+            position: absolute;
+            bottom: 8rem;
+            font-size: 34px;
+        }
+        .frem h5{
+            position: absolute;
+            bottom: 6rem;
+            color: #9c9c9c;
+        }
+        .frem a{
+            position: absolute;
+            bottom: 1rem;
+            background: linear-gradient(45deg,#ff0034,#ffbc00);
+            padding: 12px;
+            color: white;
+            text-decoration: none;
+            font-size: 23px;
+            border-radius: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="frem">
+        <p>404</p>
+        <h2>Có vẻ bạn đã đi lạc</h2>
+        <h5>trang bạn đang tìm kiếm không tồn tại</h5>
+        <a href="/">Về Trang chủ</a>
+    </div>
+
+    @* <div class="error-container">
+        <h1 class="display-4 text-danger">@Model.PageTitle</h1>
+        <p class="lead">@Model.ErrorMessage</p>
+        @if(Model.ShowRequestId){
+        <p>
+            <small><strong>Mã yêu cầu:</strong> <code>@Model.RequestId</code></small>
+        </p>
+        }
+        <hr/>
+        á
+        <a href="/" class="btn btn-primary">Quay về trang chủ</a>
+    </div> *@
+</body>
+</html>

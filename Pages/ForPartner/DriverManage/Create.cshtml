@@ -1,0 +1,102 @@
+@page
+@model BusTicketSystem.Pages.ForPartner.DriverManage.CreateModel
+@{
+    // ViewData["Title"] is set in PageModel
+    // Layout is set by _ViewStart.cshtml
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForBusCompany/Dashboard/Index" style="text-decoration: none;">Bảng điều khiển Nhà xe</a></li>/
+            <li><a asp-page="./Index" style="text-decoration: none;">Tài xế</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Thêm mới</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-person-plus-fill bx'></i>
+            <h3>Thông tin Tài xế mới</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Fullname" class="form-label"></label>
+                        <input asp-for="DriverInput.Fullname" class="form-control" />
+                        <span asp-validation-for="DriverInput.Fullname" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Email" class="form-label"></label>
+                        <input asp-for="DriverInput.Email" class="form-control" />
+                        <span asp-validation-for="DriverInput.Email" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Phone" class="form-label"></label>
+                        <input asp-for="DriverInput.Phone" class="form-control" />
+                        <span asp-validation-for="DriverInput.Phone" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.LicenseNumber" class="form-label"></label>
+                        <input asp-for="DriverInput.LicenseNumber" class="form-control" />
+                        <span asp-validation-for="DriverInput.LicenseNumber" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.DateOfBirth" class="form-label"></label>
+                        <input asp-for="DriverInput.DateOfBirth" class="form-control" type="date" />
+                        <span asp-validation-for="DriverInput.DateOfBirth" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Address" class="form-label"></label>
+                        <input asp-for="DriverInput.Address" class="form-control" />
+                        <span asp-validation-for="DriverInput.Address" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="DriverInput.Status" class="form-label"></label>
+                        <select asp-for="DriverInput.Status" asp-items="Html.GetEnumSelectList<BusTicketSystem.Models.DriverStatus>().Where(e => e.Value == BusTicketSystem.Models.DriverStatus.Active.ToString() || e.Value == BusTicketSystem.Models.DriverStatus.OnLeave.ToString())" class="form-select">
+                           
+                        </select>
+                        <span asp-validation-for="DriverInput.Status" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Thêm Tài xế</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

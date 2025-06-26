@@ -1,0 +1,115 @@
+@page "{id:int?}"
+@model BusTicketSystem.Pages.ForAdmin.BusCompanyManage.EditModel
+@using BusTicketSystem.Models
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = Model.CompanyInput.CompanyId == 0 ? "Thêm mới Nhà xe" : "Chỉnh sửa Nhà xe";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="/ForAdmin/BusCompanyManage/Index" style="text-decoration: none;">Nhà xe</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">@(Model.CompanyInput.CompanyId == 0 ? "Thêm mới" : "Chỉnh sửa")</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["InfoMessage"] != null)
+{
+    <div class="alert alert-info">@TempData["InfoMessage"]</div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-pencil-square bx'></i>
+            <h3>@(Model.CompanyInput.CompanyId == 0 ? "Thông tin Nhà xe mới" : $"Thông tin Nhà xe: {Model.CompanyInput.CompanyName}")</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="CompanyInput.CompanyId" />
+            <input type="hidden" asp-for="CompanyInput.CreatedAt" />
+            <input type="hidden" asp-for="CompanyInput.ApprovedAt" />
+            <input type="hidden" asp-for="CompanyInput.ReviewedAt" />
+            <input type="hidden" asp-for="CompanyInput.RejectedAt" />
+            <input type="hidden" asp-for="CompanyInput.RejectionReason" />
+            <input type="hidden" asp-for="CompanyInput.TerminatedAt" />
+            <input type="hidden" asp-for="CompanyInput.TerminationReason" />
+
+
+            <h5 class="mt-2 mb-3">Thông tin Công ty</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CompanyInput.CompanyName" class="form-label"></label>
+                    <input asp-for="CompanyInput.CompanyName" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.CompanyName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CompanyInput.Email" class="form-label"></label>
+                    <input asp-for="CompanyInput.Email" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CompanyInput.Phone" class="form-label"></label>
+                    <input asp-for="CompanyInput.Phone" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.Phone" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CompanyInput.Address" class="form-label"></label>
+                    <input asp-for="CompanyInput.Address" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.Address" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="CompanyInput.Description" class="form-label"></label>
+                <textarea asp-for="CompanyInput.Description" class="form-control" rows="3" readonly="@(Model.CompanyInput.CompanyId != 0)"></textarea>
+                <span asp-validation-for="CompanyInput.Description" class="text-danger"></span>
+            </div>
+
+            <h5 class="mt-4 mb-3">Thông tin Người liên hệ</h5>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CompanyInput.ContactPersonName" class="form-label"></label>
+                    <input asp-for="CompanyInput.ContactPersonName" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.ContactPersonName" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CompanyInput.ContactPersonEmail" class="form-label"></label>
+                    <input asp-for="CompanyInput.ContactPersonEmail" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.ContactPersonEmail" class="text-danger"></span>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label asp-for="CompanyInput.ContactPersonPhone" class="form-label"></label>
+                    <input asp-for="CompanyInput.ContactPersonPhone" class="form-control" readonly="@(Model.CompanyInput.CompanyId != 0)" />
+                    <span asp-validation-for="CompanyInput.ContactPersonPhone" class="text-danger"></span>
+                </div>
+            </div>
+
+            <h5 class="mt-4 mb-3">Quản lý</h5>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="CompanyInput.Status" class="form-label"></label>
+                    <select asp-for="CompanyInput.Status" asp-items="Html.GetEnumSelectList<BusCompanyStatus>()" class="form-select">
+                        @* Options are now fully generated by asp-items *@
+                    </select>
+                    <span asp-validation-for="CompanyInput.Status" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
