@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Hosting;
 using System.IO;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForCustomer.MyAccount
 {
+    [Authorize(Roles = "Member")]
 #pragma warning disable CS9113 // Parameter is unread.
     public class IndexModel(AppDbContext context, IHttpContextAccessor httpContextAccessor, IWebHostEnvironment hostEnvironment) : PageModel
 #pragma warning restore CS9113 // Parameter is unread.
@@ -60,7 +62,7 @@ namespace BusTicketSystem.Pages.ForCustomer.MyAccount
         public async Task<IActionResult> OnPostAsync()
         {
             var userToUpdate = await _context.Users.FindAsync(Profile.UserId);
-            if (userToUpdate == null || userToUpdate.Role != "member")
+            if (userToUpdate == null || userToUpdate.Role != "Member")
             {
                 ErrorMessage = "Không tìm thấy tài khoản hoặc bạn không có quyền cập nhật.";
                 return RedirectToPage();

@@ -9,9 +9,11 @@ using System.Threading.Tasks;
 using System.Security.Claims;
 using BusTicketSystem.Pages.ForAdmin.RouteManage;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.RouteManage
 {
+    [Authorize(Roles = "Partner")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _db;
@@ -119,8 +121,8 @@ namespace BusTicketSystem.Pages.ForPartner.RouteManage
                     EstimatedDuration = estimatedDurationTimeSpan,
                     Status = RouteStatus.PendingApproval,
                     ProposedByCompanyId = partnerCompanyId.Value,
-                    Trips=new List<Models.Trip>(),
-                    Promotions=new List<Models.Promotion>(),
+                    Trips = new List<Models.Trip>(),
+                    Promotions = new List<Models.Promotion>(),
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };

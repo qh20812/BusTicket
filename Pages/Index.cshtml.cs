@@ -10,13 +10,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Routing;
 
-
 namespace BusTicketSystem.Pages;
 
 public class IndexModel(AppDbContext context) : PageModel
 {
     private readonly AppDbContext _context = context;
-    
     
     public List<TripViewModel> Popular { get; set; } = new List<TripViewModel>();
     public List<Trip> PopularTrips { get; set; } = new List<Trip>();
@@ -25,17 +23,34 @@ public class IndexModel(AppDbContext context) : PageModel
 
     public async Task OnGetAsync()
     {
-        await Task.CompletedTask;
-        PopularTrips = await _context.Trips.Include(t => t.Route).OrderBy(t => t.DepartureTime).Take(6).ToListAsync();
-        RecentPosts = await _context.Posts.Where(p => p.Status == PostStatus.Published).OrderByDescending(p => p.CreatedAt).Take(3).ToListAsync();
+        PopularTrips = await _context.Trips
+            .Include(t => t.Route)
+            .Where(t => t.Status == TripStatus.Scheduled)
+            .OrderBy(t => t.DepartureTime)
+            .Take(6)
+            .ToListAsync();
+
+        var popularTrip = await _context.Routes
+            .Where(r => r.Status == RouteStatus.Approved)
+            .Take(6)
+            .ToListAsync();
+
+        Popular = popularTrip.Select(r => new TripViewModel(new Trip { Route = r, DepartureTime = DateTime.UtcNow }, TimeSpan.Zero)).ToList();
+
+        RecentPosts = await _context.Posts
+            .Where(p => p.Status == PostStatus.Published)
+            .OrderByDescending(p => p.CreatedAt)
+            .Take(3)
+            .ToListAsync();
     }
+
     public IActionResult OnPostSearch(string departure, string destination, string date, int quantity, string tripType, string? returnDateStr)
     {
         var routeValues = new RouteValueDictionary
         {
             { "departure", departure },
             { "destination", destination },
-            { "departureDate", date }, // Giả sử trang Schedule mong đợi 'departureDate'
+            { "departureDate", date },
             { "quantity", quantity },
             { "tripType", tripType }
         };

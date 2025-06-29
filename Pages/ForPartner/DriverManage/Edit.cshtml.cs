@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.DriverManage
 {
-    // [Authorize(Policy = "BusCompanyOnly")]
+    [Authorize(Roles = "Partner")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;

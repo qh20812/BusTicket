@@ -22,9 +22,6 @@ namespace BusTicketSystem.ValidationAttributes
 
             if (value == null)
             {
-                // This case should be handled by [Required] if the field is mandatory.
-                // If DateOfBirth is optional and null, it's valid from this attribute's perspective.
-                // However, for age calculation, a value is needed.
                 return new ValidationResult($"Vui lòng nhập {validationContext.DisplayName}.");
             }
 

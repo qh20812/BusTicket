@@ -6,21 +6,23 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.Message
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel(AppDbContext context) : PageModel
     {
         private readonly AppDbContext _context = context;
 
         public List<MessageViewModel> MessagesDisplay { get; set; } = new List<MessageViewModel>();
-        [BindProperty(SupportsGet=true)]
+        [BindProperty(SupportsGet = true)]
         [Display(Name = "Nội dung tìm kiếm")]
         [StringLength(100, ErrorMessage = "{0} không được vượt quá {1} ký tự.")]
         public string? SearchTerm { get; set; }
-        [BindProperty(SupportsGet=true)]
+        [BindProperty(SupportsGet = true)]
         public string? FilterStatus { get; set; }
-        [BindProperty(SupportsGet =true)]
+        [BindProperty(SupportsGet = true)]
         public string? SortOrder { get; set; }
         public SelectList Statuses { get; set; } = new SelectList(Enumerable.Empty<SelectListItem>());
 
@@ -105,7 +107,7 @@ namespace BusTicketSystem.Pages.ForAdmin.Message
             {
                 TempData["ErrorMessage"] = "Không tìm thấy tin nhắn.";
             }
-            return RedirectToPage(new {SearchTerm, FilterStatus, SortOrder });
+            return RedirectToPage(new { SearchTerm, FilterStatus, SortOrder });
         }
         public class MessageViewModel
         {

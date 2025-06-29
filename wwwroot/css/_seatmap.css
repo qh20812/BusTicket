@@ -1,0 +1,72 @@
+/* Styles for the seat map container */
+.seat-map-container-style {
+    border: 2px solid #007bff;
+    padding: 20px;
+    border-radius: 15px;
+    background-color: #f8f9fa;
+}
+
+/* Styles for the seat grid */
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* Responsive grid */
+    gap: 5px;
+    max-width: 400px; /* Limit width for bus shape */
+    margin: auto; /* Center the grid */
+}
+
+/* Base styles for individual seats */
+.seat {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    display:grid;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+/* Styles for available seats */
+.seat.available {
+    background-color: #fff; /* White */
+    color: #333;
+}
+
+/* Styles for booked seats */
+.seat.booked {
+    background-color: #dc3545; /* Red */
+    color: #fff;
+    cursor: not-allowed;
+}
+
+/* Styles for selected seats */
+.seat.selected {
+    background-color: #28a745; /* Green */
+    color: #fff;
+}
+
+.bus-layout {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.bus-level {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 5px;
+    width: 100%;
+    max-width: 400px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+}
+
+.bus-level:last-child {
+    margin-bottom: 0;
+}

@@ -9,9 +9,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.OrderManage
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel(AppDbContext context) : PageModel
     {
         private readonly AppDbContext _context = context;
@@ -49,14 +51,14 @@ namespace BusTicketSystem.Pages.ForAdmin.OrderManage
 
             if (!string.IsNullOrEmpty(SearchTerm))
             {
-                string searchTermLower = SearchTerm.ToLower();
+
 #pragma warning disable CS8602 // Dereference of a possibly null reference.
                 query = query.Where(o =>
-                    o.OrderId.ToString().Contains(searchTermLower) ||
-                    (o.User != null && (o.User.Fullname.Contains(searchTermLower, StringComparison.CurrentCultureIgnoreCase) || o.User.Email.ToLower().Contains(searchTermLower))) ||
-                    (o.GuestEmail != null && o.GuestEmail.ToLower().Contains(searchTermLower)) ||
-                    (o.OrderTickets.Any(ot => ot.TicketId.ToString().Contains(searchTermLower)))
-                );
+                                o.OrderId.ToString().Contains(SearchTerm) ||
+                                (o.User != null && (o.User.Fullname.Contains(SearchTerm) || o.User.Email.Contains(SearchTerm))) ||
+                                (o.GuestEmail != null && o.GuestEmail.Contains(SearchTerm)) ||
+                                (o.OrderTickets.Any(ot => ot.TicketId.ToString().Contains(SearchTerm)))
+                                );
 #pragma warning restore CS8602 // Dereference of a possibly null reference.
             }
 

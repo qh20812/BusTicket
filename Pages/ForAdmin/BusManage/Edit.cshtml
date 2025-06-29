@@ -44,7 +44,14 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="BusInput.BusType" class="form-label"></label>
-                        <input asp-for="BusInput.BusType" class="form-control" />
+                        <select asp-for="BusInput.BusType" class="form-select">
+                            <option value="">-- Chọn loại xe --</option>
+                            <option value="Giường nằm 2 tầng">Giường nằm 2 tầng</option>
+                            <option value="Giường nằm 1 tầng">Giường nằm 1 tầng</option>
+                            <option value="Ghế 2 tầng">Ghế 2 tầng</option>
+                            <option value="Ghế 1 tầng">Ghế 1 tầng</option>
+                        </select>
+                        @* <input asp-for="BusInput.BusType" class="form-control" /> *@
                         <span asp-validation-for="BusInput.BusType" class="text-danger"></span>
                     </div>
                 </div>

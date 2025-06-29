@@ -11,7 +11,7 @@
         <ul class="breadcrumb">
             <li><a asp-page="/Index" style="text-decoration: none;">Trang chủ</a></li>
             /
-            <li><a asp-page="/ForCustomer/MyAccount/Index" class="active" style="text-decoration: none;">Tài khoản</a></li>
+            <li><a asp-page="/ForCustomer/MyAccount/Index" style="text-decoration: none;">Tài khoản</a></li>
             /
             <li><a asp-page="/ForCustomer/MyAccount/Index" class="active" style="text-decoration: none;">Thông tin cá nhân</a></li>
         </ul>
@@ -19,7 +19,7 @@
 </div>
 
 <div class="bottom-data">
-    <div class="orders"> @* Sử dụng class 'orders' để có thể tái sử dụng style từ _adminlayout.css (nay là _accountinfolayout.css) *@
+    <div class="orders">
         <div class="header">
             <i class='bi bi-person-fill-gear bx'></i>
             <h3>Chỉnh sửa thông tin cá nhân</h3>
@@ -39,22 +39,9 @@
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
-            <form method="post">
+            <form method="post" enctype="multipart/form-data">
                 <input type="hidden" asp-for="Profile.UserId" />
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-                @* <div class="mb-4 text-center avatar-upload-container">
-                    <label for="Profile_AvatarFile" class="avatar-upload-wrapper">
-                        <img id="avatarPreview" 
-                             src="@Url.Content("~" + (Model.Profile.CurrentAvatarPath ?? "/images/logo2.png"))"
-                             alt="User Avatar" 
-                             class="avatar-image-preview" />
-                        <span class="change-avatar-prompt">Đổi ảnh đại diện</span>
-                    </label>
-                    <input asp-for="Profile.AvatarFile" type="file" class="d-none" id="Profile_AvatarFile" accept="image/*" onchange="previewAvatar(event)" />
-                    <span asp-validation-for="Profile.AvatarFile" class="text-danger d-block mt-2"></span>
-                </div> *@
-
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="Profile.Username" class="form-label"></label>

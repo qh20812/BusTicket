@@ -23,7 +23,7 @@ builder.Services.AddAuthentication("CookieAuth") // "CookieAuth" là tên scheme
     {
         options.Cookie.Name = "BusTicketSystem.AuthCookie";
         options.LoginPath = "/Account/Login/Login"; // Đường dẫn đến trang đăng nhập
-        options.AccessDeniedPath = "/Error?errorCode=AccessDenied"; // Trang hiển thị khi truy cập bị từ chối
+        options.AccessDeniedPath = "/Error?statusCode=403"; // Trang hiển thị khi truy cập bị từ chối
         options.ExpireTimeSpan = TimeSpan.FromMinutes(60); // Thời gian cookie hết hạn
         options.SlidingExpiration = true; // Gia hạn cookie nếu người dùng hoạt động
     });
@@ -38,7 +38,7 @@ if (!app.Environment.IsDevelopment())
     app.UseExceptionHandler("/Error");
     app.UseHsts();
 }
-
+app.UseStatusCodePagesWithReExecute("/Error", "?statusCode={0}");
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

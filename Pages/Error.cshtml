@@ -69,23 +69,10 @@
 </head>
 <body>
     <div class="frem">
-        <p>404</p>
-        <h2>Có vẻ bạn đã đi lạc</h2>
-        <h5>trang bạn đang tìm kiếm không tồn tại</h5>
+        <p>@(Model.StatusCode?.ToString() ?? "Lỗi")</p>
+        <h2>@Model.PageTitle</h2>
+        <h5>@Model.ErrorMessage</h5>
         <a href="/">Về Trang chủ</a>
     </div>
-
-    @* <div class="error-container">
-        <h1 class="display-4 text-danger">@Model.PageTitle</h1>
-        <p class="lead">@Model.ErrorMessage</p>
-        @if(Model.ShowRequestId){
-        <p>
-            <small><strong>Mã yêu cầu:</strong> <code>@Model.RequestId</code></small>
-        </p>
-        }
-        <hr/>
-        á
-        <a href="/" class="btn btn-primary">Quay về trang chủ</a>
-    </div> *@
 </body>
 </html>

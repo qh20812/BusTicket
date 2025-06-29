@@ -104,7 +104,7 @@ namespace BusTicketSystem.Pages.Account.PartnerRegistration
                 PasswordHash = $"{hashedPassword}:{saltBase64}",
                 Fullname = Input.ContactPersonName, // Lấy tên người liên hệ làm Fullname
                 Phone = Input.ContactPersonPhone,   // Lấy SĐT người liên hệ
-                Role = "partner",
+                Role = "Partner",
                 CompanyId = newCompany.CompanyId, 
                 IsActive = false, // <<<< THAY ĐỔI Ở ĐÂY: Tài khoản chưa kích hoạt cho đến khi admin duyệt
                 CreatedAt = DateTime.UtcNow,

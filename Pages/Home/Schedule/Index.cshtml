@@ -5,8 +5,8 @@
     ViewData["BodyClass"] = "schedule-page";
     ViewData["Title"]=@Model.Departure ?? "Lịch trình" + " - " + @Model.Destination;
 }
-<div class="container my-4">
-    @Html.AntiForgeryToken() @* Giữ lại AntiForgeryToken nếu các modal vẫn cần POST form *@
+<div class="container" style="padding-top: 15px;">
+    @Html.AntiForgeryToken()
     
     <div class="search-trip-panel">
         @await Component.InvokeAsync("SearchTripPanel",new{
@@ -18,33 +18,36 @@
             TripType=Model.TripType
         })
     </div>
-@if (Model.IsSearching)
+    <h1 class="schedule-title">Lịch trình chuyến đi</h1>
+@* @if (Model.IsSearching)
     {
-        <h2 class="mt-4">Kết quả tìm kiếm (@Model.AvailableTrips.Count)</h2>
+        <h2 class="schedule-title-search">Kết quả tìm kiếm @Model.AvailableTrips.Count chuyến đi</h2>
     }
     else
     {
-        <h2 class="mt-4">Lịch trình hiện có (@Model.AvailableTrips.Count)</h2>
+        <h2 class="schedule-title">Lịch trình chuyến đi</h2>
     }
+     *@
     
-
     @if (Model.AvailableTrips.Any())
     {
+        
         <div class="trip-results">
             @foreach (var trip in Model.AvailableTrips)
             {
+                
                 <div class="card mb-3 trip-item">
                     <div class="card-body">
                         <div class="row align-items-center">
                             <div class="col-md-3">
-                                <h5 class="card-title">
+                                <h5 class="schedule-card-title">
                                     <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId" class="shedule--card-link" title="Xem chi tiết chuyến đi">@trip.RouteName</a>
                                 </h5>
                                 <p class="card-text"><small class="text-muted">Nhà xe: @(trip.CompanyName ?? "N/A")</small></p>
                             </div>
                             <div class="col-md-3">
-                                <p class="card-text"><strong>Khởi hành:</strong> @trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")</p>
-                                <p class="card-text"><strong>Đến dự kiến:</strong> @trip.EstimatedArrivalTime.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p class="schedule-text-card"><strong>Khởi hành:</strong> @trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")</p>
+                                <p class="schedule-text-card"><strong>Đến dự kiến:</strong> @trip.EstimatedArrivalTime.ToString("dd/MM/yyyy HH:mm")</p>
                             </div>
                             <div class="col-md-2">
                                 <p class="card-text"><strong>Thời gian:</strong> @trip.EstimatedDuration</p>
@@ -213,6 +216,7 @@
                     const data = await response.json();
                     busCapacity = data.capacity;
                     bookedSeats = data.bookedSeats;
+                    seatMapContainer.dataset.isTwoStory = data.isTwoStory;
                     renderSeatMap(busCapacity, bookedSeats);
                 } catch (error) {
                     seatMapContainer.innerHTML = `<p class="text-danger text-center">Lỗi xử lý sơ đồ ghế: ${error.message}</p>`;
@@ -225,61 +229,50 @@
             // Hiển thị sơ đồ ghế
             function renderSeatMap(capacity, booked) {
                 seatMapContainer.innerHTML = ''; // Xóa sơ đồ cũ
-                seatMapContainer.style.position = 'relative'; // Đảm bảo position được đặt cho div loading tuyệt đối
+                const isTwoStory = JSON.parse(seatMapContainer.dataset.isTwoStory);
+                const busLayout = document.createElement('div');
+                busLayout.classList.add('bus-layout');
 
-                const seatGrid = document.createElement('div');
-                seatGrid.style.display = 'grid';
-                seatGrid.style.gridTemplateColumns = 'repeat(auto-fill, minmax(50px, 1fr))'; // Lưới đáp ứng
-                seatGrid.style.gap = '10px';
-                seatGrid.style.maxWidth = '400px'; // Giới hạn chiều rộng cho hình dạng xe buýt
-                seatGrid.style.margin = 'auto'; // Căn giữa lưới
+                if(isTwoStory){
+                    // xe 2 tang
+                    const firstLevel = document.createElement('div');
+                    firstLevel.classList.add('bus-level');
+                    const secondLevel = document.createElement('div');
+                    secondLevel.classList.add('bus-level');
+                    
+                    // chia ghe deu cho ca hai tang
+                    const firstLevelCapacity = Math.floor(capacity / 2);
+                    const secondLevelCapacity = capacity - firstLevelCapacity;
 
-                // Đánh số ghế đơn giản (A1, A2, B1, B2, v.v. hoặc chỉ 1, 2, 3...)
-                // Sử dụng số đơn giản cho ví dụ này, sắp xếp theo hàng/cột
-                const seatsPerRow = 4; // Ví dụ: 2 ghế, lối đi, 2 ghế
-                const totalRows = Math.ceil(capacity / seatsPerRow);
+                    createSeat(firstLevel,1,firstLevelCapacity,booked);
+                    createSeat(secondLevel,firstLevelCapacity+1,secondLevelCapacity,booked);
+
+                    busLayout.appendChild(firstLevel);
+                    busLayout.appendChild(secondLevel);
+                }else{
+                    // xe 1 tang
+                    createSeat(busLayout,1,capacity,booked);
+                }
+                
 
                 for (let i = 1; i <= capacity; i++) {
                     const seatNumber = i.toString().padStart(2, '0'); // Đánh số đơn giản 01, 02...
-                    // Hoặc sử dụng logic A01, A02, B01, B02... dựa trên hàng/cột
-                    // const row = Math.ceil(i / seatsPerRow);
-                    // const col = i % seatsPerRow === 0 ? seatsPerRow : i % seatsPerRow;
-                    // const seatNumber = `${String.fromCharCode(64 + row)}${col.toString().padStart(2, '0')}`; // A01, A02, B01... (điều chỉnh logic cho lối đi)
 
                     const seatElement = document.createElement('div');
                     seatElement.classList.add('seat');
                     seatElement.textContent = seatNumber;
                     seatElement.dataset.seatNumber = seatNumber;
-                    seatElement.style.width = '50px';
-                    seatElement.style.height = '50px';
-                    seatElement.style.borderRadius = '8px';
-                    seatElement.style.border = '1px solid #ccc';
-                    seatElement.style.display = 'flex';
-                    seatElement.style.justifyContent = 'center';
-                    seatElement.style.alignItems = 'center';
-                    seatElement.style.cursor = 'pointer';
-                    seatElement.style.fontWeight = 'bold';
 
                     if (booked.includes(seatNumber)) {
                         seatElement.classList.add('booked'); // Ghế đã đặt
-                        seatElement.style.backgroundColor = '#dc3545'; // Màu đỏ
-                        seatElement.style.color = '#fff';
-                        seatElement.style.cursor = 'not-allowed'; // Không cho phép nhấp
                     } else {
                         seatElement.classList.add('available'); // Ghế trống
-                        seatElement.style.backgroundColor = '#fff'; // Màu trắng
-                        seatElement.style.color = '#333';
                         seatElement.addEventListener('click', handleSeatClick);
                     }
-                    seatGrid.appendChild(seatElement);
+                    container.appendChild(seatElement);
                 }
-                 seatMapContainer.appendChild(seatGrid);
 
-                 // Tùy chọn: Thêm đường viền đơn giản cho xe buýt (chỉ mang tính trực quan)
-                 seatMapContainer.style.border = '2px solid #007bff';
-                 seatMapContainer.style.padding = '20px';
-                 seatMapContainer.style.borderRadius = '15px';
-                 seatMapContainer.style.backgroundColor = '#f8f9fa';
+                 seatMapContainer.classList.add('seat-map-container-style');
             }
 
             // Xử lý sự kiện nhấp vào ghế để chọn
@@ -290,14 +283,11 @@
                 if (index > -1) {
                     // Bỏ chọn ghế
                     selectedSeats.splice(index, 1);
-                    this.style.backgroundColor = '#fff'; // Màu trắng
                     this.classList.remove('selected');
                 } else {
                     // Chọn ghế, nếu chưa đạt giới hạn số lượng
                     if (selectedSeats.length < requiredQuantity) {
                         selectedSeats.push(seatNumber);
-                        this.style.backgroundColor = '#28a745'; // Màu xanh lá
-                        this.style.color = '#fff';
                         this.classList.add('selected');
                     } else {
                         alert(`Bạn chỉ có thể chọn tối đa ${requiredQuantity} ghế.`);
@@ -305,34 +295,28 @@
                 }
                 updateSeatSelectionDisplay();
             }
-
             // Cập nhật hiển thị các ghế đã chọn và bật/tắt nút xác nhận
             function updateSeatSelectionDisplay() {
                 selectedSeatsDisplay.textContent = selectedSeats.length > 0 ? selectedSeats.join(', ') : 'Chưa chọn ghế nào';
                 selectedSeatCountSpan.textContent = selectedSeats.length;
                 confirmBookingBtn.disabled = selectedSeats.length !== requiredQuantity;
             }
-
             // Xử lý sự kiện nhấp nút "Xác nhận đặt vé"
             confirmBookingBtn.addEventListener('click', async function () {
                 if (selectedSeats.length !== requiredQuantity) {
                     alert(`Vui lòng chọn đúng ${requiredQuantity} ghế.`);
                     return;
                 }
-
                 const guestPhone = document.getElementById('guestPhone').value;
-
                 const bookingData = {
                     tripId: currentTripId,
                     selectedSeats: selectedSeats,
                     quantity: requiredQuantity,
                     guestPhone: guestPhone
                 };
-
                 // Vô hiệu hóa nút và hiển thị chỉ báo đang tải nếu muốn
                 confirmBookingBtn.disabled = true;
                 confirmBookingBtn.textContent = 'Đang xử lý...';
-
                 try {
                     const response = await fetch('/Home/Schedule/Index?handler=Book', {
                         method: 'POST',

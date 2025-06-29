@@ -6,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho đúng
 {
+    [Authorize(Roles ="Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -24,7 +26,7 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho �
         public string? SearchName { get; set; }
 
         [BindProperty(SupportsGet = true)]
-        public string? SortName { get; set; } 
+        public string? SortName { get; set; }
 
         public async Task OnGetAsync()
         {
@@ -42,8 +44,8 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho �
                 case "za":
                     query = query.OrderByDescending(u => u.Fullname);
                     break;
-                default: 
-                    query = query.OrderByDescending(u => u.CreatedAt); 
+                default:
+                    query = query.OrderByDescending(u => u.CreatedAt);
                     break;
             }
 
@@ -70,13 +72,13 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho �
                 var newNotification = new Notification
                 {
                     Message = notificationMessage,
-                    Category = NotificationCategory.Customer, 
+                    Category = NotificationCategory.Customer,
                     TargetUrl = Url.Page("/ForAdmin/CustomerManage/Edit", new { id = customer.UserId }),
                     IconCssClass = "bi bi-person-slash-fill",
                     RecipientUserId = null // General admin notification
                 };
                 _context.Notifications.Add(newNotification);
-                
+
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = $"Khách hàng '{customer.Fullname}' đã được chặn thành công.";
             }
@@ -85,7 +87,7 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho �
                 TempData["InfoMessage"] = $"Khách hàng '{customer.Fullname}' đã bị chặn trước đó.";
             }
 
-            return RedirectToPage(); 
+            return RedirectToPage();
         }
 
         public async Task<IActionResult> OnPostUnblockAsync(int id)
@@ -122,6 +124,6 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage // Sửa namespace cho �
             }
             return RedirectToPage();
         }
-        
+
     }
 }

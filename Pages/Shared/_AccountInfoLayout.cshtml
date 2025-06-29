@@ -21,38 +21,38 @@
 <body>
     <div class="sidebar">
         <a href="/Index" class="logo" style="text-decoration: none;">
-            <i class='bx bx-bus'></i>
-            <div class="logo-name"><span>Bus</span>Ticket</div>
+            <img class="logo_dashboard" src="/images/LogoAndSlogan2.png" alt="Trang chủ">
         </a>
         <ul class="side-menu">
             <li class="@(currentPath.StartsWith("/forcustomer/myaccount") ? "active" : "")"><a href="/ForCustomer/MyAccount/Index"><i class='bx bx-user-circle'></i>Thông tin cá nhân</a></li>
             <li class="@(currentPath.StartsWith("/forcustomer/myorders") ? "active" : "")"><a href="/ForCustomer/MyOrders/Index"><i class='bx bx-receipt'></i>Đơn hàng của tôi</a></li>
-            <li class="@(currentPath.StartsWith("/forcustomer/myreviews") ? "active" : "")"><a href="/ForCustomer/MyReviews/Index"><i class='bx bx-comment-edit'></i>Nhận xét chuyến đi</a></li>
+            <li class="@(currentPath.StartsWith("/forcustomer/myreviews") ? "active" : "")"><a href="#"><i class='bx bx-comment-edit'></i>Nhận xét chuyến đi</a></li>
         </ul>
         <ul class="side-menu">
             <li>
-                <form asp-page="/Account/Logout/Index" method="post" style="width: 100%;">
-                    <button type="submit" class="logout" style="border:none; background:none; padding-left: 20px; width: 100%; text-align: left; display: flex; align-items: center; gap: 10px; height: 48px;">
-                        <i class='bx bx-log-out-circle'></i>
-                        Đăng xuất
-                    </button>
-                </form>
+                <a href="/Account/Logout/Index" class="logout"  style='text-decoration: none;'>
+                    <i class='bx bx-log-out-circle'></i>
+                    Đăng xuất
+                </a>
             </li>
         </ul>
     </div>
     <div class="content">
         <nav>
             <i class='bx bx-menu'></i>
-            @* Search form removed for customer layout, can be added back if needed *@
+            <form method="get" asp-page="/ForCustomer/SearchHandler/Index">
+                <div class="form-input">
+                    
+                </div>
+            </form>
             <input type="checkbox" id="theme-toggle" hidden>
             <label for="theme-toggle" class="theme-toggle" title="Dark/Light Mode"></label>
-            <a href="#" class="notif"> @* Customer notifications can be implemented here *@
-                <i class='bx bx-bell'></i>
-                @* <span >0</span> *@ @* Placeholder for customer notification count *@
+            <a href="/ForCustomer/Notifications/Index" class="notif">
+                @* <i class='bx bx-bell'></i> *@
+                <span>@await Component.InvokeAsync("UnreadNotificationCount")</span>
             </a>
-            <a href="/ForCustomer/MyAccount/Index" class="profile" title="Thông tin cá nhân">
-                @* <img src="@Url.Content("~" + avatarPath)" alt="User Avatar" style="width: 36px; height: 36px; border-radius: 50%; object-fit: cover;"> *@
-                <i class='bx bx-user-circle' style="font-size: 36px;"></i>
+            <a href="/ForAdmin/ProfileAdmin" class="profile" title="Thông tin cá nhân">
+                
             </a>
         </nav>
         <main>
@@ -86,16 +86,31 @@
             }
         });
 
-        const toggler = document.getElementById('theme-toggle');
-        if (toggler) {
-            toggler.addEventListener('change', function () {
-                if (this.checked) {
-                    document.body.classList.add('dark');
-                } else {
-                    document.body.classList.remove('dark');
-                }
-            });
+        const toggler=document.getElementById('theme-toggle');
+        const body=document.body;
+
+        function applyTheme(theme){
+            if(theme==='dark'){
+                body.classList.add('dark');
+                toggler.checked=true;
+            }else{
+                body.classList.remove('dark');
+                toggler.checked=false;
+            }
         }
+        const savedTheme=localStorage.getItem('theme');
+        if(savedTheme){
+            applyTheme(savedTheme);
+        }
+        toggler.addEventListener('change',function(){
+            if(this.checked){
+                body.classList.add('dark');
+                localStorage.setItem('theme','dark');
+            }else{
+                body.classList.remove('dark');
+                localStorage.setItem('theme','light');
+            }
+        })
     </script>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js" integrity="sha384-j1CDi7MgGQ12Z7Qab0qlWQ/Qqz24Gc6BM0thvEMVjHnfYGF0rmFCozFSxQBxwHKO" crossorigin="anonymous"></script>

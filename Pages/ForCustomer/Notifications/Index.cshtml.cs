@@ -7,11 +7,9 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authorization;
 
-namespace BusTicketSystem.Pages.ForPartner.Notifications
+namespace BusTicketSystem.Pages.ForCustomer.Notifications
 {
-    [Authorize(Roles = "Partner")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -25,37 +23,41 @@ namespace BusTicketSystem.Pages.ForPartner.Notifications
 
         public IList<BusTicketSystem.Models.Notification> Notifications { get; set; } = new List<BusTicketSystem.Models.Notification>();
 
-        private int? GetCurrentCompanyId()
+        private int? GetCurrentMemberId()
         {
-            return _httpContextAccessor.HttpContext?.Session.GetInt32("CompanyId");
+            var userId = _httpContextAccessor.HttpContext?.Session.GetInt32("UserId");
+            var role = _httpContextAccessor.HttpContext?.Session.GetString("Role");
+            return (userId.HasValue && "member".Equals(role, System.StringComparison.OrdinalIgnoreCase)) ? userId : null;
         }
 
         public async Task<IActionResult> OnGetAsync()
         {
-            var companyId = GetCurrentCompanyId();
-            if (!companyId.HasValue)
+            var memberId = GetCurrentMemberId();
+            if (!memberId.HasValue)
             {
-                TempData["ErrorMessage"] = "Không thể xác định thông tin nhà xe. Vui lòng đăng nhập lại.";
-                return RedirectToPage("/Account/Login"); // Or an appropriate error page
+                TempData["ErrorMessage"] = "Không thể xác định thông tin khách hàng. Vui lòng đăng nhập lại.";
+                return Redirect("/Account/Login/Index");
             }
-
-            Notifications = await _context.Notifications
-                .Where(n => n.RecipientCompanyId == companyId.Value)
-                .OrderByDescending(n => n.CreatedAt)
-                .AsNoTracking()
-                .ToListAsync();
+            var allowedCategories = new[]{
+                NotificationCategory.Customer,
+                NotificationCategory.Order,
+                NotificationCategory.Trip,
+                NotificationCategory.Registration
+            };
+            Notifications = await _context.Notifications.Where(n => n.RecipientUserId == memberId.Value && allowedCategories.Contains(n.Category)).OrderByDescending(n => n.CreatedAt).AsNoTracking().ToListAsync();
 
             return Page();
         }
 
         public async Task<IActionResult> OnPostMarkAsReadAsync(int id)
         {
-            var companyId = GetCurrentCompanyId();
-            if (!companyId.HasValue) return Forbid();
-
-            var notification = await _context.Notifications
-                                     .FirstOrDefaultAsync(n => n.NotificationId == id && n.RecipientCompanyId == companyId.Value);
-
+            var memberId = GetCurrentMemberId();
+            if (!memberId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập lại.";
+                return Forbid();
+            }
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.NotificationId == id && n.RecipientUserId == memberId.Value);
             if (notification != null)
             {
                 notification.IsRead = true;
@@ -72,13 +74,13 @@ namespace BusTicketSystem.Pages.ForPartner.Notifications
 
         public async Task<IActionResult> OnPostMarkAllAsReadAsync()
         {
-            var companyId = GetCurrentCompanyId();
-            if (!companyId.HasValue) return Forbid();
-
-            var unreadNotifications = await _context.Notifications
-                .Where(n => n.RecipientCompanyId == companyId.Value && !n.IsRead)
-                .ToListAsync();
-
+            var memberId = GetCurrentMemberId();
+            if (!memberId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập lại.";
+                return Forbid();
+            }
+            var unreadNotifications = await _context.Notifications.Where(n => n.RecipientUserId == memberId.Value && !n.IsRead).ToListAsync();
             foreach (var notification in unreadNotifications)
             {
                 notification.IsRead = true;
@@ -91,11 +93,13 @@ namespace BusTicketSystem.Pages.ForPartner.Notifications
 
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
-            var companyId = GetCurrentCompanyId();
-            if (!companyId.HasValue) return Forbid();
-
-            var notification = await _context.Notifications
-                                     .FirstOrDefaultAsync(n => n.NotificationId == id && n.RecipientCompanyId == companyId.Value);
+            var memberId = GetCurrentMemberId();
+            if (!memberId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập lại.";
+                return Forbid();
+            }
+            var notification = await _context.Notifications.FirstOrDefaultAsync(n => n.NotificationId == id && n.RecipientUserId == memberId.Value);
             if (notification != null)
             {
                 _context.Notifications.Remove(notification);
@@ -110,10 +114,13 @@ namespace BusTicketSystem.Pages.ForPartner.Notifications
         }
         public async Task<IActionResult> OnPostDeleteAllReadAsync()
         {
-            var companyId = GetCurrentCompanyId();
-            if (!companyId.HasValue) return Forbid();
-
-            var readNotifications = await _context.Notifications.Where(n => n.RecipientCompanyId == companyId.Value && n.IsRead).ToListAsync();
+            var memberId = GetCurrentMemberId();
+            if (!memberId.HasValue)
+            {
+                TempData["ErrorMessage"] = "Vui lòng đăng nhập lại.";
+                return Forbid();
+            }
+            var readNotifications = await _context.Notifications.Where(n => n.RecipientUserId == memberId.Value && n.IsRead).ToListAsync();
             _context.Notifications.RemoveRange(readNotifications);
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = "Đã xóa tất cả thông báo đã đọc.";

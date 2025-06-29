@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.BusManage
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -19,7 +21,7 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
             _context = context;
         }
 
-        public IList<BusViewModel> Buses { get;set; } = new List<BusViewModel>();
+        public IList<BusViewModel> Buses { get; set; } = new List<BusViewModel>();
 
         [BindProperty(SupportsGet = true)]
         public string? SearchTerm { get; set; } // Tìm kiếm theo biển số hoặc loại xe

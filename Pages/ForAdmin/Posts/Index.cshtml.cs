@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.Posts
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -48,7 +50,7 @@ namespace BusTicketSystem.Pages.ForAdmin.Posts
 
             return RedirectToPage("./Index");
         }
-        
+
         public async Task<IActionResult> OnPostDeleteAsync(int id)
         {
             var postToDelete = await _context.Posts.FindAsync(id);

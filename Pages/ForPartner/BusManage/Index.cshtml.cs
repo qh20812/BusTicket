@@ -7,11 +7,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using BusTicketSystem.Pages.ForAdmin.BusManage; // Thêm using cho BusViewModel
 using System.ComponentModel.DataAnnotations; // Required for DisplayAttribute
 
 namespace BusTicketSystem.Pages.ForPartner.BusManage
 {
+    [Authorize(Roles = "Partner")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;

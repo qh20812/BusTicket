@@ -9,9 +9,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.OrderManage
 {
+    [Authorize(Roles = "Partner")]
     public class PartnerOrderViewModel
     {
         public int OrderId { get; set; }

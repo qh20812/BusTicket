@@ -10,9 +10,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.Notifications
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel(AppDbContext context) : PageModel
     {
         private readonly AppDbContext _context = context;

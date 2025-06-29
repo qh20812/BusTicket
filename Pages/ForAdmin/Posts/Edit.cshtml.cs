@@ -3,9 +3,11 @@ using BusTicketSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.Posts
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel(AppDbContext context) : PageModel
     {
         private readonly AppDbContext _context = context;

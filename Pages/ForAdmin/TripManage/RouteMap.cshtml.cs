@@ -44,7 +44,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             if (CurrentTrip.Route != null && !string.IsNullOrEmpty(CurrentTrip.Route.OriginCoordinates))
             {
                 var originCoordsStr = CurrentTrip.Route.OriginCoordinates.Split(',');
-                if (originCoordsStr.Length == 2 && 
+                if (originCoordsStr.Length == 2 &&
                     double.TryParse(originCoordsStr[0], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double originLat) &&
                     double.TryParse(originCoordsStr[1], System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out double originLon))
                 {

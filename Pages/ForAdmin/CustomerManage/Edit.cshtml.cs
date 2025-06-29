@@ -6,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.CustomerManage
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -47,7 +49,7 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage
                 Phone = customer.Phone,
                 Address = customer.Address,
                 Role = customer.Role,
-                PasswordHash = customer.PasswordHash, 
+                PasswordHash = customer.PasswordHash,
                 CreatedAt = customer.CreatedAt,
                 IsActive = customer.IsActive // Populate IsActive
             };
@@ -84,7 +86,7 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage
             // customerToUpdate.Username = CustomerInput.Username; // Read-only
             // customerToUpdate.Phone = CustomerInput.Phone;       // Read-only
             // customerToUpdate.Address = CustomerInput.Address;   // Read-only
-            
+
             // Update Role
             customerToUpdate.Role = CustomerInput.Role;
 
@@ -93,7 +95,7 @@ namespace BusTicketSystem.Pages.ForAdmin.CustomerManage
             customerToUpdate.CreatedAt = CustomerInput.CreatedAt;
             customerToUpdate.IsActive = CustomerInput.IsActive; // Preserve IsActive status
 
-            customerToUpdate.UpdatedAt = DateTime.UtcNow; 
+            customerToUpdate.UpdatedAt = DateTime.UtcNow;
 
             try
             {

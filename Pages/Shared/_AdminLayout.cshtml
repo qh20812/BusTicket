@@ -20,9 +20,8 @@
 </head>
 <body>
     <div class="sidebar">
-        <a href="/Index" class="logo" style="text-decoration: none;">
-            <img class="logo_dashboard" src="/images/logo5.png" alt="Trang chủ">
-            <div class="logo-name"><span>Bus</span>Ticket</div>
+        <a href="/ForAdmin/Dashboard/Index" class="logo" style="text-decoration: none;">
+            <img class="logo_dashboard" src="/images/LogoAndSlogan2.png" alt="Trang chủ">
         </a>
         <ul class="side-menu">
             <li class="@(currentPath.StartsWith("/foradmin/dashboard") ? "active" : "")"><a asp-page="/ForAdmin/Dashboard/Index"><i class='bx bxs-dashboard'></i>Tổng quan</a></li>
@@ -32,8 +31,10 @@
             <li class="@(currentPath.StartsWith("/foradmin/busmanage") ? "active" : "")"><a asp-page="/ForAdmin/BusManage/Index"><i class='bx  bx-bus'></i>Phương tiện</a></li>
             <li class="@(currentPath.StartsWith("/foradmin/ordermanage") ? "active" : "")"><a asp-page="/ForAdmin/OrderManage/Index"><i class='bi bi-receipt bx'></i>Đơn hàng</a></li>
             <li class="@(currentPath.StartsWith("/foradmin/tripmanage") ? "active" : "")"><a asp-page="/ForAdmin/TripManage/Index"><i class='bi bi-signpost-split bx'></i>Chuyến đi</a></li>
+            <li class="@(currentPath.StartsWith("/foradmin/routemanage")?"active":"")"><a asp-page="/ForAdmin/RouteManage/Index"><i class="bi bi-map bx"></i>Lộ trình</a></li>
             @* <li class="@(currentPath.StartsWith("/foradmin/promotionmanage") ? "active" : "")"><a asp-page="/ForAdmin/PromotionManage/Index"><i class='bi bi-ticket-perforated bx'></i>Khuyến mãi</a></li> *@
             <li class="@(currentPath.StartsWith("/foradmin/posts") ? "active" : "")"><a asp-page="/ForAdmin/Posts/Index"><i class='bi bi-file-earmark-post bx'></i>Bài đăng</a></li>
+            <li class="@(currentPath.StartsWith("/foradmin/cancelticket")?"active":"")"><a asp-page="/ForAdmin/CancelTicket/Index"><i class="bi bi-x-circle bx"></i>Hủy vé</a></li>
             <li class="@(currentPath.StartsWith("/foradmin/message") ? "active" : "")"><a asp-page="/ForAdmin/Message/Index"><i class='bi bi-envelope bx'></i>Hộp thư</a></li>
         </ul>
         <ul class="side-menu">
@@ -48,9 +49,9 @@
     <div class="content">
         <nav>
             <i class='bx bx-menu'></i>
-            <form action="#">
+            <form method="get" asp-page="/ForAdmin/SearchHandler/Index">
                 <div class="form-input">
-                    <input type="search" placeholder="Tìm kiếm...">
+                    <input type="search" name="searchTerm" placeholder="Tìm kiếm...">
                     <button class="search-btn" type="submit"><i class='bx bx-search'></i></button>
                 </div>
             </form>
@@ -61,31 +62,10 @@
                 <span>@await Component.InvokeAsync("UnreadNotificationCount")</span>
             </a>
             <a href="/ForAdmin/ProfileAdmin" class="profile" title="Thông tin cá nhân">
-                <img src="/images/logo2.png">
+                <i class="bx bx-user-circle"></i>
             </a>
         </nav>
         <main>
-            @* @if (TempData["SuccessMessage"] != null)
-            {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
-                    @TempData["SuccessMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["ErrorMessage"] != null)
-            {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    @TempData["ErrorMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            }
-            @if (TempData["WarningMessage"] != null)
-            {
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    @TempData["WarningMessage"]
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            } *@
             @RenderBody()
         </main>
     </div>
@@ -134,11 +114,28 @@
             }
         });
         const toggler=document.getElementById('theme-toggle');
+        const body=document.body;
+
+        function applyTheme(theme){
+            if(theme==='dark'){
+                body.classList.add('dark');
+                toggler.checked=true;
+            }else{
+                body.classList.remove('dark');
+                toggler.checked=false;
+            }
+        }
+        const savedTheme=localStorage.getItem('theme');
+        if(savedTheme){
+            applyTheme(savedTheme);
+        }
         toggler.addEventListener('change',function(){
             if(this.checked){
-                document.body.classList.add('dark');
+                body.classList.add('dark');
+                localStorage.setItem('theme','dark');
             }else{
-                document.body.classList.remove('dark');
+                body.classList.remove('dark');
+                localStorage.setItem('theme','light');
             }
         })
     </script>

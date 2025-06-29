@@ -12,9 +12,11 @@ using BCrypt.Net;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.ProfileAdmin
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -42,7 +44,7 @@ namespace BusTicketSystem.Pages.ForAdmin.ProfileAdmin
                 return null;
             }
             // Ensure we are fetching an admin user
-            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.Role == "admin");
+            return await _context.Users.FirstOrDefaultAsync(u => u.Username == username && u.Role == "Admin");
         }
 
         public async Task<IActionResult> OnGetAsync()
@@ -67,7 +69,7 @@ namespace BusTicketSystem.Pages.ForAdmin.ProfileAdmin
         public async Task<IActionResult> OnPostAsync()
         {
             var userToUpdate = await _context.Users.FindAsync(Profile.UserId);
-            if (userToUpdate == null || userToUpdate.Role != "admin")
+            if (userToUpdate == null || userToUpdate.Role != "Admin")
             {
                 ErrorMessage = "Không tìm thấy tài khoản hoặc bạn không có quyền cập nhật."; // Account not found or you do not have permission to update.
                 return RedirectToPage();

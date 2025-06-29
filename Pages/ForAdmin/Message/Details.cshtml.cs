@@ -4,9 +4,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.Message
 {
+    [Authorize(Roles = "Admin")]
     public class DetailsModel(AppDbContext context) : PageModel
     {
         private readonly AppDbContext _context = context;

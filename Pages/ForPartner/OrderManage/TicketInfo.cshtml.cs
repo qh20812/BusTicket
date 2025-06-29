@@ -7,9 +7,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.OrderManage
 {
+    [Authorize(Roles = "Partner")]
     public class TicketInfoModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -62,10 +64,10 @@ namespace BusTicketSystem.Pages.ForPartner.OrderManage
 
             if (!PartnerTickets.Any())
             {
-                 // This case should ideally be caught by the initial query, but as a safeguard:
+                // This case should ideally be caught by the initial query, but as a safeguard:
                 return NotFound($"Đơn hàng ID {orderId} không có vé nào thuộc nhà xe của bạn.");
             }
-            
+
             // Use the helper from PartnerOrderViewModel for consistency
             OrderStatusDisplay = BusTicketSystem.Pages.ForPartner.OrderManage.PartnerOrderViewModel.GetStatusDisplayName(Order.Status);
             return Page();

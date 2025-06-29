@@ -5,9 +5,11 @@ using BusTicketSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.RouteManage
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -90,8 +92,8 @@ namespace BusTicketSystem.Pages.ForAdmin.RouteManage
                     Distance = RouteInput.Distance,
                     EstimatedDuration = estimatedDurationTimeSpan,
                     Status = RouteInput.Status,
-                    Trips=new List<Trip>(),
-                    Promotions=new List<Promotion>(),
+                    Trips = new List<Trip>(),
+                    Promotions = new List<Promotion>(),
                     ProposedByCompanyId = RouteInput.ProposedByCompanyId,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow

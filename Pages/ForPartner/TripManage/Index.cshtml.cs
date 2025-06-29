@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace BusTicketSystem.Pages.ForPartner.TripManage
 {
-    [Authorize(Roles = "partner")] // Ensure only partners can access
+    [Authorize(Roles = "Partner")]
     public class IndexModel : PartnerBasePageModel
     {
         public IndexModel(AppDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)

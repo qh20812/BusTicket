@@ -9,9 +9,11 @@ using System.Globalization;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.TripManage
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -48,14 +50,14 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
                                 .AsNoTracking()
                                 .ToListAsync();
             Buses = new SelectList(activeBuses ?? Enumerable.Empty<object>(), "BusId", "Name", selectedBusId);
-    
+
             IQueryable<Driver> driversQuery = _context.Drivers.Where(d => d.Status == DriverStatus.Active);
 
             if (filterDriversByCompany && selectedCompanyId.HasValue)
             {
                 driversQuery = driversQuery.Where(d => d.CompanyId == selectedCompanyId.Value);
             }
-            else if (filterDriversByCompany && !selectedCompanyId.HasValue) 
+            else if (filterDriversByCompany && !selectedCompanyId.HasValue)
             {
                 // Nếu filterDriversByCompany là true nhưng không có selectedCompanyId (ví dụ: người dùng xóa chọn nhà xe),
                 // thì sẽ hiển thị danh sách rỗng nếu tất cả tài xế đều thuộc nhà xe nào đó.
@@ -169,7 +171,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             {
                 await LoadSelectListsAsync(TripInput.RouteId, TripInput.BusId, TripInput.DriverId, TripInput.CompanyId, filterDriversByCompany: TripInput.CompanyId.HasValue);
                 ViewData["Title"] = TripInput.TripId == 0 ? "Thêm mới Chuyến đi" : "Chỉnh sửa Chuyến đi";
-                
+
                 TripInput.TripStops ??= new List<TripStopInputModel>();
                 return Page();
             }
@@ -197,7 +199,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
                 };
 #pragma warning restore CS8629 // Nullable value type may be null.
                 _context.Trips.Add(newTrip);
-                await _context.SaveChangesAsync(); 
+                await _context.SaveChangesAsync();
                 if (TripInput.TripStops != null)
                 {
                     foreach (var stopInput in TripInput.TripStops)
@@ -305,13 +307,14 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
                 {
                     originCoordinates = route.OriginCoordinates,
                     destinationCoordinates = route.DestinationCoordinates,
-                    originAddress = route.OriginAddress ?? route.Departure, 
-                    destinationAddress = route.DestinationAddress ?? route.Destination, 
+                    originAddress = route.OriginAddress ?? route.Departure,
+                    destinationAddress = route.DestinationAddress ?? route.Destination,
                     distance = route.Distance,
-                    estimatedDuration = route.EstimatedDuration?.ToString(@"hh\h\ mm\m") 
+                    estimatedDuration = route.EstimatedDuration?.ToString(@"hh\h\ mm\m")
                 });
             }
-            return new JsonResult(new {
+            return new JsonResult(new
+            {
                 originAddress = route.OriginAddress ?? route.Departure,
                 destinationAddress = route.DestinationAddress ?? route.Destination,
                 distance = route.Distance,
@@ -319,7 +322,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             });
         }
 
-        
+
 
         public async Task<JsonResult> OnGetDriversByCompanyAsync(int? companyId)
         {

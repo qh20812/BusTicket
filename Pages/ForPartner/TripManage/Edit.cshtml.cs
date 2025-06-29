@@ -14,7 +14,7 @@ using BusTicketSystem.Pages.ForAdmin.TripManage;
 
 namespace BusTicketSystem.Pages.ForPartner.TripManage
 {
-    [Authorize(Roles = "partner")]
+    [Authorize(Roles = "Partner")]
     public class EditModel : PartnerBasePageModel // Inherit from PartnerBasePageModel
     {
         public EditModel(AppDbContext context, IHttpContextAccessor httpContextAccessor) : base(context, httpContextAccessor)

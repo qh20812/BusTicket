@@ -6,9 +6,11 @@ using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
 using System.Reflection;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.BusCompanyManage
 {
+    [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -170,8 +172,10 @@ namespace BusTicketSystem.Pages.ForAdmin.BusCompanyManage
 
             var notification = new Notification
             {
-                Message = notificationMessage, Category = NotificationCategory.BusCompany,
-                TargetUrl = Url.Page("./Index", new { SearchTerm = companyToUpdate.CompanyName }), IconCssClass = "bi bi-buildings"
+                Message = notificationMessage,
+                Category = NotificationCategory.BusCompany,
+                TargetUrl = Url.Page("./Index", new { SearchTerm = companyToUpdate.CompanyName }),
+                IconCssClass = "bi bi-buildings"
             };
             _context.Notifications.Add(notification);
 

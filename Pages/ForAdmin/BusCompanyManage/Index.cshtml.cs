@@ -8,9 +8,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Reflection;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.BusCompanyManage
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -115,7 +117,7 @@ namespace BusTicketSystem.Pages.ForAdmin.BusCompanyManage
             }
 
             company.Status = BusCompanyStatus.Active; // Chính thức hoạt động
-            
+
             company.ApprovedAt = DateTime.UtcNow;
             company.UpdatedAt = DateTime.UtcNow;
 
@@ -225,7 +227,7 @@ namespace BusTicketSystem.Pages.ForAdmin.BusCompanyManage
                     user.IsActive = targetUserIsActiveState;
                     user.UpdatedAt = DateTime.UtcNow;
                 }
-}
+            }
 
             var notification = new Notification
             {

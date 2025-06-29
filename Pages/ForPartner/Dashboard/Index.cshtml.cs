@@ -8,9 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.Dashboard
 {
+    [Authorize(Roles = "Partner")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;

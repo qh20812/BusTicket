@@ -4,10 +4,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims; // Required for User.FindFirstValue
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.DriverManage
 {
-    // [Authorize(Policy = "BusCompanyOnly")] // Add appropriate authorization
+    [Authorize(Roles = "Partner")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -17,7 +18,7 @@ namespace BusTicketSystem.Pages.ForPartner.DriverManage
             _context = context;
         }
 
-        public IList<DriverViewModel> CompanyDrivers { get;set; } = new List<DriverViewModel>();
+        public IList<DriverViewModel> CompanyDrivers { get; set; } = new List<DriverViewModel>();
 
         [BindProperty(SupportsGet = true)]
         public string? SearchName { get; set; }
@@ -48,7 +49,7 @@ namespace BusTicketSystem.Pages.ForPartner.DriverManage
             if (companyId == null)
             {
                 TempData["ErrorMessage"] = "Không thể xác định thông tin nhà xe. Vui lòng đăng nhập lại.";
-                return RedirectToPage("/Account/Login/Login"); 
+                return RedirectToPage("/Account/Login/Login");
             }
 
             IQueryable<Driver> query = _context.Drivers

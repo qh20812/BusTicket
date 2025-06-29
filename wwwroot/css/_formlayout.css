@@ -214,7 +214,6 @@ body{
     width: 100%; /* Hoặc chiều rộng cụ thể của input cha nếu cần */
     /* margin-bottom: 15px; */ /* Tùy chỉnh khoảng cách dưới nếu cần, tương tự các input khác */
 }
-
 .password-container input[type="password"],
 .password-container input[type="text"] {
     width: 100%; /* Input chiếm toàn bộ chiều rộng của container */

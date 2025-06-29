@@ -32,7 +32,7 @@ namespace BusTicketSystem.Models.ViewModels
         public string? CancellationReason { get; set; }
         public string? BusLicensePlate { get; set; }
         public decimal Price { get; set; }
-        public decimal Distance { get; set; }
+        public decimal? Distance { get; set; } // Changed to nullable to match Route.Distance
         public decimal? OldPrice { get; set; }
         public decimal? DiscountPercentage { get; set; }
 
@@ -54,10 +54,10 @@ namespace BusTicketSystem.Models.ViewModels
         {
             TripId = t.TripId;
             if (t.Route != null) {
-                RouteName = $"{t.Route.Departure} \u2192 {t.Route.Destination}"; // Sử dụng mũi tên đẹp hơn
+                RouteName = $"{t.Route.Departure} \u2192 {t.Route.Destination}";
                 Departure = t.Route.Departure;
                 Destination = t.Route.Destination;
-                Distance = t.Route.Distance ?? 0;
+                Distance = t.Route.Distance; // No need for ?? 0 since Distance is now nullable
                 EstimatedDuration = t.Route.EstimatedDuration ?? TimeSpan.Zero;
             }
             if (t.Bus != null)
@@ -84,8 +84,8 @@ namespace BusTicketSystem.Models.ViewModels
             CanCompleteManually = t.Status == TripStatus.Scheduled && t.DepartureTime < DateTime.UtcNow;
             CanDelete = !t.Tickets.Any(ti => ti.Status == TicketStatus.Booked || ti.Status == TicketStatus.Used) && (t.Status == TripStatus.Scheduled || t.Status == TripStatus.Cancelled);
         }
-
     }
+
     public class PromotionViewModel
     {
         public int PromotionId { get; set; }
@@ -99,5 +99,4 @@ namespace BusTicketSystem.Models.ViewModels
         public bool IsFirstOrder { get; set; }
         public int? RouteId { get; set; }
     }
-    
 }

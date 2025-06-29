@@ -7,9 +7,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.OrderManage
 {
+    [Authorize(Roles = "Admin")]
     public class TicketInfoModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -31,8 +33,8 @@ namespace BusTicketSystem.Pages.ForAdmin.OrderManage
             Order = await _context.Orders
                 .Include(o => o.OrderTickets)
                     .ThenInclude(ot => ot.Ticket)
-                        .ThenInclude(t => t!.Trip) 
-                            .ThenInclude(tr => tr!.Route) 
+                        .ThenInclude(t => t!.Trip)
+                            .ThenInclude(tr => tr!.Route)
                 .Include(o => o.User)
                 .Include(o => o.Promotion)
                 .FirstOrDefaultAsync(m => m.OrderId == orderId);
@@ -43,7 +45,7 @@ namespace BusTicketSystem.Pages.ForAdmin.OrderManage
             }
 
             // Logic chuyển đổi trạng thái đã có trong OrderViewModel, nhưng nếu cần trực tiếp:
-            
+
             return Page();
         }
     }

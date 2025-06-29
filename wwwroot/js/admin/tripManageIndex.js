@@ -1,5 +1,8 @@
-p// Global variable for the map instance in the modal
+// Global variable for the map instance in the modal
 let tripModalMap = null;
+
+// Load environment variables
+require('dotenv').config();
 
 document.addEventListener('DOMContentLoaded', function () {
     // --- Existing JavaScript for tripActionModal ---
@@ -129,38 +132,38 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 });
 
-async function initTripModalMap(tripId){
-    const mapContainer=document.getElementById('tripMapContainer');
-    mapContainer.innerHTML='<p class="text-center">Đang tải bản đồ...</p>';
+async function initTripModalMap(tripId) {
+    const mapContainer = document.getElementById('tripMapContainer');
+    mapContainer.innerHTML = '<p class="text-center">Đang tải bản đồ...</p>';
 
-    try{
-        const response=await fetch(`/ForAdmin/TripManage/Index?handler=RouteDetailsForMap&tripId=${tripId}`);
-        if(!response.ok){
-            let errorMsg=`Lỗi ${response.status}: ${response.statusText}`;
-            try{
-                const errorData=await response.json();
-                errorMsg=errorData.value||errorData.title||errorMsg;
+    try {
+        const response = await fetch(`/ForAdmin/TripManage/Index?handler=RouteDetailsForMap&tripId=${tripId}`);
+        if (!response.ok) {
+            let errorMsg = `Lỗi ${response.status}: ${response.statusText}`;
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.value || errorData.title || errorMsg;
             } catch (e) {}
-            mapContainer.innerHTML=`<p class="text-center text-danger">Lỗi tải dữ liệu lộ trình: ${errorMsg}</p>`;
+            mapContainer.innerHTML = `<p class="text-center text-danger">Lỗi tải dữ liệu lộ trình: ${errorMsg}</p>`;
             return;
         }
-        const data=await response.json();
-        mapContainer.innerHTML='';
-        if(tripModalMap){
+        const data = await response.json();
+        mapContainer.innerHTML = '';
+        if (tripModalMap) {
             tripModalMap.remove();
         }
-        tripModalMap = L.map(mapContainer).setView([10.762622, 106.660172],6);
-        L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=AIzaSyDcq-HEZDdXSiMsbD5o_T9GDS-iJGR9Ar0',{
+        tripModalMap = L.map(mapContainer).setView([10.762622, 106.660172], 6);
+        L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=' + process.env.GOOGLE_MAPS_API_KEY, {
             attribution: '&copy; Google',
-            subdomains: ['0','1','2','3']
+            subdomains: ['0', '1', '2', '3']
         }).addTo(tripModalMap);
-        const markers=[];
+        const markers = [];
         let originCoordsTuple, destinationCoordsTuple;
 
-        function addMarkerAndGetLatLng(coordsStr, title){
-            if(coordsStr){
+        function addMarkerAndGetLatLng(coordsStr, title) {
+            if (coordsStr) {
                 const [lat, lon] = coordsStr.split(',').map(Number);
-                if(!isNaN(lat)&&!isNaN(lon)){
+                if (!isNaN(lat) && !isNaN(lon)) {
                     const marker = L.marker([lat, lon]).addTo(tripModalMap).bindPopup(title);
                     markers.push(marker.getLatLng());
                     return [lat, lon];
@@ -178,17 +181,17 @@ async function initTripModalMap(tripId){
         if (originCoordsTuple && destinationCoordsTuple) {
             L.polyline([originCoordsTuple, destinationCoordsTuple], { color: 'blue' }).addTo(tripModalMap);
         }
-        if(markers.length>0){
-            tripModalMap.fitBounds(markers,{padding: [50,50]});
-        }else if (data.originAddress && data.destinationAddress && !(data.originCoordinates && data.destinationCoordinates)) {
-             mapContainer.innerHTML = `<p class="text-center text-warning">Lộ trình từ <strong>${data.originAddress}</strong> đến <strong>${data.destinationAddress}</strong> không có tọa độ chi tiết để vẽ bản đồ.</p>`;
+        if (markers.length > 0) {
+            tripModalMap.fitBounds(markers, { padding: [50, 50] });
+        } else if (data.originAddress && data.destinationAddress && !(data.originCoordinates && data.destinationCoordinates)) {
+            mapContainer.innerHTML = `<p class="text-center text-warning">Lộ trình từ <strong>${data.originAddress}</strong> đến <strong>${data.destinationAddress}</strong> không có tọa độ chi tiết để vẽ bản đồ.</p>`;
         } else {
-             tripModalMap.setView([10.762622, 106.660172], 6);
+            tripModalMap.setView([10.762622, 106.660172], 6);
         }
-        document.getElementById('mapDistance').textContent=data.distance?`${data.distance} km`:'N/A (Cần dịch vụ định tuyến)';
+        document.getElementById('mapDistance').textContent = data.distance ? `${data.distance} km` : 'N/A (Cần dịch vụ định tuyến)';
         document.getElementById('mapDuration').textContent = data.estimatedDuration || 'N/A (Cần dịch vụ định tuyến)';
-    } catch(error){
+    } catch (error) {
         console.error('Lỗi khi tải bản đồ:', error);
-        mapContainer.innerHTML=`<p class=text-center text-danger">Lỗi khi tải bản đồ. ${error.message}</p>`;
+        mapContainer.innerHTML = `<p class="text-center text-danger">Lỗi khi tải bản đồ. ${error.message}</p>`;
     }
 }

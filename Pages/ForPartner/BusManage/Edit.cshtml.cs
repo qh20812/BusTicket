@@ -8,9 +8,11 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.BusManage
 {
+    [Authorize(Roles = "Partner")]
     public class EditModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -157,7 +159,7 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
 
                 _context.Attach(busToUpdate).State = EntityState.Modified;
                 TempData["SuccessMessage"] = $"Đã cập nhật xe '{busToUpdate.LicensePlate}' thành công.";
-                 if(busToUpdate.Status == BusStatus.PendingApproval)  TempData["SuccessMessage"] += " Thay đổi sẽ có hiệu lực sau khi quản trị viên duyệt lại (nếu cần).";
+                if (busToUpdate.Status == BusStatus.PendingApproval) TempData["SuccessMessage"] += " Thay đổi sẽ có hiệu lực sau khi quản trị viên duyệt lại (nếu cần).";
             }
 
             await _context.SaveChangesAsync();

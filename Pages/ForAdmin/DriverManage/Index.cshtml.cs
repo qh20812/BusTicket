@@ -3,9 +3,11 @@ using BusTicketSystem.Models;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.DriverManage
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -15,8 +17,8 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
             _context = context;
         }
 
-        public IList<DriverViewModel> PendingApplications { get;set; } = new List<DriverViewModel>();
-        public IList<DriverViewModel> OfficialDrivers { get;set; } = new List<DriverViewModel>();
+        public IList<DriverViewModel> PendingApplications { get; set; } = new List<DriverViewModel>();
+        public IList<DriverViewModel> OfficialDrivers { get; set; } = new List<DriverViewModel>();
 
         [BindProperty(SupportsGet = true)]
         public string? SearchName { get; set; }
@@ -30,7 +32,7 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
         public async Task OnGetAsync()
         {
             IQueryable<Driver> query = _context.Drivers.Include(d => d.Company);
-            
+
 
             if (!string.IsNullOrEmpty(SearchName))
             {
@@ -60,7 +62,7 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
             OfficialDrivers = allDrivers
                 .Where(d => d.Status != DriverStatus.PendingApproval && d.Status != DriverStatus.UnderReview)
                 .Select(d => new DriverViewModel(d)).ToList();
-            
+
         }
 
         // "Nhận hồ sơ"
@@ -116,8 +118,8 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
                 await OnGetAsync();
                 TempData["ShowActionModalOnError"] = DriverActionInput.DriverIdToAction.ToString();
                 TempData["ActionTypeOnError"] = DriverActionInput.ActionType;
-                var firstError = ModelState.Values.SelectMany(v => v.Errors).Select(e=>e.ErrorMessage);
-                TempData["ActionError"] = string.Join("",firstError);
+                var firstError = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage);
+                TempData["ActionError"] = string.Join("", firstError);
                 return Page();
             }
 

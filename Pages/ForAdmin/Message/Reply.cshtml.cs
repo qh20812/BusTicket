@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 public interface IEmailSender
 {
@@ -15,6 +16,7 @@ public interface IEmailSender
 
 namespace BusTicketSystem.Pages.ForAdmin.Message
 {
+    [Authorize(Roles = "Admin")]
     public class ReplyModel(AppDbContext context, UserManager<User> userManager, IEmailSender emailSender) : PageModel
     {
         private readonly AppDbContext _context = context;

@@ -5,10 +5,11 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForPartner.DriverManage
 {
-    // [Authorize(Policy = "PartnerOnly")]
+    [Authorize(Roles = "Partner")]
     public class CreateModel : PageModel
     {
         private readonly AppDbContext _context;

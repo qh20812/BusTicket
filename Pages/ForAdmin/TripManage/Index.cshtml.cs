@@ -6,9 +6,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace BusTicketSystem.Pages.ForAdmin.TripManage
 {
+    [Authorize(Roles = "Admin")]
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
@@ -87,7 +89,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
         }
         public async Task<IActionResult> OnPostProcessActionAsync()
         {
-            
+
             var routeActionKeysToRemove = ModelState.Keys.Where(k => k.StartsWith("RouteActionInput.")).ToList();
             foreach (var key in routeActionKeysToRemove)
             {
@@ -229,7 +231,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
                 originAddress = trip.Route.OriginAddress ?? trip.Route.Departure,
                 destinationAddress = trip.Route.DestinationAddress ?? trip.Route.Destination,
                 distance = trip.Route.Distance,
-                estimatedDuration = trip.Route.EstimatedDuration?.ToString(@"hh\h\ mm\m") 
+                estimatedDuration = trip.Route.EstimatedDuration?.ToString(@"hh\h\ mm\m")
             });
         }
     }
