@@ -5,11 +5,11 @@
         <label for="departure">Nơi đi</label>
         <div class="input-with-icon">
             <i class="bi bi-record-circle-fill"></i>
-            <input list="departure-options" id="departure" name="Departure" class="destination-input" placeholder="Nhập điểm đi" value="@Model.Departure">
+            <input list="departure-options" id="departure" name="Departure" class="destination-input" placeholder="Nhập điểm đi" value="@Model.Departure" required>
+            <button type="button" class="clear-button" onclick="clearInput('departure')">
+                <i class="bi bi-x"></i>
+            </button>
         </div>
-        <button type="button" class="clear-button" onclick="clearInput('departure')">
-            x
-        </button>
         <datalist id="departure-options">
             @foreach(var location in Model.DepartureLocations)
             {
@@ -24,11 +24,11 @@
         <label for="destination">Nơi đến</label>
         <div class="input-with-icon">
             <i class="bi bi-geo-alt-fill"></i>
-            <input list="destination-options" id="destination" name="Destination" class="destination-input" placeholder="Nhập điểm đến" value="@Model.Destination">
+            <input list="destination-options" id="destination" name="Destination" class="destination-input" placeholder="Nhập điểm đến" value="@Model.Destination" required>
+            <button type="button" class="clear-button" onclick="clearInput('destination')">
+                <i class="bi bi-x"></i>
+            </button>
         </div>
-        <button type="button" class="clear-button" onclick="clearInput('destination')">
-            x
-        </button>
         <datalist id="destination-options">
             @foreach(var location in Model.DestinationLocations)
             {
@@ -37,29 +37,21 @@
         </datalist>
     </div>
     <div class="search-form-group">
-        <label for="departureDate">Ngày khởi hành</label>
-        <input type="date" id="departure-date" name="date" class="date-input" value="@Model.DepartureDate?.ToString("yyyy-MM-dd")">
+        <label for="departure-date">Ngày khởi hành</label>
+        <input type="date" id="departure-date" name="date" class="date-input" value="@Model.DepartureDate?.ToString("yyyy-MM-dd")" required>
     </div>
     <div class="search-form-group" id="return-date-group">
-        <label for="returnDate">Ngày về (khứ hồi)</label>
+        <label for="return-date">Ngày về (khứ hồi)</label>
         <input type="date" id="return-date" name="returnDateStr" class="date-input" value="@Model.ReturnDate?.ToString("yyyy-MM-dd")">
     </div>
     <div class="search-form-group">
         <label for="ticket-quantity">Số lượng vé</label>
-        <select id="ticket-quantity" class="ticket-select">
+        <select id="ticket-quantity" name="Quantity" class="ticket-select">
             @for(int i = 1; i <= 5; i++)
             {
-                if (Model.Quantity == i)
-                {
-                    <option value="@i" selected>@i vé</option>
-                }
-                else
-                {
-                    <option value="@i">@i vé</option>
-                }
+                <option value="@i" selected="@(Model.Quantity == i ? "selected" : null)">@i vé</option>
             }
         </select>
-        <input type="hidden" name="Quantity" id="hidden-ticket-quantity" value="@Model.Quantity"/>
     </div>
     <input type="hidden" name="TripType" id="hidden-trip-type" value="@(Model.TripType ?? "one-way")">
     <button type="submit" class="submit-button">Tìm chuyến</button>
@@ -76,16 +68,14 @@
     }
 
     function clearInput(inputId) {
-        const input = document.getElementById(inputId);
-        input.value = '';
+        document.getElementById(inputId).value = '';
         updateClearButtons();
     }
 
     function updateClearButtons() {
-        const inputs = ['departure', 'destination'];
-        inputs.forEach(id => {
+        ['departure', 'destination'].forEach(id => {
             const input = document.getElementById(id);
-            const formGroup = input.parentElement;
+            const formGroup = input.closest('.search-form-group');
             if (input.value) {
                 formGroup.classList.add('has-content');
             } else {
@@ -97,7 +87,6 @@
     function updateTripTypeBasedOnReturnDate() {
         const returnDateInput = document.getElementById('return-date');
         const hiddenTripType = document.getElementById('hidden-trip-type');
-        console.log('Return Date:',returnDateInput.value,'Trip Type:',hiddenTripType.value)
         if (returnDateInput.value) {
             hiddenTripType.value = 'round-trip';
             returnDateInput.setAttribute('required', 'required');
@@ -109,9 +98,6 @@
 
     document.getElementById('departure').addEventListener('input', updateClearButtons);
     document.getElementById('destination').addEventListener('input', updateClearButtons);
-    document.getElementById('ticket-quantity').addEventListener('change', function(){
-        document.getElementById('hidden-ticket-quantity').value = this.value;
-    });
     document.getElementById('return-date').addEventListener('change', updateTripTypeBasedOnReturnDate);
 
     updateTripTypeBasedOnReturnDate();

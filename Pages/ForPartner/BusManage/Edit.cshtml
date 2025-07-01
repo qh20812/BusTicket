@@ -1,8 +1,8 @@
 @page "{id:int?}"
 @model BusTicketSystem.Pages.ForPartner.BusManage.EditModel
-@using BusTicketSystem.Models // For BusStatus enum
+@using BusTicketSystem.Models
 @{
-    Layout = "_PartnerLayout"; // Assuming you have a _PartnerLayout
+    Layout = "_PartnerLayout";
     ViewData["Title"] = Model.BusInput.BusId == 0 ? "Yêu cầu thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
 }
 
@@ -33,7 +33,7 @@
         <form method="post" class="p-3">
             <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
             <input type="hidden" asp-for="BusInput.BusId" />
-            <input type="hidden" asp-for="BusInput.CompanyId" /> @* CompanyId is set by partner context *@
+            <input type="hidden" asp-for="BusInput.CompanyId" />
 
             <div class="alert alert-info">
                 Xe thuộc công ty: <strong>@Model.PartnerCompanyName</strong>
@@ -50,7 +50,13 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="BusInput.BusType" class="form-label"></label>
-                        <input asp-for="BusInput.BusType" class="form-control" />
+                        <select asp-for="BusInput.BusType" class="form-select">
+                            <option value="">-- Chọn loại xe --</option>
+                            <option value="Giường nằm 2 tầng">Giường nằm 2 tầng</option>
+                            <option value="Giường nằm 1 tầng">Giường nằm 1 tầng</option>
+                            <option value="Ghế 2 tầng">Ghế 2 tầng</option>
+                            <option value="Ghế 1 tầng">Ghế 1 tầng</option>
+                        </select>
                         <span asp-validation-for="BusInput.BusType" class="text-danger"></span>
                     </div>
                 </div>
@@ -60,7 +66,7 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="BusInput.Capacity" class="form-label"></label>
-                        <input asp-for="BusInput.Capacity" class="form-control" type="number" min="1" />
+                        <input asp-for="BusInput.Capacity" class="form-control" type="number" min="1" max="100" />
                         <span asp-validation-for="BusInput.Capacity" class="text-danger"></span>
                     </div>
                 </div>
@@ -69,13 +75,15 @@
                         <label asp-for="BusInput.Status" class="form-label"></label>
                         @if (Model.BusInput.BusId == 0 || Model.BusInput.Status == BusStatus.PendingApproval || Model.BusInput.Status == BusStatus.Rejected)
                         {
-                            <input asp-for="BusInput.Status" class="form-control" readonly value="@Model.BusInput.Status.ToString()" />
+                            <input class="form-control" readonly value="@(Model.BusInput.Status?.ToString() ?? "Chờ duyệt")" />
                             <span class="form-text">Trạng thái này sẽ được quản trị viên xem xét.</span>
-                             <input type="hidden" asp-for="BusInput.Status" /> @* Ensure value is posted back *@
+                            <input type="hidden" asp-for="BusInput.Status" />
                         }
                         else
                         {
-                            <select asp-for="BusInput.Status" asp-items="Html.GetEnumSelectList<BusStatus>().Where(i => i.Value != BusStatus.PendingApproval.ToString() && i.Value != BusStatus.Rejected.ToString())" class="form-select"></select>
+                            <select asp-for="BusInput.Status" asp-items="Html.GetEnumSelectList<BusStatus>().Where(i => i.Value != BusStatus.PendingApproval.ToString() && i.Value != BusStatus.Rejected.ToString())" class="form-select">
+                                <option value="">-- Chọn trạng thái --</option>
+                            </select>
                         }
                         <span asp-validation-for="BusInput.Status" class="text-danger"></span>
                     </div>

@@ -42,64 +42,6 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
-
-<div class="bottom-data">
-    <div class="orders">
-        <div class="header">
-            <i class='bx bx-list-ul'></i>
-            <h3>Danh sách Lộ trình</h3>
-        </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Điểm đi</th>
-                    <th>Điểm đến</th>
-                    <th>Khoảng cách (km)</th>
-                    <th>Thời gian ước tính</th>
-                    <th>Trạng thái</th>
-                    <th>Nhà xe đề xuất</th>
-                    <th>Hành động</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if (Model.Routes.Any())
-                {
-                    @foreach (var item in Model.Routes)
-                    {
-                        <tr>
-                            <td>@item.RouteId</td>
-                            <td>@Html.DisplayFor(modelItem => item.Departure)</td>
-                            <td>@Html.DisplayFor(modelItem => item.Destination)</td>
-                            <td>@(item.Distance.HasValue ? item.Distance.Value.ToString("N1") : "N/A")</td>
-                            <td>@(item.EstimatedDuration.HasValue ? item.EstimatedDuration.Value.ToString(@"hh\h\ mm\m") : "N/A")</td>
-                            <td class="truncate-status">
-                                <span class="status @item.Status.ToString().ToLower()">
-                                    @Html.DisplayFor(modelItem => item.Status)
-                                </span>
-                            </td>
-                            <td>@(item.ProposedByCompany?.CompanyName ?? "N/A")</td>
-                            <td>
-                                <a asp-page="./Edit" asp-route-id="@item.RouteId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa</a>
-                                <form asp-page-handler="Delete" asp-route-id="@item.RouteId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lộ trình này? Hành động này không thể hoàn tác.');">
-                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
-                                </form>
-                            </td>
-                        </tr>
-                    }
-                }
-                else
-                {
-                    <tr>
-                        <td colspan="8" class="text-center">Chưa có lộ trình nào.</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</div>
-
-<!-- Section for Pending Approval Routes -->
 <div class="bottom-data">
     <div class="orders">
         <div class="header">
@@ -158,6 +100,65 @@
         }
     </div>
 </div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-list-ul'></i>
+            <h3>Danh sách Lộ trình</h3>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Điểm đi</th>
+                    <th>Điểm đến</th>
+                    <th>Khoảng cách (km)</th>
+                    <th>Thời gian ước tính</th>
+                    <th>Trạng thái</th>
+                    <th>Nhà xe đề xuất</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model.Routes.Any())
+                {
+                    @foreach (var item in Model.Routes)
+                    {
+                        <tr>
+                            <td>@item.RouteId</td>
+                            <td>@Html.DisplayFor(modelItem => item.Departure)</td>
+                            <td>@Html.DisplayFor(modelItem => item.Destination)</td>
+                            <td>@(item.Distance.HasValue ? item.Distance.Value.ToString("N1") : "N/A")</td>
+                            <td>@(item.EstimatedDuration.HasValue ? item.EstimatedDuration.Value.ToString(@"hh\h\ mm\m") : "N/A")</td>
+                            <td class="truncate-status">
+                                <span class="status @item.Status.ToString().ToLower()">
+                                    @Html.DisplayFor(modelItem => item.Status)
+                                </span>
+                            </td>
+                            <td>@(item.ProposedByCompany?.CompanyName ?? "N/A")</td>
+                            <td>
+                                <a asp-page="./Edit" asp-route-id="@item.RouteId" class="btn btn-sm btn-outline-primary"><i class="bi bi-pencil-square"></i> Sửa</a>
+                                <form asp-page-handler="Delete" asp-route-id="@item.RouteId" method="post" class="d-inline" onsubmit="return confirm('Bạn có chắc chắn muốn xóa lộ trình này? Hành động này không thể hoàn tác.');">
+                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i> Xóa</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td colspan="8" class="text-center">Chưa có lộ trình nào.</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Section for Pending Approval Routes -->
+
 
 <!-- Modal for Rejecting Route -->
 <div class="modal fade" id="rejectRouteModal" tabindex="-1" aria-labelledby="rejectRouteModalLabel" aria-hidden="true">

@@ -8,7 +8,8 @@
     <div class="block-title">
         <div class="title-ticket">Thông tin thanh toán</div>
     </div>
-    <div class="card-ticket">
+    <div class="card-ticket"
+        style="background-color: #fff; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
         <div class="card-body-ticket">
             <div class="content-ticket-info">
                 <div style="display: flex; flex-direction: row; align-items: baseline;">
@@ -18,7 +19,8 @@
                     </div>
                     <div class="body-ticket">
                         <p>#@Model.OrderId</p>
-                        <p style="color: #D32F2F; font-weight: bold; font-size: 1.4rem;">@Model.AmountToPay.ToString("N0")đ</p>
+                        <p style="color: #D32F2F; font-weight: bold; font-size: 1.4rem;">
+                            @Model.AmountToPay.ToString("N0")đ</p>
                     </div>
                 </div>
             </div>
@@ -29,12 +31,16 @@
                 <p class="mt-2 text-muted">Đang xử lý thanh toán, vui lòng chờ trong giây lát...</p>
             </div>
             <div class="qr-code-payment">
-                <div class="payment-qr-section">
+                <div class="payment-qr-section" id="payment-qr-section">
                     <p class="text-primary">Quét mã QR dưới đây để thanh toán</p>
-                    <p class="text-muted">(Hệ thống sẽ tự động xác nhận sau <span id="countdown" class="fw-bold text-success">10</span> giây)</p>
+                    <p class="text-muted">(Hệ thống sẽ tự động xác nhận sau <span id="countdown"
+                            class="fw-bold text-success">10</span> giây)</p>
                     <div class="qr-code-payment-2">
-                        @if(!string.IsNullOrEmpty(Model.QrDataUrl)){
-                            <img id="qrCodeImage" src="@Url.Page("./Index", "GenerateQrCode", new { data = Model.QrDataUrl })" alt="Mã QR Thanh toán" class="img-qrcode" />
+                        @if (!string.IsNullOrEmpty(Model.QrDataUrl))
+                        {
+                            <img id="qrCodeImage"
+                                src="@Url.Page("./Index", "GenerateQrCode", new { data = Model.QrDataUrl })"
+                                alt="Mã QR Thanh toán" class="img-qrcode" />
                         }
                         else
                         {
@@ -44,11 +50,12 @@
                         }
                     </div>
                     <div id="payment-result" class="mt-3" style="display:none;">
-                        @* Thông báo kết quả sẽ được hiển thị ở đây bởi JavaScript *@
                     </div>
                 </div>
             </div>
-            <p style="font-size: 1.1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 500; text-align: center; color: #D32F2F;">Vui lòng kiểm tra kỹ lại hóa đơn trước khi thanh toán.</p>
+            <p
+                style="font-size: 1.1rem; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-weight: 500; text-align: center; color: #D32F2F;">
+                Vui lòng kiểm tra kỹ lại hóa đơn trước khi thanh toán.</p>
             <div class="container-invoice">
                 <div class="header-invoice">
                     <div class="icon-invoice">
@@ -83,7 +90,10 @@
                         <p class="value-item">@Model.TicketOriginAddress</p>
                     </div>
                     <div class="invoice-row">
-                        <p class="label-item">Quý khách vui lòng có mặt tại Bến xe <span style="font-weight: bold;">@Model.TicketOriginAddress</span> <span style="color: rgb(214, 2, 2);">Trước @(Model.TicketDepartureTime)</span> để kiểm tra thông tin trước khi lên xe.</p>
+                        <p class="label-item">Quý khách vui lòng có mặt tại Bến xe <span
+                                style="font-weight: bold;">@Model.TicketOriginAddress</span> <span
+                                style="color: rgb(214, 2, 2);">Trước @(Model.TicketDepartureTime)</span> để kiểm tra
+                            thông tin trước khi lên xe.</p>
                         <p class="value-item"></p>
                     </div>
                     <div class="invoice-row">
@@ -114,7 +124,7 @@
             const paymentQrSection = document.getElementById('payment-qr-section');
             const paymentProcessingDiv = document.getElementById('payment-processing');
             const paymentResultDiv = document.getElementById('payment-result');
-            const confirmationUrl = '@Html.Raw(Model.ConfirmationUrl)'; 
+            const confirmationUrl = '@Html.Raw(Model.ConfirmationUrl)';
             const orderId = @Model.OrderId;
             let timeLeft = 10; // Thời gian đếm ngược (giây)
 
@@ -125,20 +135,20 @@
 
                 let alertClass = success ? 'alert-success' : 'alert-danger';
                 let iconClass = success ? 'bi-check-circle-fill' : 'bi-exclamation-triangle-fill';
-                
+
                 paymentResultDiv.innerHTML = `
-                    <div class="alert ${alertClass} d-flex align-items-center" role="alert">
-                        <i class="bi ${iconClass} me-2 fs-4"></i>
-                        <div>${message}</div>
-                    </div>`;
+                        <div class="alert ${alertClass} d-flex align-items-center" role="alert">
+                            <i class="bi ${iconClass} me-2 fs-4"></i>
+                            <div>${message}</div>
+                        </div>`;
 
                 if (success && redirectUrl) {
                     paymentResultDiv.innerHTML += `<p class="text-muted small">Bạn sẽ được chuyển hướng sau 3 giây...</p>`;
-                    setTimeout(function() {
+                    setTimeout(function () {
                         window.location.href = redirectUrl;
                     }, 3000);
                 } else if (!success) {
-                     paymentResultDiv.innerHTML += `<a href="@Url.Page("/ForCustomer/TicketInvoice/Index", new { orderId = Model.OrderId })" class="btn btn-outline-primary mt-2"><i class="bi bi-receipt"></i> Xem lại hóa đơn</a>`;
+                    paymentResultDiv.innerHTML += `<a href="@Url.Page("/ForCustomer/TicketInvoice/Index", new { orderId = Model.OrderId })" class="btn btn-outline-primary mt-2"><i class="bi bi-receipt"></i> Xem lại hóa đơn</a>`;
                 }
             }
 
@@ -152,7 +162,7 @@
 
                         try {
                             const response = await fetch(confirmationUrl, {
-                                method: 'GET', 
+                                method: 'GET',
                                 headers: {
                                     'X-Requested-With': 'XMLHttpRequest'
                                 }

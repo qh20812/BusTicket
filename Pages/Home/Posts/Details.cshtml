@@ -8,10 +8,9 @@
 
 @if (Model.Post != null)
 {
-    <div class="container mt-5 mb-5 post-detail-container" style="width: 900px;">
+    <div class="container mt-5 mb-5 post-detail-container" style="max-width: 900px;">
         <div style="font-family: 'Times New Roman', Times, serif; font-weight: bold; text-align: left; padding-left: 10px; font-size: 3.5rem;">@Model.Post.Title</div>
         <div class="container-post-smalltitle">
-            
             <div class="divider"></div>
             <div class="content-post">
                 <div style="text-align: right;">
@@ -23,11 +22,16 @@
             </div>
             <div class="divider"></div>
         </div>
-        <div style="padding-left: 10px; padding-right: 10px; font-size: 1.5rem; font-family: 'Times New Roman', Times, serif;">
-            @Model.Post.Content
-        </div>
-        <div>
-
+        <div class="post-detail-flex-wrap" style="display:flex; flex-wrap:wrap; gap:32px; align-items:flex-start; margin-bottom:24px;">
+            @if (!string.IsNullOrEmpty(Model.Post.ImageUrl))
+            {
+                <div class="post-image-container" style="flex:0 0 340px; max-width:340px; min-width:220px; width:32%; display:flex; justify-content:center; align-items:flex-start;">
+                    <img src="@Model.Post.ImageUrl" alt="@Model.Post.Title" class="post-image" style="width:100%; max-width:340px; max-height:380px; border-radius:16px; box-shadow:0 2px 12px rgba(25,118,210,0.10); object-fit:cover; background:#f8f9fa;" />
+                </div>
+            }
+            <div class="post-detail-content" style="flex:1 1 0; min-width:220px; font-size:1.18rem; font-family:\"Times New Roman\", Times, serif; padding:0; word-break:break-word;">
+                @Html.Raw(Model.Post.Content)
+            </div>
         </div>
         <div class="mt-4">
             <a asp-page="./Index" class="btn btn-outline-secondary">

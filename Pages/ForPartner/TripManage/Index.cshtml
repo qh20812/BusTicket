@@ -84,10 +84,10 @@
                             <td class="truncate" title="@trip.AvailableSeats">@trip.AvailableSeats</td>
                             <td class="truncate-status" title="@trip.StatusDisplayName" style="width: fit-content;">
                                 <span class="status @trip.Status.ToString().ToLower()">@trip.StatusDisplayName</span>
-                                @if(trip.Status == BusTicketSystem.Models.TripStatus.Rejected && !string.IsNullOrEmpty(trip.CancellationReason))
+                                @* @if(trip.Status == BusTicketSystem.Models.TripStatus.Rejected && !string.IsNullOrEmpty(trip.CancellationReason))
                                 {
                                     <i class="bx bx-info-circle" title="Lý do từ chối: @trip.CancellationReason" style="cursor:help; color: #dc3545; margin-left: 5px;"></i>
-                                }
+                                } *@
                             </td>
                             <td>
                                 <a asp-page="./Edit" asp-route-id="@trip.TripId" class="btn btn-sm btn-outline-primary" title="Sửa/Xem"><i class="bi bi-pencil-square"></i></a>
@@ -98,7 +98,7 @@
                                     </form>
                                 }
                                 <!-- Add other relevant actions for partner -->
-                                 <a asp-page="./RouteMap" asp-route-tripId="@trip.TripId" class="btn btn-sm btn-outline-secondary" title="Xem chi tiết điểm dừng"><i class="bi bi-signpost-2"></i></a>
+                                 @* <a asp-page="./RouteMap" asp-route-tripId="@trip.TripId" class="btn btn-sm btn-outline-secondary" title="Xem chi tiết điểm dừng"><i class="bi bi-signpost-2"></i></a> *@
                             </td>
                         </tr>
                     }

@@ -1,46 +1,51 @@
+
 @model BusTicketSystem.Pages.ForAdmin.TripManage.TripStopInputModel
+@inject BusTicketSystem.Data.AppDbContext AppDb
 @{
     var index = ViewData["Index"] as int? ?? 0;
+    var stops = AppDb.Stops
+        .OrderBy(s => s.StopName)
+        .Select(s => new SelectListItem { Value = s.StopId.ToString(), Text = s.StopName })
+        .ToList();
 }
 
 <div class="row g-3 mb-3 trip-stop-item border rounded p-3 bg-light" data-index="@index">
-    <input type="hidden" name="TripInput.TripStops[@index].StopId" value="@Model.StopId" />
+    <div class="col-md-3">
+        <label asp-for="StationName" class="form-label"></label>
+        <input asp-for="StationName" name="TripInput.TripStops[@index].StationName" class="form-control form-control-sm" required />
+        <span asp-validation-for="StationName" class="text-danger"></span>
+    </div>
     <div class="col-md-2">
+        <label asp-for="Latitude" class="form-label"></label>
+        <input asp-for="Latitude" name="TripInput.TripStops[@index].Latitude" class="form-control form-control-sm" type="number" step="any" required />
+        <span asp-validation-for="Latitude" class="text-danger"></span>
+    </div>
+    <div class="col-md-2">
+        <label asp-for="Longitude" class="form-label"></label>
+        <input asp-for="Longitude" name="TripInput.TripStops[@index].Longitude" class="form-control form-control-sm" type="number" step="any" required />
+        <span asp-validation-for="Longitude" class="text-danger"></span>
+    </div>
+    <div class="col-md-1">
         <label asp-for="StopOrder" class="form-label"></label>
         <input asp-for="StopOrder" name="TripInput.TripStops[@index].StopOrder" class="form-control form-control-sm" required min="1" />
         <span asp-validation-for="StopOrder" class="text-danger"></span>
     </div>
-    <div class="col-md-4">
-        <label asp-for="StationName" class="form-label"></label>
-        <input asp-for="StationName" name="TripInput.TripStops[@index].StationName" class="form-control form-control-sm" required maxlength="255" />
-        <span asp-validation-for="StationName" class="text-danger"></span>
-    </div>
-    <div class="col-md-3">
-        <label asp-for="Latitude" class="form-label"></label>
-        <input asp-for="Latitude" name="TripInput.TripStops[@index].Latitude" class="form-control form-control-sm" required step="any" />
-        <span asp-validation-for="Latitude" class="text-danger"></span>
-    </div>
-    <div class="col-md-3">
-        <label asp-for="Longitude" class="form-label"></label>
-        <input asp-for="Longitude" name="TripInput.TripStops[@index].Longitude" class="form-control form-control-sm" required step="any" />
-        <span asp-validation-for="Longitude" class="text-danger"></span>
-    </div>
-     <div class="col-md-3">
+    <div class="col-md-1">
         <label asp-for="EstimatedArrival" class="form-label"></label>
         <input asp-for="EstimatedArrival" name="TripInput.TripStops[@index].EstimatedArrival" class="form-control form-control-sm" type="time" />
         <span asp-validation-for="EstimatedArrival" class="text-danger"></span>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-1">
         <label asp-for="EstimatedDeparture" class="form-label"></label>
         <input asp-for="EstimatedDeparture" name="TripInput.TripStops[@index].EstimatedDeparture" class="form-control form-control-sm" type="time" />
         <span asp-validation-for="EstimatedDeparture" class="text-danger"></span>
     </div>
-     <div class="col-md-5">
+    <div class="col-md-1">
         <label asp-for="Note" class="form-label"></label>
         <input asp-for="Note" name="TripInput.TripStops[@index].Note" class="form-control form-control-sm" maxlength="500" />
         <span asp-validation-for="Note" class="text-danger"></span>
     </div>
     <div class="col-md-1 d-flex align-items-end">
-         <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
+        <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
     </div>
 </div>

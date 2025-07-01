@@ -4,69 +4,100 @@
     padding: 20px;
     border-radius: 15px;
     background-color: #f8f9fa;
+    max-width: 600px;
+    margin: auto;
 }
 
-/* Styles for the seat grid */
-.seat-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); /* Responsive grid */
-    gap: 5px;
-    max-width: 400px; /* Limit width for bus shape */
-    margin: auto; /* Center the grid */
-}
-
-/* Base styles for individual seats */
-.seat {
-    width: 50px;
-    height: 50px;
-    border-radius: 8px;
-    border: 1px solid #ccc;
-    display:grid;
-    justify-content: center;
-    align-items: center;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.2s ease, color 0.2s ease;
-}
-
-/* Styles for available seats */
-.seat.available {
-    background-color: #fff; /* White */
-    color: #333;
-}
-
-/* Styles for booked seats */
-.seat.booked {
-    background-color: #dc3545; /* Red */
-    color: #fff;
-    cursor: not-allowed;
-}
-
-/* Styles for selected seats */
-.seat.selected {
-    background-color: #28a745; /* Green */
-    color: #fff;
-}
-
+/* Styles for the bus layout */
 .bus-layout {
     display: flex;
     flex-direction: column;
     align-items: center;
+    gap: 20px;
 }
 
+/* Styles for each bus level */
 .bus-level {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
-    gap: 5px;
     width: 100%;
-    max-width: 400px;
-    margin-bottom: 10px;
-    padding: 10px;
+    max-width: 500px;
+    padding: 15px;
     border: 1px solid #ccc;
     border-radius: 10px;
-    background-color: #f0f0f0;
+    background-color: #e9ecef;
+    position: relative;
 }
 
-.bus-level:last-child {
-    margin-bottom: 0;
+/* Steering wheel icon */
+.steering-wheel {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    font-size: 24px;
+    color: #333;
+}
+
+/* Styles for seat rows */
+.seat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+/* Styles for individual seats/beds */
+.seat {
+    flex: 1;
+    text-align: center;
+    font-weight: bold;
+    transition: background-color 0.2s ease, color 0.2s ease;
+}
+
+.seat.bed {
+    width: 80px;
+    height: 40px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+.seat.chair {
+    width: 50px;
+    height: 50px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #fff;
+}
+
+/* Styles for available seats/beds */
+.seat.available {
+    background-color: #fff;
+    color: #333;
+    cursor: pointer;
+}
+
+/* Styles for booked seats/beds */
+.seat.booked {
+    background-color: #dc3545;
+    color: #fff;
+    cursor: not-allowed;
+}
+
+/* Styles for selected seats/beds */
+.seat.selected {
+    background-color: #28a745;
+    color: #fff;
+}
+
+/* Styles for aisle */
+.aisle {
+    width: 20px;
+    height: 40px;
+    background-color: transparent;
 }

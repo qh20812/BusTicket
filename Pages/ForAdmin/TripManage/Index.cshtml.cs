@@ -1,3 +1,5 @@
+        // Handler for approving a trip from the list
+        
 using System.ComponentModel.DataAnnotations;
 using BusTicketSystem.Data;
 using BusTicketSystem.Models;
@@ -212,6 +214,25 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             await _context.SaveChangesAsync();
             TempData["SuccessMessage"] = $"Đã xóa chuyến đi ID {id} ({trip.Route?.Departure} - {trip.Route?.Destination}, khởi hành {trip.DepartureTime:dd/MM/yyyy HH:mm}) thành công.";
             return RedirectToPage(new { SearchTerm, FilterStatus, SortOrder });
+        }
+        public async Task<IActionResult> OnPostApproveAsync(int id)
+        {
+            var trip = await _context.Trips.Include(t => t.Route).FirstOrDefaultAsync(t => t.TripId == id);
+            if (trip == null)
+            {
+                TempData["ErrorMessage"] = $"Không tìm thấy chuyến đi với ID {id}.";
+                return RedirectToPage();
+            }
+            if (trip.Status != TripStatus.PendingApproval)
+            {
+                TempData["ErrorMessage"] = $"Chỉ có thể duyệt chuyến đi ở trạng thái 'Chờ duyệt'.";
+                return RedirectToPage();
+            }
+            trip.Status = TripStatus.Scheduled;
+            trip.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = $"Đã duyệt chuyến đi ID {trip.TripId} ({trip.Route?.Departure} - {trip.Route?.Destination}).";
+            return RedirectToPage();
         }
         public async Task<JsonResult> OnGetRouteDetailsForMapAsync(int tripId)
         {

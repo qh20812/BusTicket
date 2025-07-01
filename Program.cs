@@ -30,7 +30,7 @@ builder.Services.AddAuthentication("CookieAuth") // "CookieAuth" là tên scheme
 
 // builder.Services.Configure<MailerSendEmailSenderOptions>(builder.Configuration.GetSection("MailerSend"));
 // builder.Services.AddTransient<IEmailSender,MailerSendEmailSender>();
-
+DotNetEnv.Env.Load(".env"); // hoặc ".env"
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

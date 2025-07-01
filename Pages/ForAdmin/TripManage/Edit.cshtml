@@ -2,7 +2,6 @@
 @model BusTicketSystem.Pages.ForAdmin.TripManage.EditModel
 @{
     Layout = "_AdminLayout";
-    // ViewData["Title"] được set trong OnGetAsync
 }
 
 <div class="header">
@@ -30,6 +29,15 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
+                        <label asp-for="TripInput.CompanyId" class="form-label"></label>
+                        <select asp-for="TripInput.CompanyId" asp-items="Model.Companies" class="form-select">
+                            <option value="">-- Chọn nhà xe (nếu có) --</option>
+                        </select>
+                        <span asp-validation-for="TripInput.CompanyId" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
                         <label asp-for="TripInput.RouteId" class="form-label"></label>
                         <select asp-for="TripInput.RouteId" asp-items="Model.Routes" class="form-select">
                             <option value="">-- Chọn lộ trình --</option>
@@ -38,6 +46,9 @@
                         <small><a asp-page="/ForAdmin/RouteManage/Edit" target="_blank">Thêm hoặc Quản lý lộ trình</a></small>
                     </div>
                 </div>
+            </div>
+
+            <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="TripInput.BusId" class="form-label"></label>
@@ -48,9 +59,6 @@
                         <small><a asp-page="/ForAdmin/BusManage/Edit" target="_blank">Thêm xe mới?</a></small>
                     </div>
                 </div>
-            </div>
-
-            <div class="row">
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="TripInput.DriverId" class="form-label"></label>
@@ -58,15 +66,6 @@
                             <option value="">-- Chọn tài xế --</option>
                         </select>
                         <span asp-validation-for="TripInput.DriverId" class="text-danger"></span>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="TripInput.CompanyId" class="form-label"></label>
-                        <select asp-for="TripInput.CompanyId" asp-items="Model.Companies" class="form-select">
-                            <option value="">-- Chọn nhà xe (nếu có) --</option>
-                        </select>
-                        <span asp-validation-for="TripInput.CompanyId" class="text-danger"></span>
                     </div>
                 </div>
             </div>
@@ -89,12 +88,12 @@
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label asp-for="TripInput.InitialAvailableSeats" class="form-label"></label>
-                        <input asp-for="TripInput.InitialAvailableSeats" class="form-control" type="number" />
+                        <input asp-for="TripInput.InitialAvailableSeats" class="form-control" type="number" min="1" max="100" />
                         <span asp-validation-for="TripInput.InitialAvailableSeats" class="text-danger"></span>
                     </div>
                 </div>
             </div>
-            @if (Model.TripInput.TripId != 0) // Chỉ hiển thị khi chỉnh sửa
+            @if (Model.TripInput.TripId != 0)
             {
                 <div class="row">
                     <div class="col-md-6">
@@ -103,6 +102,13 @@
                             <select asp-for="TripInput.Status" asp-items="Html.GetEnumSelectList<BusTicketSystem.Models.TripStatus>()" class="form-select">
                             </select>
                             <span asp-validation-for="TripInput.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="mb-3">
+                            <label asp-for="TripInput.CancellationReason" class="form-label"></label>
+                            <input asp-for="TripInput.CancellationReason" class="form-control" />
+                            <span asp-validation-for="TripInput.CancellationReason" class="text-danger"></span>
                         </div>
                     </div>
                 </div>
@@ -125,15 +131,54 @@
             </div>
 
             <hr class="my-4">
+
             <h4>Điểm dừng chân</h4>
             <div id="tripStopsContainer">
-                @if(Model.TripInput.TripStops!=null){
-                    for(int i=0;i<Model.TripInput.TripStops.Count;i++){
-                        <partial name="_TripStopInputPartial" model="Model.TripInput.TripStops[i]" view-data='new ViewDataDictionary(ViewData){{"Index",i}}'/>
+                @if (Model.TripInput.TripStops != null)
+                {
+                    for (int i = 0; i < Model.TripInput.TripStops.Count; i++)
+                    {
+                        <div class="row g-3 mb-3 trip-stop-item border rounded p-3 bg-light" data-index="@i">
+                            <div class="col-md-3">
+                                <label class="form-label">Tên trạm dừng</label>
+                                <input type="text" name="TripInput.TripStops[@i].StationName" value="@Model.TripInput.TripStops[i].StationName" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Vĩ độ</label>
+                                <input type="number" step="any" name="TripInput.TripStops[@i].Latitude" value="@Model.TripInput.TripStops[i].Latitude" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label">Kinh độ</label>
+                                <input type="number" step="any" name="TripInput.TripStops[@i].Longitude" value="@Model.TripInput.TripStops[i].Longitude" class="form-control form-control-sm" required />
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">Thứ tự</label>
+                                <input type="number" name="TripInput.TripStops[@i].StopOrder" value="@Model.TripInput.TripStops[i].StopOrder" class="form-control form-control-sm" required min="1" />
+                                <span data-valmsg-for="TripInput.TripStops[@i].StopOrder" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">Đến</label>
+                                <input type="time" name="TripInput.TripStops[@i].EstimatedArrival" value="@(Model.TripInput.TripStops[i].EstimatedArrival?.ToString(@"hh\:mm") ?? "")" class="form-control form-control-sm" />
+                                <span data-valmsg-for="TripInput.TripStops[@i].EstimatedArrival" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">Đi</label>
+                                <input type="time" name="TripInput.TripStops[@i].EstimatedDeparture" value="@(Model.TripInput.TripStops[i].EstimatedDeparture?.ToString(@"hh\:mm") ?? "")" class="form-control form-control-sm" />
+                                <span data-valmsg-for="TripInput.TripStops[@i].EstimatedDeparture" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-1">
+                                <label class="form-label">Ghi chú</label>
+                                <input type="text" name="TripInput.TripStops[@i].Note" value="@Model.TripInput.TripStops[i].Note" class="form-control form-control-sm" maxlength="500" />
+                                <span data-valmsg-for="TripInput.TripStops[@i].Note" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-1 d-flex align-items-end">
+                                <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
+                            </div>
+                        </div>
                     }
                 }
             </div>
-            <button type="button" id="addTripStopBtn" class="btn btn-outline-secondary btn-sm mt-2"><i class="bi bi-plus-circle me-1"></i>Thêm điểm dừng</button> 
+            <button type="button" id="addTripStopBtn" class="btn btn-outline-secondary btn-sm mt-2"><i class="bi bi-plus-circle me-1"></i>Thêm điểm dừng</button>
 
             <div class="mt-4">
                 <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
@@ -143,47 +188,43 @@
     </div>
 </div>
 
-<div id="tripStopTemplateContainer" style="display: none;"> @* Bọc trong div ẩn để không ảnh hưởng layout *@
+<div id="tripStopTemplateContainer" style="display: none;">
     <script id="tripStopTemplate" type="text/html">
         <div class="row g-3 mb-3 trip-stop-item border rounded p-3 bg-light" data-index="{index}">
-            <input type="hidden" name="TripInput.TripStops[{index}].StopId" value="{stopId}" />
-            <div class="col-md-2">
-                <label class="form-label">Thứ tự</label>
-                <input type="number" name="TripInput.TripStops[{index}].StopOrder" value="{stopOrder}" class="form-control form-control-sm" required min="1" readonly />
-                <span data-valmsg-for="TripInput.TripStops[{index}].StopOrder" class="text-danger"></span>
-            </div>
-            <div class="col-md-4">
-                <label class="form-label">Tên trạm</label>
-                <input type="text" name="TripInput.TripStops[{index}].StationName" value="{stationName}" class="form-control form-control-sm" required maxlength="255" />
-                <span data-valmsg-for="TripInput.TripStops[{index}].StationName" class="text-danger"></span>
-            </div>
             <div class="col-md-3">
+                <label class="form-label">Tên trạm dừng</label>
+                <input type="text" name="TripInput.TripStops[{index}].StationName" value="{stationName}" class="form-control form-control-sm" required />
+            </div>
+            <div class="col-md-2">
                 <label class="form-label">Vĩ độ</label>
                 <input type="number" step="any" name="TripInput.TripStops[{index}].Latitude" value="{latitude}" class="form-control form-control-sm" required />
-                <span data-valmsg-for="TripInput.TripStops[{index}].Latitude" class="text-danger"></span>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                 <label class="form-label">Kinh độ</label>
                 <input type="number" step="any" name="TripInput.TripStops[{index}].Longitude" value="{longitude}" class="form-control form-control-sm" required />
-                <span data-valmsg-for="TripInput.TripStops[{index}].Longitude" class="text-danger"></span>
             </div>
-             <div class="col-md-3">
-                <label class="form-label">Đến (dự kiến)</label>
+            <div class="col-md-1">
+                <label class="form-label">Thứ tự</label>
+                <input type="number" name="TripInput.TripStops[{index}].StopOrder" value="{stopOrder}" class="form-control form-control-sm" required min="1" />
+                <span data-valmsg-for="TripInput.TripStops[{index}].StopOrder" class="text-danger"></span>
+            </div>
+            <div class="col-md-1">
+                <label class="form-label">Đến</label>
                 <input type="time" name="TripInput.TripStops[{index}].EstimatedArrival" value="{estimatedArrival}" class="form-control form-control-sm" />
                 <span data-valmsg-for="TripInput.TripStops[{index}].EstimatedArrival" class="text-danger"></span>
             </div>
-            <div class="col-md-3">
-                <label class="form-label">Đi (dự kiến)</label>
+            <div class="col-md-1">
+                <label class="form-label">Đi</label>
                 <input type="time" name="TripInput.TripStops[{index}].EstimatedDeparture" value="{estimatedDeparture}" class="form-control form-control-sm" />
                 <span data-valmsg-for="TripInput.TripStops[{index}].EstimatedDeparture" class="text-danger"></span>
             </div>
-             <div class="col-md-5">
+            <div class="col-md-1">
                 <label class="form-label">Ghi chú</label>
                 <input type="text" name="TripInput.TripStops[{index}].Note" value="{note}" class="form-control form-control-sm" maxlength="500" />
                 <span data-valmsg-for="TripInput.TripStops[{index}].Note" class="text-danger"></span>
             </div>
             <div class="col-md-1 d-flex align-items-end">
-                 <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
+                <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
             </div>
         </div>
     </script>
@@ -191,8 +232,9 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <!-- Mapbox GL JS -->
+    <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet" />
+    <script src="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.js"></script>
     <script>
         function initializeValidation(selector) {
             $(selector).find(':input').each(function() {
@@ -276,9 +318,15 @@
              });
         });
 
-        // Leaflet Map for Edit Page
+
+        // Mapbox GL JS for Edit Page
+        // ==== SET YOUR MAPBOX API KEY HERE ====
+        const MAPBOX_API_KEY = '@Model.MapboxAccessToken'; // <-- Thay thế bằng API key của bạn
+        // =======================================
+
         let editPageMap = null;
-        const routeSelectForMap = document.getElementById('TripInput_RouteId'); 
+        let editPageMarkers = [];
+        const routeSelectForMap = document.getElementById('TripInput_RouteId');
         const mapEditContainer = document.getElementById('editTripMapContainer');
         const originAddressSpanOnEdit = document.getElementById('gmapOriginAddress');
         const destinationAddressSpanOnEdit = document.getElementById('gmapDestinationAddress');
@@ -304,50 +352,114 @@
                 if (!response.ok) {
                     console.error("Failed to fetch route details. Status:", response.status);
                     let errorMsg = `Lỗi ${response.status}: ${response.statusText}`;
-                     try { const errorData = await response.json(); errorMsg = errorData.value || errorData.title || errorMsg; } catch (e) {}
+                    try { const errorData = await response.json(); errorMsg = errorData.value || errorData.title || errorMsg; } catch (e) {}
                     mapEditContainer.innerHTML = `<p class="text-center text-danger">Lỗi tải dữ liệu lộ trình: ${errorMsg}</p>`;
                     return;
                 }
                 const data = await response.json();
                 console.log("Route details data:", data);
 
-                mapEditContainer.innerHTML = ''; 
+                // Clear previous map
+                mapEditContainer.innerHTML = '<div id="mapboxEditMap" style="width: 100%; height: 100%; min-height: 350px;"></div>';
                 if (editPageMap) {
                     editPageMap.remove();
+                    editPageMap = null;
                 }
-                editPageMap = L.map(mapEditContainer).setView([10.762622, 106.660172], 6); 
-                L.tileLayer('https://mt{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}&key=AIzaSyDcq-HEZDdXSiMsbD5o_T9GDS-iJGR9Ar0', {
-                    attribution: '&copy; Google',
-                    subdomains: ['0', '1', '2', '3']
-                }).addTo(editPageMap);
+
+                mapboxgl.accessToken = MAPBOX_API_KEY;
+                editPageMap = new mapboxgl.Map({
+                    container: 'mapboxEditMap',
+                    style: 'mapbox://styles/mapbox/streets-v11',
+                    center: [106.660172, 10.762622], // [lng, lat] (HCM default)
+                    zoom: 6
+                });
 
                 originAddressSpanOnEdit.textContent = data.originAddress || 'N/A';
                 destinationAddressSpanOnEdit.textContent = data.destinationAddress || 'N/A';
                 distanceSpanOnEdit.textContent = data.distance ? `${data.distance} km` : 'N/A';
                 durationSpanOnEdit.textContent = data.estimatedDuration || 'N/A';
 
-                const markersOnEdit = [];
-                let originLatLng, destLatLng;
+                let originLngLat, destLngLat;
+                editPageMarkers = [];
 
                 if (data.originCoordinates) {
                     const [lat, lon] = data.originCoordinates.split(',').map(Number);
-                    if(!isNaN(lat) && !isNaN(lon)) {
-                        originLatLng = [lat, lon];
-                        markersOnEdit.push(L.marker(originLatLng).addTo(editPageMap).bindPopup(`Điểm đi: ${data.originAddress || ''}`).getLatLng());
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        originLngLat = [lon, lat];
+                        const marker = new mapboxgl.Marker({ color: 'green' })
+                            .setLngLat(originLngLat)
+                            .setPopup(new mapboxgl.Popup().setText(`Điểm đi: ${data.originAddress || ''}`))
+                            .addTo(editPageMap);
+                        editPageMarkers.push(originLngLat);
                     }
                 }
                 if (data.destinationCoordinates) {
                     const [lat, lon] = data.destinationCoordinates.split(',').map(Number);
-                     if(!isNaN(lat) && !isNaN(lon)) {
-                        destLatLng = [lat, lon];
-                        markersOnEdit.push(L.marker(destLatLng).addTo(editPageMap).bindPopup(`Điểm đến: ${data.destinationAddress || ''}`).getLatLng());
-                     }
+                    if (!isNaN(lat) && !isNaN(lon)) {
+                        destLngLat = [lon, lat];
+                        const marker = new mapboxgl.Marker({ color: 'red' })
+                            .setLngLat(destLngLat)
+                            .setPopup(new mapboxgl.Popup().setText(`Điểm đến: ${data.destinationAddress || ''}`))
+                            .addTo(editPageMap);
+                        editPageMarkers.push(destLngLat);
+                    }
                 }
 
-                if (originLatLng && destLatLng) L.polyline([originLatLng, destLatLng], { color: 'red' }).addTo(editPageMap);
-                
-                if (markersOnEdit.length > 0) editPageMap.fitBounds(markersOnEdit, { padding: [50, 50] });
-                else mapEditContainer.innerHTML = '<p class="text-center text-warning">Lộ trình này không có tọa độ để hiển thị trên bản đồ.</p>';
+                // Draw actual route using Mapbox Directions API if both points exist
+                if (originLngLat && destLngLat) {
+                    editPageMap.on('load', async function () {
+                        try {
+                            // Call Mapbox Directions API
+                            const directionsUrl = `https://api.mapbox.com/directions/v5/mapbox/driving/${originLngLat[0]},${originLngLat[1]};${destLngLat[0]},${destLngLat[1]}?geometries=geojson&access_token=${MAPBOX_API_KEY}`;
+                            const directionsRes = await fetch(directionsUrl);
+                            if (!directionsRes.ok) throw new Error('Không lấy được dữ liệu tuyến đường thực tế từ Mapbox Directions API');
+                            const directionsData = await directionsRes.json();
+                            const routeGeoJson = directionsData.routes && directionsData.routes[0] && directionsData.routes[0].geometry;
+                            if (routeGeoJson) {
+                                // Add route as GeoJSON line
+                                if (editPageMap.getSource('routeLine')) editPageMap.removeLayer('routeLineLayer');
+                                if (editPageMap.getSource('routeLine')) editPageMap.removeSource('routeLine');
+                                editPageMap.addSource('routeLine', {
+                                    'type': 'geojson',
+                                    'data': {
+                                        'type': 'Feature',
+                                        'geometry': routeGeoJson
+                                    }
+                                });
+                                editPageMap.addLayer({
+                                    'id': 'routeLineLayer',
+                                    'type': 'line',
+                                    'source': 'routeLine',
+                                    'layout': { 'line-join': 'round', 'line-cap': 'round' },
+                                    'paint': { 'line-color': '#ff0000', 'line-width': 4 }
+                                });
+                                // Fit bounds to route
+                                const bounds = new mapboxgl.LngLatBounds();
+                                routeGeoJson.coordinates.forEach(coord => bounds.extend(coord));
+                                editPageMap.fitBounds(bounds, { padding: 50 });
+                            } else {
+                                // fallback: fit to markers
+                                const bounds = new mapboxgl.LngLatBounds();
+                                editPageMarkers.forEach(coord => bounds.extend(coord));
+                                editPageMap.fitBounds(bounds, { padding: 50 });
+                            }
+                        } catch (err) {
+                            console.error('Lỗi khi lấy tuyến đường thực tế:', err);
+                            // fallback: fit to markers
+                            const bounds = new mapboxgl.LngLatBounds();
+                            editPageMarkers.forEach(coord => bounds.extend(coord));
+                            editPageMap.fitBounds(bounds, { padding: 50 });
+                        }
+                    });
+                } else if (editPageMarkers.length > 0) {
+                    editPageMap.on('load', function () {
+                        const bounds = new mapboxgl.LngLatBounds();
+                        editPageMarkers.forEach(coord => bounds.extend(coord));
+                        editPageMap.fitBounds(bounds, { padding: 50 });
+                    });
+                } else {
+                    mapEditContainer.innerHTML = '<p class="text-center text-warning">Lộ trình này không có tọa độ để hiển thị trên bản đồ.</p>';
+                }
 
             } catch (error) {
                 console.error('Lỗi khi cập nhật bản đồ trang Edit:', error);

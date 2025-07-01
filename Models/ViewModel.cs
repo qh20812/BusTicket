@@ -35,6 +35,7 @@ namespace BusTicketSystem.Models.ViewModels
         public decimal? Distance { get; set; } // Changed to nullable to match Route.Distance
         public decimal? OldPrice { get; set; }
         public decimal? DiscountPercentage { get; set; }
+        public bool CanApprove { get; set; } = false;
 
         public TripStatus Status { get; set; }
 
@@ -83,6 +84,7 @@ namespace BusTicketSystem.Models.ViewModels
             CanCancel = t.Status == TripStatus.Scheduled && t.DepartureTime > DateTime.UtcNow.Add(cancellationBuffer);
             CanCompleteManually = t.Status == TripStatus.Scheduled && t.DepartureTime < DateTime.UtcNow;
             CanDelete = !t.Tickets.Any(ti => ti.Status == TicketStatus.Booked || ti.Status == TicketStatus.Used) && (t.Status == TripStatus.Scheduled || t.Status == TripStatus.Cancelled);
+            CanApprove = t.Status == TripStatus.PendingApproval;
         }
     }
 

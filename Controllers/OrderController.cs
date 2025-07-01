@@ -49,6 +49,22 @@ namespace BusTicketSystem.Controllers
         public async Task<ActionResult<Order>> CreateOrder(Order order)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Lấy userId từ Claims (Identity)
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not logged in.");
+
+            // Nếu Order.UserId là int, cần ép kiểu
+            if (int.TryParse(userId, out int parsedUserId))
+            {
+                order.UserId = parsedUserId;
+            }
+            else
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetOrder), new { id = order.OrderId }, order);

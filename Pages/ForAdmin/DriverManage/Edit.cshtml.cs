@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Rendering; // Thêm directive này
 
 namespace BusTicketSystem.Pages.ForAdmin.DriverManage
 {
@@ -20,24 +21,14 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
         [BindProperty]
         public DriverInputModel DriverInput { get; set; } = new DriverInputModel();
 
-        // Để hiển thị danh sách các công ty xe (nếu có và cần thiết)
-        // public SelectList Companies { get; set; }
+        public SelectList Companies { get; set; } // Bỏ comment để khai báo Companies
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var driver = await _context.Drivers.FirstOrDefaultAsync(m => m.DriverId == id);
+            if (driver == null) return NotFound();
 
-            if (driver == null)
-            {
-                return NotFound();
-            }
-
-            // Không cho phép sửa nếu tài xế đã bị sa thải hoặc nghỉ việc
             if (driver.Status == DriverStatus.Terminated || driver.Status == DriverStatus.Resigned)
             {
                 TempData["ErrorMessage"] = "Không thể chỉnh sửa thông tin tài xế đã nghỉ việc hoặc bị sa thải.";
@@ -57,8 +48,15 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
                 CompanyId = driver.CompanyId
             };
 
-            // Nếu bạn muốn cho phép chọn công ty
-            // Companies = new SelectList(_context.BusCompanies.OrderBy(c => c.CompanyName), "CompanyId", "CompanyName", driver.CompanyId);
+            Companies = new SelectList(
+                await _context.BusCompanies
+                    .Where(c => c.Status == BusCompanyStatus.Active)
+                    .OrderBy(c => c.CompanyName)
+                    .Select(c => new { c.CompanyId, c.CompanyName })
+                    .AsNoTracking()
+                    .ToListAsync(),
+                "CompanyId", "CompanyName", driver.CompanyId
+            );
 
             return Page();
         }
@@ -67,34 +65,63 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
         {
             if (!ModelState.IsValid)
             {
-                // Nếu bạn muốn cho phép chọn công ty, tải lại danh sách
-                // Companies = new SelectList(_context.BusCompanies.OrderBy(c => c.CompanyName), "CompanyId", "CompanyName", DriverInput.CompanyId);
+                Companies = new SelectList(
+                    await _context.BusCompanies
+                        .Where(c => c.Status == BusCompanyStatus.Active)
+                        .OrderBy(c => c.CompanyName)
+                        .Select(c => new { c.CompanyId, c.CompanyName })
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "CompanyId", "CompanyName", DriverInput.CompanyId
+                );
                 return Page();
             }
 
             var driverToUpdate = await _context.Drivers.FindAsync(DriverInput.DriverId);
+            if (driverToUpdate == null) return NotFound();
 
-            if (driverToUpdate == null)
-            {
-                return NotFound();
-            }
-
-            // Không cho phép sửa nếu tài xế đã bị sa thải hoặc nghỉ việc (kiểm tra lại phòng trường hợp)
             if (driverToUpdate.Status == DriverStatus.Terminated || driverToUpdate.Status == DriverStatus.Resigned)
             {
                 TempData["ErrorMessage"] = "Không thể chỉnh sửa thông tin tài xế đã nghỉ việc hoặc bị sa thải.";
-                // Companies = new SelectList(_context.BusCompanies.OrderBy(c => c.CompanyName), "CompanyId", "CompanyName", DriverInput.CompanyId);
-                return Page(); // Hoặc RedirectToPage("./Index")
+                Companies = new SelectList(
+                    await _context.BusCompanies
+                        .Where(c => c.Status == BusCompanyStatus.Active)
+                        .OrderBy(c => c.CompanyName)
+                        .Select(c => new { c.CompanyId, c.CompanyName })
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "CompanyId", "CompanyName", DriverInput.CompanyId
+                );
+                return Page();
+            }
+
+            if (DriverInput.CompanyId.HasValue)
+            {
+                var company = await _context.BusCompanies.FindAsync(DriverInput.CompanyId);
+                if (company == null || company.Status != BusCompanyStatus.Active)
+                {
+                    ModelState.AddModelError("DriverInput.CompanyId", "Nhà xe không hợp lệ hoặc không hoạt động.");
+                    Companies = new SelectList(
+                        await _context.BusCompanies
+                            .Where(c => c.Status == BusCompanyStatus.Active)
+                            .OrderBy(c => c.CompanyName)
+                            .Select(c => new { c.CompanyId, c.CompanyName })
+                            .AsNoTracking()
+                            .ToListAsync(),
+                        "CompanyId", "CompanyName", DriverInput.CompanyId
+                    );
+                    return Page();
+                }
             }
 
             driverToUpdate.Fullname = DriverInput.Fullname;
             driverToUpdate.Email = DriverInput.Email;
             driverToUpdate.Phone = DriverInput.Phone;
-            driverToUpdate.LicenseNumber = DriverInput.LicenseNumber; // Cẩn thận nếu đây là UNIQUE
+            driverToUpdate.LicenseNumber = DriverInput.LicenseNumber;
             driverToUpdate.DateOfBirth = DriverInput.DateOfBirth;
             driverToUpdate.Address = DriverInput.Address;
             driverToUpdate.Status = DriverInput.Status;
-            driverToUpdate.CompanyId = DriverInput.CompanyId.Value; // Nếu có
+            driverToUpdate.CompanyId = DriverInput.CompanyId; // Cho phép null
             driverToUpdate.UpdatedAt = DateTime.UtcNow;
 
             try
@@ -105,7 +132,7 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
                     Category = NotificationCategory.Driver,
                     TargetUrl = Url.Page("/ForAdmin/DriverManage/Index", new { id = driverToUpdate.DriverId }),
                     IconCssClass = "bi bi-pencil-square",
-                    RecipientUserId = null // Assuming AdminRecipientId is the correct property name
+                    RecipientUserId = null
                 };
                 _context.Notifications.Add(notification);
                 await _context.SaveChangesAsync();
@@ -118,19 +145,30 @@ namespace BusTicketSystem.Pages.ForAdmin.DriverManage
                 {
                     return NotFound();
                 }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi cập nhật dữ liệu. Vui lòng thử lại.");
-                    // Companies = new SelectList(_context.BusCompanies.OrderBy(c => c.CompanyName), "CompanyId", "CompanyName", DriverInput.CompanyId);
-                    return Page();
-                }
+                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi cập nhật dữ liệu. Vui lòng thử lại.");
+                Companies = new SelectList(
+                    await _context.BusCompanies
+                        .Where(c => c.Status == BusCompanyStatus.Active)
+                        .OrderBy(c => c.CompanyName)
+                        .Select(c => new { c.CompanyId, c.CompanyName })
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "CompanyId", "CompanyName", DriverInput.CompanyId
+                );
+                return Page();
             }
-            catch (DbUpdateException) // Bắt lỗi nếu LicenseNumber bị trùng (UNIQUE constraint)
+            catch (DbUpdateException)
             {
-                // Kiểm tra InnerException để xem có phải lỗi UNIQUE constraint không
-                // Ví dụ: if (ex.InnerException is MySqlException mysqlEx && mysqlEx.Number == 1062)
                 ModelState.AddModelError("DriverInput.LicenseNumber", "Số bằng lái này đã tồn tại.");
-                // Companies = new SelectList(_context.BusCompanies.OrderBy(c => c.CompanyName), "CompanyId", "CompanyName", DriverInput.CompanyId);
+                Companies = new SelectList(
+                    await _context.BusCompanies
+                        .Where(c => c.Status == BusCompanyStatus.Active)
+                        .OrderBy(c => c.CompanyName)
+                        .Select(c => new { c.CompanyId, c.CompanyName })
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "CompanyId", "CompanyName", DriverInput.CompanyId
+                );
                 return Page();
             }
         }

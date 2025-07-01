@@ -5,6 +5,16 @@ let tripModalMap = null;
 require('dotenv').config();
 
 document.addEventListener('DOMContentLoaded', function () {
+    // Always re-bind hidden input values on form submit (for ModelState error and modal re-show)
+    const tripActionForm = document.getElementById('tripActionForm');
+    if (tripActionForm) {
+        tripActionForm.addEventListener('submit', function (e) {
+            const tripIdInput = document.getElementById('tripIdToActionInputModal');
+            const actionTypeInput = document.getElementById('actionTypeInputModal');
+            if (typeof tripIdActionOnError !== 'undefined' && tripIdActionOnError) tripIdInput.value = tripIdActionOnError;
+            if (typeof actionTypeOnError !== 'undefined' && actionTypeOnError) actionTypeInput.value = actionTypeOnError;
+        });
+    }
     // --- Existing JavaScript for tripActionModal ---
     const tripActionModalElement = document.getElementById('tripActionModal');
     if (tripActionModalElement) {

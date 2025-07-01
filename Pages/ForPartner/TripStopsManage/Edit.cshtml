@@ -1,0 +1,66 @@
+@page "{id:int?}"
+@model BusTicketSystem.Pages.ForPartner.TripStopsManage.TripStopEditModel
+@{
+    Layout = "_PartnerLayout";
+    ViewData["Title"] = Model.StopInput.StopId == 0 ? "Thêm mới điểm dừng" : "Chỉnh sửa điểm dừng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a asp-page="./Index" style="text-decoration: none;">Trạm dừng</a></li>
+            <li><a class="active" style="text-decoration: none;">@(Model.StopInput.StopId == 0 ? "/ Thêm mới" : "/ Chỉnh sửa" )</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-pencil-square bx'></i>
+            <h3>@(Model.StopInput.StopId == 0 ? "Thêm mới điểm dừng" : $"Chỉnh sửa điểm dừng ID: {Model.StopInput.StopId}")</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="StopInput.StopId" />
+
+
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StopInput.StationName" class="form-label"></label>
+                    <input asp-for="StopInput.StationName" class="form-control" />
+                    <span asp-validation-for="StopInput.StationName" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StopInput.Latitude" class="form-label"></label>
+                    <input asp-for="StopInput.Latitude" class="form-control" type="number" step="any" />
+                    <span asp-validation-for="StopInput.Latitude" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StopInput.Longitude" class="form-label"></label>
+                    <input asp-for="StopInput.Longitude" class="form-control" type="number" step="any" />
+                    <span asp-validation-for="StopInput.Longitude" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="StopInput.Note" class="form-label"></label>
+                    <textarea asp-for="StopInput.Note" class="form-control"></textarea>
+                    <span asp-validation-for="StopInput.Note" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">@((Model.StopInput.StopId == 0 ? "Thêm mới" : "Cập nhật"))</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

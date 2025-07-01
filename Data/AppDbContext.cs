@@ -23,10 +23,26 @@ namespace BusTicketSystem.Data
         public DbSet<Bus> Buses { get; set; }
         // public DbSet<RoutePoint> RoutePoints { get; set; }
         public DbSet<TripStop> TripStops { get; set; }
+        public DbSet<Stop> Stops{ get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Menu> Menus { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<Stop>()
+                .Property(s => s.Status)
+                .HasConversion<string>()
+                .HasMaxLength(50);
+
+            modelBuilder.Entity<Stop>()
+                .HasOne(s => s.Company)
+                .WithMany(c => c.Stops)
+                .HasForeignKey(s => s.CompanyId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            modelBuilder.Entity<Stop>()
+                .HasIndex(s => new { s.StopName, s.Latitude, s.Longitude })
+                .IsUnique();
             modelBuilder.Entity<User>().ToTable("User"); 
             modelBuilder.Entity<User>()
                 .Property(u => u.Role)

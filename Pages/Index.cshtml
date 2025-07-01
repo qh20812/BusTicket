@@ -11,262 +11,141 @@
     <!-- Chuyến xe phổ biến -->
     @if (Model.PopularTrips.Any())
     {
-        <div class="separator mt-5">
-            <h2>Chuyến Xe Phổ Biến</h2>
-            <a asp-page="/Home/Schedule/Index">Xem tất cả <i class="bx bx-chevron-right"></i></a>
+        <div class="carousel-header mt-5">
+            <h2 class="carousel-title">Chuyến Xe Phổ Biến</h2>
+            <a asp-page="/Home/Schedule/Index" class="carousel-more-link">Xem tất cả <i class="bx bx-chevron-right"></i></a>
         </div>
-        <div id="popularTripsCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
+        <div class="carousel-bg">
+            <div class="carousel-container">
+                <div id="popularTripsCarousel" class="custom-carousel">
                 @{
+                    var cardColors = new[] { "#FF6F61", "#6B7280", "#10B981", "#3B82F6", "#FBBF24", "#8B5CF6" };
+                    var tripImages = new[] {
+                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTsz9K5rzPfHPYXjiHUY3swWV-5MrqkzEu3kw&s",
+                        "https://f1e425bd6cd9ac6.cmccloud.com.vn/cms-tool/destination/images/5/img_hero.png?v1",
+                        "https://f1e425bd6cd9ac6.cmccloud.com.vn/cms-tool/destination/images/22/img_hero.png",
+                        "https://f1e425bd6cd9ac6.cmccloud.com.vn/cms-tool/destination/images/21/img_card.png",
+                        "https://f1e425bd6cd9ac6.cmccloud.com.vn/cms-tool/destination/images/27/img_hero.png",
+                        "https://f1e425bd6cd9ac6.cmccloud.com.vn/cms-tool/destination/images/20/img_card.png"
+                        };
                     var tripIndex = 0;
-                    var cardColors = new[] { "#FF5733", "#33FF57", "#3357FF", "#FF33F0", "#F0FF33", "#33F0FF" };
-                    var cardImages = new[] {
-                        "https://picsum.photos/300/200?random=1",
-                        "https://picsum.photos/300/200?random=2",
-                        "https://picsum.photos/300/200?random=3",
-                        "https://picsum.photos/300/200?random=4",
-                        "https://picsum.photos/300/200?random=5",
-                        "https://picsum.photos/300/200?random=6"
-                    };
                 }
                 @foreach (var trip in Model.PopularTrips)
                 {
                     var currentColor = cardColors[tripIndex % cardColors.Length];
-                    var currentImage = cardImages[tripIndex % cardImages.Length];
-                    <div class="carousel-item @(tripIndex == 0 ? "active" : "")">
-                        <div class="popular-trip-card" style="background-color: @currentColor;">
-                            <div class="card-background-visual" style="background-image: url('@currentImage');">
-                                <div class="card-overlay"></div>
+                    var currentImage = tripImages[tripIndex % tripImages.Length];
+                    <div class="carousel-item">
+                        <div class="carousel-card" style="background-color: @currentColor;">
+                            <div class="carousel-image">
+                                <img src="@currentImage" alt="Trip @trip.TripId"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
-                            <div class="card-content-wrapper">
-                                <div class="top">
-                                    <div class="info">
-                                        <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId">@trip.Route.Departure - @trip.Route.Destination</a>
-                                        <p>Khởi hành: @trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")</p>
-                                    </div>
-                                </div>
-                                <div class="bottom">
-                                    <div class="price">
-                                        <h5>Giá vé: @trip.Price.ToString("N0") VND</h5>
-                                    </div>
-                                    <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId" class="btn btn-primary btn-sm">Xem chi tiết</a>
-                                </div>
+                            <div class="carousel-info">
+                                <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId">@trip.Route.Departure -
+                                    @trip.Route.Destination</a>
+                                <p class="price">Chỉ từ: @trip.Price.ToString("N0") VND</p>
+                                <a asp-page="/Home/Schedule/Details" asp-route-id="@trip.TripId" class="btn">Xem chi tiết</a>
                             </div>
                         </div>
                     </div>
                     tripIndex++;
                 }
+                </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#popularTripsCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#popularTripsCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
         </div>
     }
 
     <!-- Tuyến đường phổ biến -->
     @if (Model.Popular.Any())
     {
-        <div class="separator mt-5">
-            <h2>Tuyến Đường Phổ Biến</h2>
-            <a asp-page="/Home/Schedule/Index">Xem tất cả <i class="bx bx-chevron-right"></i></a>
+        <div class="carousel-header mt-5">
+            <h2 class="carousel-title">Tuyến Đường Phổ Biến</h2>
+            <a asp-page="/Home/Schedule/Index" class="carousel-more-link">Xem tất cả <i class="bx bx-chevron-right"></i></a>
         </div>
-        <div id="popularRoutesCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
+        <div class="carousel-bg">
+            <div class="carousel-container">
+                <div id="popularRoutesCarousel" class="custom-carousel">
                 @{
+                    var routeCardColors = new[] { "#EF4444", "#8B5CF6", "#10B981", "#3B82F6", "#FBBF24", "#EC4899" };
+                    var routeImages = new[] {
+                        "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQq1sHHcAVGzVrS7JcTcrJpMHe2hD9l0FySOg&s","https://otohoaphat.com/wp-content/uploads/2023/03/xe-khach-Daewoo-G8-34-cho.gif","https://ddk.1cdn.vn/2022/11/24/image.daidoanket.vn-images-upload-nghipm-11232022-_anh-bai-duoi.jpg","https://vissaihotel.vn/photo/xe-khach-ninh-binh-3.jpg","https://hoanghuyauto.com/wp-content/uploads/2024/11/xe-kim-long-99-24-giuong-hoan-toan-moi-1.jpg","https://xekhachansinh.com/wp-content/uploads/2022/05/xe-khach-an-sinh-016-599x400.jpg"
+                        };
                     var routeIndex = 0;
-                    var routeCardColors = new[] { "#FF5733", "#33FF57", "#3357FF", "#FF33F0", "#F0FF33", "#33F0FF" };
-                    var routeCardImages = new[] {
-                        "https://picsum.photos/300/200?random=7",
-                        "https://picsum.photos/300/200?random=8",
-                        "https://picsum.photos/300/200?random=9",
-                        "https://picsum.photos/300/200?random=10",
-                        "https://picsum.photos/300/200?random=11",
-                        "https://picsum.photos/300/200?random=12"
-                    };
                 }
                 @foreach (var route in Model.Popular)
                 {
                     var currentColor = routeCardColors[routeIndex % routeCardColors.Length];
-                    var currentImage = routeCardImages[routeIndex % routeCardImages.Length];
-                    <div class="carousel-item @(routeIndex == 0 ? "active" : "")">
-                        <div class="popular-trip-card" style="background-color: @currentColor;">
-                            <div class="card-background-visual" style="background-image: url('@currentImage');">
-                                <div class="card-overlay"></div>
+                    var currentImage = routeImages[routeIndex % routeImages.Length];
+                    <div class="carousel-item">
+                        <div class="carousel-card" style="background-color: @currentColor;">
+                            <div class="carousel-image">
+                                <img src="@currentImage" alt="@route.Departure - @route.Destination"
+                                    style="width: 100%; height: 100%; object-fit: cover;">
                             </div>
-                            <div class="card-content-wrapper">
-                                <div class="top">
-                                    <div class="info">
-                                        <a asp-page="/Home/Schedule/Index" asp-route-departure="@route.Departure" asp-route-destination="@route.Destination">@route.Departure - @route.Destination</a>
-                                        <p>Khoảng cách: @(route.Distance.HasValue ? route.Distance.Value.ToString("N0") : "N/A") km</p>
-                                    </div>
-                                </div>
-                                <div class="bottom">
-                                    <div class="price">
-                                        <h5>Thời gian: @(route.EstimatedDuration.ToString(@"hh\:mm") ?? "N/A")</h5>
-                                    </div>
-                                    <a asp-page="/Home/Schedule/Index" asp-route-departure="@route.Departure" asp-route-destination="@route.Destination" class="btn btn-primary btn-sm">Tìm chuyến</a>
-                                </div>
+                            <div class="carousel-info">
+                                <a asp-page="/Home/Schedule/Index" asp-route-departure="@route.Departure"
+                                    asp-route-destination="@route.Destination">@route.Departure - @route.Destination</a>
+                                <p>Khoảng cách: @(route.Distance.HasValue? route.Distance.Value.ToString("N0") : "N/A") km</p>
+                                <p class="price">Thời gian: @(route.EstimatedDuration.ToString(@"hh\:mm") ?? "N/A")</p>
+                                <a asp-page="/Home/Schedule/Index" asp-route-departure="@route.Departure"
+                                    asp-route-destination="@route.Destination" class="btn">Tìm chuyến</a>
                             </div>
                         </div>
                     </div>
                     routeIndex++;
                 }
+                </div>
             </div>
-            <button class="carousel-control-prev" type="button" data-bs-target="#popularRoutesCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Previous</span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#popularRoutesCarousel" data-bs-slide="next">
-                <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Next</span>
-            </button>
         </div>
     }
 
     <!-- Tin tức nổi bật -->
     @if (Model.RecentPosts.Any())
     {
-        <div class="separator mt-5">
-            <h2>Tin Tức Nổi Bật</h2>
-            <a asp-page="/Home/Posts/Index">Xem tất cả <i class="bx bx-chevron-right"></i></a>
+        <div class="carousel-header mt-5">
+            <h2 class="carousel-title">Tin Tức Nổi Bật</h2>
+            <a asp-page="/Home/Posts/Index" class="carousel-more-link">Xem tất cả <i class="bx bx-chevron-right"></i></a>
         </div>
-        <div class="carousel-container">
-            <div id="recentPostsCarousel" class="popular-trips-carousel">
+        <div class="carousel-bg">
+            <div class="carousel-container">
+                <div id="recentPostsCarousel" class="custom-carousel">
+                @{
+                    var postCardColors = new[] { "#F87171", "#4B5563", "#34D399", "#60A5FA", "#FBBF24", "#A78BFA" };
+                    var postIndex = 0;
+                }
                 @foreach (var post in Model.RecentPosts)
                 {
-                    <div class="post-card">
-                        @if (!string.IsNullOrEmpty(post.ImageUrl))
-                        {
-                            <img class="post-card-image" src="@post.ImageUrl" alt="@post.Title">
-                        }
-                        else
-                        {
-                            <div class="post-card-placeholder-image">No Image Available</div>
-                        }
-                        <div class="post-card-content">
-                            <div class="post-card-category">
-                                <span class="badge">@post.Category.GetDisplayName()</span>
-                            </div>
-                            <a asp-page="/Home/Posts/Details" asp-route-id="@post.PostId" class="post-card-link">
-                                <h3 class="post-card-title">@post.Title</h3>
-                            </a>
-                            <div class="post-card-summary">
-                                @(post.Content.Length > 100 ? post.Content.Substring(0, 100) + "..." : post.Content)
-                            </div>
-                            <div class="post-card-footer">
-                                <span class="post-card-date">@post.CreatedAt.ToString("dd/MM/yyyy")</span>
-                            </div>
+                    var currentColor = postCardColors[postIndex % postCardColors.Length];
+                <div class="carousel-item">
+                    <div class="carousel-card" style="background-color: @currentColor; cursor:pointer;" onclick="window.location.href='@Url.Page("/Home/Posts/Details", new { id = post.PostId })'">
+                        <div class="carousel-image">
+                            <img src="@post.ImageUrl" alt="@post.Title"
+                                style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <div class="carousel-info">
+                            <span class="post-card-link" style="font-weight:700;">@post.Title</span>
+                            <p>@post.Category.GetDisplayName()</p>
+                            <p>@(post.Content.Length > 50 ? post.Content.Substring(0, 50) + "..." : post.Content)</p>
+                            <p class="price">@post.CreatedAt.ToString("dd/MM/yyyy")</p>
                         </div>
                     </div>
+                </div>
+                postIndex++;
                 }
+                </div>
             </div>
-            <div class="custom-scrollbar"><div class="custom-scrollbar-thumb"></div></div>
         </div>
     }
 </div>
 
 @section Scripts {
+    <!-- Inject GROQ_API_KEY for chatbot.js -->
+    @{
+        var groqApiKey = Environment.GetEnvironmentVariable("GROQ_API_KEY");
+    }
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const carouselContainer = document.querySelector('#recentPostsCarousel').parentElement;
-            if (carouselContainer) {
-                const slider = carouselContainer.querySelector('.popular-trips-carousel');
-                const scrollbar = carouselContainer.querySelector('.custom-scrollbar');
-                const scrollbarThumb = carouselContainer.querySelector('.custom-scrollbar-thumb');
-
-                let isDown = false;
-                let startX;
-                let scrollLeft;
-
-                let isThumbDragging = false;
-                let thumbStartX;
-                let thumbStartLeft;
-
-                slider.addEventListener('mousedown', (e) => {
-                    isDown = true;
-                    slider.classList.add('active');
-                    startX = e.pageX - slider.offsetLeft;
-                    scrollLeft = slider.scrollLeft;
-                });
-                slider.addEventListener('mouseleave', () => {
-                    isDown = false;
-                    slider.classList.remove('active');
-                });
-                slider.addEventListener('mouseup', () => {
-                    isDown = false;
-                    slider.classList.remove('active');
-                });
-                slider.addEventListener('mousemove', (e) => {
-                    if (!isDown) return;
-                    e.preventDefault();
-                    const x = e.pageX - slider.offsetLeft;
-                    const walk = (x - startX);
-                    slider.scrollLeft = scrollLeft - walk;
-                });
-
-                scrollbarThumb.addEventListener('mousedown', (e) => {
-                    e.preventDefault();
-                    isThumbDragging = true;
-                    thumbStartX = e.pageX;
-                    thumbStartLeft = scrollbarThumb.offsetLeft;
-                    scrollbarThumb.classList.add('active-drag');
-                });
-
-                document.addEventListener('mouseup', () => {
-                    isThumbDragging = false;
-                    scrollbarThumb.classList.remove('active-drag');
-                });
-
-                document.addEventListener('mousemove', (e) => {
-                    if (!isThumbDragging) return;
-                    e.preventDefault();
-
-                    const deltaX = e.pageX - thumbStartX;
-                    let newThumbLeft = thumbStartLeft + deltaX;
-
-                    const scrollbarWidth = scrollbar.clientWidth;
-                    const thumbWidth = scrollbarThumb.offsetWidth;
-                    const thumbTrackLength = scrollbarWidth - thumbWidth;
-
-                    newThumbLeft = Math.max(0, Math.min(newThumbLeft, thumbTrackLength));
-                    scrollbarThumb.style.left = `${newThumbLeft}px`;
-
-                    const scrollRatio = thumbTrackLength > 0 ? newThumbLeft / thumbTrackLength : 0;
-                    const sliderMaxScroll = slider.scrollWidth - slider.clientWidth;
-                    slider.scrollLeft = scrollRatio * sliderMaxScroll;
-                });
-
-                function updateScrollbar() {
-                    if (!scrollbar || !scrollbarThumb) return;
-
-                    const scrollWidth = slider.scrollWidth;
-                    const clientWidth = slider.clientWidth;
-                    const scrollbarWidth = scrollbar.clientWidth;
-
-                    scrollbar.style.display = scrollWidth > clientWidth ? 'block' : 'none';
-
-                    if (scrollWidth <= clientWidth) return;
-
-                    const thumbWidth = (clientWidth / scrollWidth) * scrollbarWidth;
-                    scrollbarThumb.style.width = `${thumbWidth}px`;
-
-                    const maxScrollLeft = scrollWidth - clientWidth;
-                    const thumbTrackLength = scrollbarWidth - thumbWidth;
-                    const scrollRatio = maxScrollLeft > 0 ? slider.scrollLeft / maxScrollLeft : 0;
-                    const thumbLeft = scrollRatio * thumbTrackLength;
-
-                    scrollbarThumb.style.left = `${thumbLeft}px`;
-                }
-
-                slider.addEventListener('scroll', updateScrollbar);
-                window.addEventListener('resize', updateScrollbar);
-                updateScrollbar();
-            }
-        });
+        window.GROQ_API_KEY = '@groqApiKey';
     </script>
+    <script src="~/js/chatbot.js"></script>
+    <!-- Carousel navigation script removed as navigation buttons are no longer present -->
 }

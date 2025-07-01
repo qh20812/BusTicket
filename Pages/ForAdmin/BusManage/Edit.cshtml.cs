@@ -24,22 +24,18 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
         [BindProperty]
         public BusInputModel BusInput { get; set; } = new BusInputModel();
 
-        // Dùng để populate dropdownlist Công ty
         public SelectList Companies { get; set; } = new SelectList(Enumerable.Empty<SelectListItem>());
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            // Load danh sách công ty cho dropdown
             await LoadCompaniesAsync();
 
             if (id == null)
             {
-                // Thêm mới
                 ViewData["Title"] = "Thêm mới Xe buýt";
                 return Page();
             }
 
-            // Chỉnh sửa
             ViewData["Title"] = "Chỉnh sửa Xe buýt";
             var bus = await _context.Buses.FirstOrDefaultAsync(m => m.BusId == id);
 
@@ -62,26 +58,16 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
 
         public async Task<IActionResult> OnPostAsync()
         {
-            // Load lại danh sách công ty nếu ModelState không hợp lệ để giữ dropdown
             await LoadCompaniesAsync();
 
             if (!ModelState.IsValid)
             {
-                // Đặt lại tiêu đề cho trường hợp thêm mới khi có lỗi validation
-                if (BusInput.BusId == 0)
-                {
-                    ViewData["Title"] = "Thêm mới Xe buýt";
-                }
-                else
-                {
-                    ViewData["Title"] = "Chỉnh sửa Xe buýt";
-                }
+                ViewData["Title"] = BusInput.BusId == 0 ? "Thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
                 return Page();
             }
 
             if (BusInput.BusId == 0)
             {
-                // Thêm mới
                 var newBus = new Bus
                 {
                     LicensePlate = BusInput.LicensePlate,
@@ -92,11 +78,10 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
                     UpdatedAt = DateTime.UtcNow
                 };
 
-                // Kiểm tra trùng biển số trước khi thêm
                 if (await _context.Buses.AnyAsync(b => b.LicensePlate == newBus.LicensePlate))
                 {
                     ModelState.AddModelError("BusInput.LicensePlate", "Biển số xe này đã tồn tại.");
-                    ViewData["Title"] = "Thêm mới Xe buýt"; // Đặt lại tiêu đề
+                    ViewData["Title"] = "Thêm mới Xe buýt";
                     return Page();
                 }
 
@@ -105,7 +90,6 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
             }
             else
             {
-                // Chỉnh sửa
                 var busToUpdate = await _context.Buses.FindAsync(BusInput.BusId);
 
                 if (busToUpdate == null)
@@ -114,11 +98,10 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
                     return RedirectToPage("./Index");
                 }
 
-                // Kiểm tra trùng biển số với xe khác (trừ chính nó)
                 if (await _context.Buses.AnyAsync(b => b.LicensePlate == BusInput.LicensePlate && b.BusId != BusInput.BusId))
                 {
                     ModelState.AddModelError("BusInput.LicensePlate", "Biển số xe này đã tồn tại ở xe khác.");
-                    ViewData["Title"] = "Chỉnh sửa Xe buýt"; // Đặt lại tiêu đề
+                    ViewData["Title"] = "Chỉnh sửa Xe buýt";
                     return Page();
                 }
 
@@ -145,39 +128,16 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
                 else
                 {
                     ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi cập nhật dữ liệu. Vui lòng thử lại.");
-                    // Load lại danh sách công ty nếu có lỗi DB
                     await LoadCompaniesAsync();
-                    if (BusInput.BusId == 0)
-                    {
-                        ViewData["Title"] = "Thêm mới Xe buýt";
-                    }
-                    else
-                    {
-                        ViewData["Title"] = "Chỉnh sửa Xe buýt";
-                    }
+                    ViewData["Title"] = BusInput.BusId == 0 ? "Thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
                     return Page();
                 }
             }
-            catch (DbUpdateException) // Bắt lỗi nếu LicenseNumber bị trùng (UNIQUE constraint)
+            catch (DbUpdateException)
             {
-                // Kiểm tra InnerException để xem có phải lỗi UNIQUE constraint không
-                // Đây là cách chung, bạn có thể cần điều chỉnh tùy thuộc vào loại database (MySQL, SQL Server, etc.)
-                // Ví dụ cho MySQL: if (ex.InnerException is MySqlException mysqlEx && mysqlEx.Number == 1062)
-                // Ví dụ cho SQL Server: if (ex.InnerException is SqlException sqlEx && sqlEx.Number == 2601)
-                // Nếu không rõ loại lỗi, có thể kiểm tra message hoặc chỉ bắt chung DbUpdateException
-
-                // Log lỗi chi tiết ex.InnerException.Message để debug
                 ModelState.AddModelError("BusInput.LicensePlate", "Biển số xe này đã tồn tại.");
-                // Load lại danh sách công ty nếu có lỗi DB
                 await LoadCompaniesAsync();
-                if (BusInput.BusId == 0)
-                {
-                    ViewData["Title"] = "Thêm mới Xe buýt";
-                }
-                else
-                {
-                    ViewData["Title"] = "Chỉnh sửa Xe buýt";
-                }
+                ViewData["Title"] = BusInput.BusId == 0 ? "Thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
                 return Page();
             }
 
@@ -191,18 +151,17 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
 
         private async Task LoadCompaniesAsync()
         {
-            // Chỉ lấy các công ty có trạng thái 'active'
             var activeCompanies = await _context.BusCompanies
-                                                .Where(c => c.Status == BusCompanyStatus.Active) // Giả định bạn có Enum BusCompanyStatus
-                                                .OrderBy(c => c.CompanyName)
-                                                .ToListAsync();
+                .Where(c => c.Status == BusCompanyStatus.Active)
+                .OrderBy(c => c.CompanyName)
+                .ToListAsync();
             Companies = new SelectList(activeCompanies, "CompanyId", "CompanyName");
         }
     }
 
     public class BusInputModel
     {
-        public int BusId { get; set; } // Dùng 0 cho thêm mới
+        public int BusId { get; set; }
 
         [Required(ErrorMessage = "Biển số xe không được để trống.")]
         [StringLength(20, MinimumLength = 6, ErrorMessage = "Biển số xe phải có từ 6 đến 20 ký tự.")]
@@ -211,21 +170,15 @@ namespace BusTicketSystem.Pages.ForAdmin.BusManage
         public string LicensePlate { get; set; } = string.Empty;
 
         [Required(ErrorMessage = "Loại xe không được để trống.")]
-        [StringLength(50, MinimumLength = 5, ErrorMessage = "Loại xe phải có ít nhất 5 ký tự và không quá 50 ký tự.")]
-        [RegularExpression(@"^[^\W\d_].*$", ErrorMessage = "Loại xe phải bắt đầu bằng một chữ cái và không chứa ký tự đặc biệt ở đầu.")]
         [Display(Name = "Loại xe")]
         public string BusType { get; set; } = string.Empty;
 
-        [Required(ErrorMessage = "Trạng thái không được để trống.")]
-        [Display(Name = "Trạng thái")]
-        public BusStatus? Status { get; set; }
-
         [Required(ErrorMessage = "Sức chứa không được để trống.")]
-        [Range(1, int.MaxValue, ErrorMessage = "Sức chứa phải lớn hơn 0.")]
+        [Range(1, 100, ErrorMessage = "Sức chứa phải từ 1 đến 100.")]
         [Display(Name = "Sức chứa")]
         public int? Capacity { get; set; }
 
         [Display(Name = "Công ty")]
-        public int? CompanyId { get; set; } // Cho phép null nếu xe không thuộc công ty nào
+        public int? CompanyId { get; set; }
     }
 }

@@ -1,6 +1,5 @@
 using BusTicketSystem.Data;
-using BusTicketSystem.Models; // For Bus, BusStatus
-using BusTicketSystem.Pages.ForAdmin.BusManage; // For BusInputModel
+using BusTicketSystem.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -50,14 +49,12 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
 
             if (id == null)
             {
-                // Thêm mới by Partner
                 ViewData["Title"] = "Yêu cầu thêm mới Xe buýt";
-                BusInput.CompanyId = partnerBusCompanyId; // Set CompanyId for new bus
-                BusInput.Status = BusStatus.PendingApproval; // Default status for new bus by partner
+                BusInput.CompanyId = partnerBusCompanyId;
+                BusInput.Status = BusStatus.PendingApproval;
                 return Page();
             }
 
-            // Chỉnh sửa by Partner
             ViewData["Title"] = "Chỉnh sửa Xe buýt";
             var bus = await _context.Buses.FirstOrDefaultAsync(m => m.BusId == id && m.CompanyId == partnerBusCompanyId);
 
@@ -72,8 +69,8 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
                 BusId = bus.BusId,
                 LicensePlate = bus.LicensePlate,
                 BusType = bus.BusType,
-                Capacity = bus.Capacity, // BusInput.Capacity is now int?, bus.Capacity is int?
-                CompanyId = bus.CompanyId, // Should be partner's companyId
+                Capacity = bus.Capacity,
+                CompanyId = bus.CompanyId,
                 Status = bus.Status
             };
 
@@ -83,9 +80,7 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
         public async Task<IActionResult> OnPostAsync()
         {
             int partnerBusCompanyId = GetCurrentPartnerBusCompanyId();
-            await LoadPartnerCompanyName(partnerBusCompanyId); // For display if validation fails
-
-            // Ensure CompanyId is always the partner's company ID and not tampered with
+            await LoadPartnerCompanyName(partnerBusCompanyId);
             BusInput.CompanyId = partnerBusCompanyId;
 
             if (!ModelState.IsValid)
@@ -96,14 +91,13 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
 
             if (BusInput.BusId == 0)
             {
-                // Thêm mới by Partner - goes to PendingApproval
                 var newBus = new Bus
                 {
                     LicensePlate = BusInput.LicensePlate,
                     BusType = BusInput.BusType,
                     Capacity = BusInput.Capacity,
-                    CompanyId = partnerBusCompanyId, // Explicitly set partner's company
-                    Status = BusStatus.PendingApproval, // New buses from partners are pending
+                    CompanyId = partnerBusCompanyId,
+                    Status = BusStatus.PendingApproval,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
@@ -120,7 +114,6 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
             }
             else
             {
-                // Chỉnh sửa by Partner
                 var busToUpdate = await _context.Buses.FirstOrDefaultAsync(b => b.BusId == BusInput.BusId && b.CompanyId == partnerBusCompanyId);
 
                 if (busToUpdate == null)
@@ -129,14 +122,9 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
                     return RedirectToPage("./Index");
                 }
 
-                // Partners cannot change status from PendingApproval or Rejected.
-                // They can change details if Active, or set to Maintenance/Inactive.
                 if (busToUpdate.Status == BusStatus.PendingApproval || busToUpdate.Status == BusStatus.Rejected)
                 {
-                    // Only allow updating non-status fields if pending/rejected
-                    // Or, prevent editing entirely if pending/rejected - depends on business rule
-                    // For now, let's assume they can update details but not status
-                    BusInput.Status = busToUpdate.Status; // Keep original status
+                    BusInput.Status = busToUpdate.Status;
                 }
 
                 if (await _context.Buses.AnyAsync(b => b.LicensePlate == BusInput.LicensePlate && b.BusId != BusInput.BusId))
@@ -149,11 +137,9 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
                 busToUpdate.LicensePlate = BusInput.LicensePlate;
                 busToUpdate.BusType = BusInput.BusType;
                 busToUpdate.Capacity = BusInput.Capacity;
-                // Partner cannot change CompanyId. It's already filtered.
-                // Status change logic:
                 if (busToUpdate.Status != BusStatus.PendingApproval && busToUpdate.Status != BusStatus.Rejected)
                 {
-                    busToUpdate.Status = BusInput.Status.Value; // Allow status change if not pending/rejected
+                    busToUpdate.Status = BusInput.Status!.Value;
                 }
                 busToUpdate.UpdatedAt = DateTime.UtcNow;
 
@@ -162,8 +148,57 @@ namespace BusTicketSystem.Pages.ForPartner.BusManage
                 if (busToUpdate.Status == BusStatus.PendingApproval) TempData["SuccessMessage"] += " Thay đổi sẽ có hiệu lực sau khi quản trị viên duyệt lại (nếu cần).";
             }
 
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!_context.Buses.Any(e => e.BusId == BusInput.BusId))
+                {
+                    return NotFound();
+                }
+                ModelState.AddModelError(string.Empty, "Có lỗi xảy ra khi cập nhật dữ liệu. Vui lòng thử lại.");
+                await LoadPartnerCompanyName(partnerBusCompanyId);
+                ViewData["Title"] = BusInput.BusId == 0 ? "Yêu cầu thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
+                return Page();
+            }
+            catch (DbUpdateException)
+            {
+                ModelState.AddModelError("BusInput.LicensePlate", "Biển số xe này đã tồn tại.");
+                await LoadPartnerCompanyName(partnerBusCompanyId);
+                ViewData["Title"] = BusInput.BusId == 0 ? "Yêu cầu thêm mới Xe buýt" : "Chỉnh sửa Xe buýt";
+                return Page();
+            }
+
             return RedirectToPage("./Index");
         }
+    }
+
+    public class BusInputModel
+    {
+        public int BusId { get; set; }
+
+        [Required(ErrorMessage = "Biển số xe không được để trống.")]
+        [StringLength(20, MinimumLength = 6, ErrorMessage = "Biển số xe phải có từ 6 đến 20 ký tự.")]
+        [RegularExpression(@"^[A-Z0-9\-]+$", ErrorMessage = "Biển số xe chỉ được chứa chữ cái viết hoa, số và dấu gạch nối (ví dụ: 51A-12345 hoặc 30K99999).")]
+        [Display(Name = "Biển số xe")]
+        public string LicensePlate { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Loại xe không được để trống.")]
+        [Display(Name = "Loại xe")]
+        public string BusType { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Sức chứa không được để trống.")]
+        [Range(1, 100, ErrorMessage = "Sức chứa phải từ 1 đến 100.")]
+        [Display(Name = "Sức chứa")]
+        public int? Capacity { get; set; }
+
+        [Required(ErrorMessage = "Trạng thái không được để trống.")]
+        [Display(Name = "Trạng thái")]
+        public BusStatus? Status { get; set; }
+
+        [Display(Name = "Công ty")]
+        public int? CompanyId { get; set; }
     }
 }

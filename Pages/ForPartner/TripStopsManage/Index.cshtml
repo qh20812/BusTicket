@@ -1,0 +1,86 @@
+@page
+@using BusTicketSystem.Extensions
+@model BusTicketSystem.Pages.ForPartner.TripStopsManage.IndexModel
+@{
+    Layout = "_PartnerLayout";
+    ViewData["Title"] = "Quản lý Trạm dừng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a href="/ForPartner/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li> /
+            <li><a href="#" class="active" style="text-decoration: none;">Trạm dừng</a></li>
+        </ul>
+    </div>
+    <a asp-page="/ForPartner/TripStopsManage/Edit" class="btn btn-primary report">
+        <i class='bx bx-plus'></i> Thêm trạm dừng
+    </a>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-map'></i>
+            <h3>Danh sách trạm dừng</h3>
+            <div class="search-panel" id="searchPanel">
+                <form method="get">
+                    <input type="text" name="SearchString" placeholder="Tìm kiếm tên trạm..." value="@Model.SearchString" />
+                    <button type="submit" class="btn btn-primary"><i class='bx bx-search'></i></button>
+                </form>
+            </div>
+            <i class='bx bx-search' id="toggleSearch"></i>
+        </div>
+
+        @if (Model.Stops.Any())
+        {
+            <table>
+                <thead>
+                    <tr>
+                        <th>Tên trạm</th>
+                        <th>Vĩ độ</th>
+                        <th>Kinh độ</th>
+                        <th>Địa chỉ</th>
+                        <th>Trạng thái</th>
+                        <th>Ngày tạo</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stop in Model.Stops)
+                    {
+                        <tr>
+                            <td class="truncate">@stop.StopName</td>
+                            <td>@stop.Latitude</td>
+                            <td>@stop.Longitude</td>
+                            <td class="truncate">@(stop.Address ?? "Không có")</td>
+                            <td><span class="status @stop.Status.ToString().ToLower()">@stop.Status.GetDisplayName()</span></td>
+                            <td>@stop.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td>
+                                @if (stop.Status == BusTicketSystem.Models.StopStatus.PendingApproval || stop.Status == BusTicketSystem.Models.StopStatus.Rejected)
+                                {
+                                    <a asp-page="./Edit" asp-route-id="@stop.StopId" class="btn btn-sm btn-warning"><i class='bx bx-edit'></i></a>
+                                    <a asp-page-handler="Delete" asp-route-id="@stop.StopId" class="btn btn-sm btn-danger" onclick="return confirm('Bạn có chắc muốn xóa trạm dừng này?');"><i class='bx bx-trash'></i></a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <p class="myorder-text-null">Không có trạm dừng nào.</p>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('toggleSearch').addEventListener('click', function () {
+            var searchPanel = document.getElementById('searchPanel');
+            searchPanel.style.display = searchPanel.style.display === 'block' ? 'none' : 'block';
+        });
+    </script>
+}

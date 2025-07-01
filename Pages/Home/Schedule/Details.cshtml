@@ -303,23 +303,25 @@
 
             function handleSeatClick() {
                 const seatNumber = this.dataset.seatNumber;
-                const index = selectedSeats.indexOf(seatNumber);
+    const index = selectedSeats.indexOf(seatNumber);
 
-                if (index > -1) {
-                    selectedSeats.splice(index, 1);
-                    this.style.backgroundColor = '#fff';
-                    this.classList.remove('selected');
-                } else {
-                    if (selectedSeats.length < requiredQuantity) {
-                        selectedSeats.push(seatNumber);
-                        this.style.backgroundColor = '#28a745';
-                        this.style.color = '#fff';
-                        this.classList.add('selected');
-                    } else {
-                        alert(`Bạn chỉ có thể chọn tối đa ${requiredQuantity} ghế.`);
-                    }
-                }
-                updateSeatSelectionDisplay();
+    if (index > -1) {
+        selectedSeats.splice(index, 1);
+        this.classList.remove('selected');
+        // Khôi phục style của trạng thái available
+        this.style.backgroundColor = '#fff';
+        this.style.color = '#333';
+    } else {
+        if (selectedSeats.length < requiredQuantity) {
+            selectedSeats.push(seatNumber);
+            this.classList.add('selected');
+            this.style.backgroundColor = '#28a745';
+            this.style.color = '#fff';
+        } else {
+            alert(`Bạn chỉ có thể chọn tối đa ${requiredQuantity} ghế.`);
+        }
+    }
+    updateSeatSelectionDisplay();
             }
 
             function updateSeatSelectionDisplay() {

@@ -47,6 +47,21 @@ namespace BusTicketSystem.Controllers
         public async Task<ActionResult<Ticket>> CreateTicket(Ticket ticket)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            // Lấy userId từ Claims (Identity)
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            if (string.IsNullOrEmpty(userId))
+                return Unauthorized("User is not logged in.");
+
+            if (int.TryParse(userId, out int parsedUserId))
+            {
+                ticket.UserId = parsedUserId; // Gán userId cho ticket
+            }
+            else
+            {
+                return BadRequest("Invalid user ID.");
+            }
+
             _context.Tickets.Add(ticket);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetTicket), new { id = ticket.TicketId }, ticket);

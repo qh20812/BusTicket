@@ -1,0 +1,263 @@
+@page
+@model BusTicketSystem.Pages.ForAdmin.TripStopsManage.IndexModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Quản lý Trạm dừng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a asp-page="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li>/
+            <li><a href="#" class="active" style="text-decoration: none;">Trạm dừng</a></li>
+        </ul>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        @TempData["ErrorMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <strong>Lỗi:</strong> @TempData["ActionError"]
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bi bi-signpost-fill bx'></i>
+            <h3>Danh sách Trạm dừng (@Model.Stops.Count)</h3>
+            <div class="ms-auto d-flex align-items-center">
+                <button type="button" id="addStopBtn" class="btn btn-primary btn-sm me-2">
+                    <i class="bi bi-plus-circle me-1"></i> Thêm trạm dừng
+                </button>
+            </div>
+        </div>
+
+        <!-- Filter and Search Form -->
+        <form method="get" class="mb-3 p-3 border rounded bg-light">
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label asp-for="SearchTerm" class="form-label visually-hidden">Tìm kiếm</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="bx bx-search"></i></span>
+                        <input asp-for="SearchTerm" class="form-control form-control-sm" placeholder="Tên trạm, địa chỉ..." />
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <label asp-for="SortOrder" class="form-label visually-hidden">Sắp xếp</label>
+                    <select asp-for="SortOrder" class="form-select form-select-sm">
+                        <option value="name_asc">Tên trạm (A-Z)</option>
+                        <option value="name_desc">Tên trạm (Z-A)</option>
+                        <option value="created_asc">Ngày tạo (Cũ nhất)</option>
+                        <option value="created_desc">Ngày tạo (Mới nhất)</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary btn-sm w-100">Lọc</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Biểu mẫu thêm/sửa trạm dừng -->
+        <div id="stopFormContainer" class="card p-3 mb-3" style="display: none;">
+            <form method="post" id="stopForm">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                <input type="hidden" asp-for="StopInput.StopId" />
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label asp-for="StopInput.StopName" class="form-label"></label>
+                        <input asp-for="StopInput.StopName" class="form-control" required maxlength="255" />
+                        <span asp-validation-for="StopInput.StopName" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="StopInput.Latitude" class="form-label"></label>
+                        <input asp-for="StopInput.Latitude" class="form-control" type="number" step="any" required />
+                        <span asp-validation-for="StopInput.Latitude" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-4">
+                        <label asp-for="StopInput.Longitude" class="form-label"></label>
+                        <input asp-for="StopInput.Longitude" class="form-control" type="number" step="any" required />
+                        <span asp-validation-for="StopInput.Longitude" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <label asp-for="StopInput.Address" class="form-label"></label>
+                        <input asp-for="StopInput.Address" class="form-control" maxlength="500" />
+                        <span asp-validation-for="StopInput.Address" class="text-danger"></span>
+                    </div>
+                    <div class="col-md-12">
+                        <button type="submit" class="btn btn-primary">Lưu</button>
+                        <button type="button" id="cancelStopBtn" class="btn btn-secondary">Hủy</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Bảng danh sách trạm dừng -->
+        @if (Model.Stops.Any())
+        {
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>
+                            <a asp-page="./Index" asp-route-SortOrder="@(Model.SortOrder == "name_asc" ? "name_desc" : "name_asc")"
+                               asp-all-route-data='new Dictionary<string, string> { { "SearchTerm", Model.SearchTerm ?? "" } }'
+                               class="text-decoration-none text-in-a">
+                                Tên trạm
+                                @if (Model.SortOrder == "name_asc")
+                                {<i class='bx bx-sort-up color-in-i'></i>}
+                                else if (Model.SortOrder == "name_desc")
+                                {<i class='bx bx-sort-down color-in-i'></i>}
+                                else
+                                {<i class='bx bx-sort-alt-2 text-muted color-in-i'></i>}
+                            </a>
+                        </th>
+                        <th>Vĩ độ</th>
+                        <th>Kinh độ</th>
+                        <th>Địa chỉ</th>
+                        <th>
+                            <a asp-page="./Index" asp-route-SortOrder="@(Model.SortOrder == "created_asc" ? "created_desc" : "created_asc")"
+                               asp-all-route-data='new Dictionary<string, string> { { "SearchTerm", Model.SearchTerm ?? "" } }'
+                               class="text-decoration-none text-in-a">
+                                Ngày tạo
+                                @if (Model.SortOrder == "created_asc")
+                                {<i class='bx bx-sort-up color-in-i'></i>}
+                                else if (Model.SortOrder == "created_desc")
+                                {<i class='bx bx-sort-down color-in-i'></i>}
+                                else
+                                {<i class='bx bx-sort-alt-2 text-muted color-in-i'></i>}
+                            </a>
+                        </th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var stop in Model.Stops)
+                    {
+                        <tr>
+                            <td class="truncate" title="@stop.StopName">@stop.StopName</td>
+                            <td>@stop.Latitude</td>
+                            <td>@stop.Longitude</td>
+                            <td class="truncate" title="@(stop.Address ?? "Không có")">@(stop.Address ?? "Không có")</td>
+                            <td>@stop.CreatedAt.ToString("dd/MM/yyyy HH:mm")</td>
+                            <td style="display: flex; align-items: center;">
+                                <button type="button" class="btn btn-sm btn-outline-warning edit-stop-btn" 
+                                        data-stop-id="@stop.StopId"
+                                        data-stop-name="@stop.StopName"
+                                        data-latitude="@stop.Latitude"
+                                        data-longitude="@stop.Longitude"
+                                        data-address="@(stop.Address ?? "")"
+                                        title="Sửa">
+                                    <i class="bi bi-pencil-square"></i>
+                                </button>
+                                <button type="button" class="btn btn-sm btn-outline-danger delete-stop-btn" 
+                                        data-stop-id="@stop.StopId"
+                                        title="Xóa">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        }
+        else
+        {
+            <div class="text-center p-3">
+                <p class="myorder-text-null">Không có trạm dừng nào phù hợp.</p>
+            </div>
+        }
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const stopFormContainer = document.getElementById('stopFormContainer');
+            const stopForm = document.getElementById('stopForm');
+            const addStopBtn = document.getElementById('addStopBtn');
+            const cancelStopBtn = document.getElementById('cancelStopBtn');
+
+            // Hiển thị biểu mẫu để thêm trạm mới
+            addStopBtn.addEventListener('click', function () {
+                stopForm.reset();
+                stopForm.querySelector('[name="StopInput.StopId"]').value = '0';
+                stopFormContainer.style.display = 'block';
+                stopForm.querySelectorAll('.text-danger').forEach(span => span.textContent = '');
+                $.validator.unobtrusive.parse(stopForm);
+            });
+
+            // Hủy biểu mẫu
+            cancelStopBtn.addEventListener('click', function () {
+                stopFormContainer.style.display = 'none';
+                stopForm.reset();
+            });
+
+            // Sửa trạm dừng
+            document.querySelectorAll('.edit-stop-btn').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    const stopId = this.getAttribute('data-stop-id');
+                    const stopName = this.getAttribute('data-stop-name');
+                    const latitude = this.getAttribute('data-latitude');
+                    const longitude = this.getAttribute('data-longitude');
+                    const address = this.getAttribute('data-address');
+
+                    stopForm.querySelector('[name="StopInput.StopId"]').value = stopId;
+                    stopForm.querySelector('[name="StopInput.StopName"]').value = stopName;
+                    stopForm.querySelector('[name="StopInput.Latitude"]').value = latitude;
+                    stopForm.querySelector('[name="StopInput.Longitude"]').value = longitude;
+                    stopForm.querySelector('[name="StopInput.Address"]').value = address;
+
+                    stopFormContainer.style.display = 'block';
+                    $.validator.unobtrusive.parse(stopForm);
+                });
+            });
+
+            // Xóa trạm dừng
+            document.querySelectorAll('.delete-stop-btn').forEach(btn => {
+                btn.addEventListener('click', async function () {
+                    const stopId = this.getAttribute('data-stop-id');
+                    if (confirm('Bạn có chắc muốn xóa trạm dừng này?')) {
+                        try {
+                            const response = await fetch(`/ForAdmin/TripStopsManage/Index?handler=Delete&stopId=${stopId}`, {
+                                method: 'POST',
+                                headers: {
+                                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                                }
+                            });
+                            if (response.ok) {
+                                window.location.reload();
+                            } else {
+                                alert('Lỗi khi xóa trạm dừng: ' + (await response.text()));
+                            }
+                        } catch (error) {
+                            alert('Lỗi khi xóa trạm dừng: ' + error.message);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+}

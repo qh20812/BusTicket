@@ -55,7 +55,6 @@ namespace BusTicketSystem.Pages.ForCustomer.MyOrders
                     .FirstOrDefault(c => c.Status == CancellationRequestStatus.PendingApproval);
                 ticketVm.IsCancellationPending = pendingCancellation != null;
 
-
                 if (ticket.Status == TicketStatus.Cancelled || ticket.Cancellations.Any(c => c.Status == CancellationRequestStatus.Approved))
                 {
                     CancelledTickets.Add(ticketVm);
@@ -64,7 +63,8 @@ namespace BusTicketSystem.Pages.ForCustomer.MyOrders
                 {
                     CompletedTickets.Add(ticketVm);
                 }
-                else if (ticket.Status == TicketStatus.Booked && ticket.Trip!.Status == TripStatus.Scheduled && ticket.Trip.DepartureTime > DateTime.UtcNow)
+                // Sử dụng DateTime.Now để so sánh nếu DepartureTime lưu theo giờ Việt Nam
+                else if (ticket.Status == TicketStatus.Booked && ticket.Trip!.Status == TripStatus.Scheduled && ticket.Trip.DepartureTime > DateTime.Now)
                 {
                     UpcomingTickets.Add(ticketVm);
                 }

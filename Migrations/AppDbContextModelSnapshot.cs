@@ -710,6 +710,51 @@ namespace BusTicketSystem.Migrations
                     b.ToTable("Routes");
                 });
 
+            modelBuilder.Entity("BusTicketSystem.Models.Stop", b =>
+                {
+                    b.Property<int>("StopId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    b.Property<string>("Address")
+                        .HasMaxLength(500)
+                        .HasColumnType("varchar(500)");
+
+                    b.Property<int?>("CompanyId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<double>("Latitude")
+                        .HasColumnType("double");
+
+                    b.Property<double>("Longitude")
+                        .HasColumnType("double");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<string>("StopName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.HasKey("StopId");
+
+                    b.HasIndex("CompanyId");
+
+                    b.HasIndex("StopName", "Latitude", "Longitude")
+                        .IsUnique();
+
+                    b.ToTable("Stops");
+                });
+
             modelBuilder.Entity("BusTicketSystem.Models.Ticket", b =>
                 {
                     b.Property<int>("TicketId")
@@ -1099,6 +1144,16 @@ namespace BusTicketSystem.Migrations
                     b.Navigation("ProposedByCompany");
                 });
 
+            modelBuilder.Entity("BusTicketSystem.Models.Stop", b =>
+                {
+                    b.HasOne("BusTicketSystem.Models.BusCompany", "Company")
+                        .WithMany("Stops")
+                        .HasForeignKey("CompanyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Company");
+                });
+
             modelBuilder.Entity("BusTicketSystem.Models.Ticket", b =>
                 {
                     b.HasOne("BusTicketSystem.Models.Order", "Order")
@@ -1190,6 +1245,8 @@ namespace BusTicketSystem.Migrations
                     b.Navigation("Buses");
 
                     b.Navigation("Drivers");
+
+                    b.Navigation("Stops");
 
                     b.Navigation("Trips");
                 });

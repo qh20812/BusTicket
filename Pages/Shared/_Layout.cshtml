@@ -59,14 +59,17 @@
                     class="@(requestPath.StartsWith("/home/contactus") ? "active" : "")">Liên hệ Chúng tôi</a>
             </div>
         </div>
-        <div class="buttons">
-            <a href="/HelpCenter" class="btn-help-center">
+        <div class="buttons" style="gap: 10px; align-items: center;">
+            <a asp-page="/Account/PartnerRegistration/Index" class="btn-help-center">
+                Mở bán vé trên hệ thống
+            </a>
+            <a asp-page="/HelpCenter" class="btn-help-center">
                 Hỗ trợ
             </a>
 
             @if (string.IsNullOrEmpty(username))
             {
-                <a href="/Account/Login/Login" title="Đăng nhập"
+                <a asp-page="/Account/Login/Login" title="Đăng nhập"
                     class="btn-login">
                     Đăng nhập
                 </a>
@@ -86,7 +89,7 @@
                         </li>
                         <li><a class="dropdown-item-user" href="/ForCustomer/MyAccount/Index" style="color: #1976D2;"><i class='bx bxs-user-detail'></i>Thông tin cá nhân</a></li>
                         <li><a class="dropdown-item-user" href="/ForCustomer/MyOrders/Index" style="color: #1976D2;"><i class='bx bxs-receipt'></i>Đơn hàng của tôi</a></li>
-                        <li><a class="dropdown-item-user" href="/ForCustomer/MyReviews/Index" style="color: #1976D2;"><i class='bx bxs-message-square-dots'></i>Nhận xét chuyến đi</a></li>
+                        @* <li><a class="dropdown-item-user" href="/ForCustomer/MyReviews/Index" style="color: #1976D2;"><i class='bx bxs-message-square-dots'></i>Nhận xét chuyến đi</a></li> *@
                         <li>
                             <hr class="dropdown-divider">
                         </li>
@@ -140,7 +143,7 @@
             <button>Cách đặt vé online?</button>
             <button>Hủy vé như thế nào?</button>
             <button>Làm thế nào để thanh toán?</button>
-            <button>Liên hệ tổng đài?</button>
+            <button>Liên hệ quản trị viên?</button>
         </div>
         <div id="chat"></div>
         <div id="chatbot-input-area">
@@ -148,17 +151,18 @@
             <button id="chatbot-send-btn">&#9658;</button>
         </div>
     </div>
-    <footer>
-        <section class="columns">
-            <div>
-                <img src="/images/LogoAndSlogan.png" alt="Logo&Slogan" style="margin-bottom: 5px;">
-                <p>Địa chỉ: <a href="#" class="normal">Số 123 Mã Lò, Bình Trị Đông A, Bình Tân, Tp. HCM</a></p>
-                <p>Email: <a href="#" class="email-footer">hotro@busticket.vn</a></p>
-                <p>Điện thoại: <a href="#" class="normal">0393 999 999</a></p>
+    <footer style="background:#f8fafd; border-top:1.5px solid #e3f2fd; padding:0; margin-top:32px;">
+        <section class="columns" style="max-width:1200px; margin:0 auto; display:flex; flex-wrap:wrap; gap:18px; justify-content:space-between; align-items:flex-start; padding:32px 12px 18px 12px;">
+            <div style="flex:1 1 180px; min-width:180px; max-width:220px;">
+                <img src="/images/LogoAndSlogan2.png" alt="Logo&Slogan" style="margin-bottom: 8px; width:120px;">
+                <p style="font-size:0.98rem; color:#1976D2; font-weight:700; margin-bottom:6px;">BusTicket.vn</p>
+                <p style="font-size:0.93rem; color:#333; margin-bottom:4px;">Địa chỉ: <span style="color:#1976D2;">Số 123 Mã Lò, Bình Trị Đông A, Bình Tân, Tp. HCM</span></p>
+                <p style="font-size:0.93rem; color:#333; margin-bottom:4px;">Email: <a href="mailto:hotro@busticket.vn" class="email-footer" style="color:#D32F2F;">hotro@busticket.vn</a></p>
+                <p style="font-size:0.93rem; color:#333;">Điện thoại: <a href="tel:0393999999" class="normal" style="color:#1976D2;">0393 999 999</a></p>
             </div>
-            <div>
-                <h2>Tuyến đường</h2>
-                <ul class="footer-links">
+            <div style="flex:1 1 120px; min-width:120px;">
+                <h3 style="font-size:1.05rem; color:#1976D2; font-weight:700; margin-bottom:10px;">Tuyến đường</h3>
+                <ul class="footer-links" style="font-size:0.93rem; line-height:1.7;">
                     <li><a asp-page="#">Sài Gòn - Huế</a></li>
                     <li><a asp-page="#">Sài Gòn - Đà Nẵng</a></li>
                     <li><a asp-page="#">Sài Gòn - Nha Trang</a></li>
@@ -168,9 +172,9 @@
                     <li><a asp-page="#">Vinh - Hà Nội</a></li>
                 </ul>
             </div>
-            <div>
-                <h2>Nhà xe đối tác</h2>
-                <ul class="footer-links">
+            <div style="flex:1 1 120px; min-width:120px;">
+                <h3 style="font-size:1.05rem; color:#1976D2; font-weight:700; margin-bottom:10px;">Nhà xe đối tác</h3>
+                <ul class="footer-links" style="font-size:0.93rem; line-height:1.7;">
                     <li><a asp-page="#">Phương Trang FUTA Busline</a></li>
                     <li><a asp-page="#">Xe Thanh Danh</a></li>
                     <li><a asp-page="#">Xe Long Vân Limousine</a></li>
@@ -180,9 +184,9 @@
                     <li><a asp-page="#">Xe Liên Hưng</a></li>
                 </ul>
             </div>
-            <div>
-                <h2>Bến xe hợp tác</h2>
-                <ul class="footer-links">
+            <div style="flex:1 1 120px; min-width:120px;">
+                <h3 style="font-size:1.05rem; color:#1976D2; font-weight:700; margin-bottom:10px;">Bến xe hợp tác</h3>
+                <ul class="footer-links" style="font-size:0.93rem; line-height:1.7;">
                     <li><a asp-page="#">Bến xe Nước Ngầm</a></li>
                     <li><a asp-page="#">Bến xe Miền Tây</a></li>
                     <li><a asp-page="#">Bến xe Miền Đông</a></li>
@@ -191,18 +195,19 @@
                     <li><a asp-page="#">Bến xe An Sương</a></li>
                 </ul>
             </div>
-            <div>
-                <h2>Hỗ trợ khách hàng</h2>
-                <ul class="footer-links">
-                    <li><a asp-page="/Home/BookingGuide/Index">Hướng dẫn đặt vé</a></li>
+            <div style="flex:1 1 120px; min-width:120px;">
+                <h3 style="font-size:1.05rem; color:#1976D2; font-weight:700; margin-bottom:10px;">Hỗ trợ khách hàng</h3>
+                <ul class="footer-links" style="font-size:0.93rem; line-height:1.7;">
+                    <li><a asp-page="/huong-dan-dat-ve">Hướng dẫn đặt vé</a></li>
                     <li><a asp-page="/Home/ManageBooking/Index">Tra cứu vé</a></li>
                     <li><a asp-page="/HelpCenter">Trung tâm trợ giúp</a></li>
                 </ul>
             </div>
-            <div>
-                <h2>Về Chúng tôi</h2>
-                <ul class="footer-links">
+            <div style="flex:1 1 120px; min-width:120px;">
+                <h3 style="font-size:1.05rem; color:#1976D2; font-weight:700; margin-bottom:10px;">Về Chúng tôi</h3>
+                <ul class="footer-links" style="font-size:0.93rem; line-height:1.7;">
                     <li><a asp-page="/Home/AboutUs/Index">Giới thiệu</a></li>
+                    <li><a asp-page="/Account/PartnerRegistration/Index">Mở bán vé trên hệ thống</a></li>
                     <li><a asp-page="/Account/DriverRegister/Index">Tuyển dụng</a></li>
                     <li><a asp-page="/Home/ContactUs/Index">Liên hệ</a></li>
                     <li><a asp-page="/Privacy">Chính sách bảo mật</a></li>
@@ -211,8 +216,7 @@
         </section>
     </footer>
     <div class="copyright-BT">
-        <p>© @DateTime.Now.Year | Bản quyền thuộc về StackSurfers | Chịu trách nhiệm sản xuất: Huỳnh Ngọc Quí - Vương
-            Khánh Nhân - Trần Diệu Vỹ</p>
+        <p>© @DateTime.Now.Year | Bản quyền thuộc về StackSurfers</p>
     </div>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"
         integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
@@ -221,7 +225,48 @@
         crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <script src="~/js/chatbot.js" asp-append-version="true"></script>
+    <script>
+        // Dark mode toggle logic
+        function setDarkModeUI(isDark) {
+            const body = document.body;
+            const html = document.documentElement;
+            const sun = document.getElementById('icon-sun');
+            const moon = document.getElementById('icon-moon');
+            const knob = document.getElementById('toggle-knob');
+            if (isDark) {
+                body.classList.add('darkmode');
+                html.setAttribute('data-bs-theme', 'dark');
+                sun.style.display = 'none';
+                moon.style.display = 'inline';
+                knob.style.left = '21px';
+            } else {
+                body.classList.remove('darkmode');
+                html.setAttribute('data-bs-theme', 'light');
+                sun.style.display = 'inline';
+                moon.style.display = 'none';
+                knob.style.left = '3px';
+            }
+        }
+        function getDarkModePref() {
+            if (localStorage.getItem('darkmode') === 'true') return true;
+            if (localStorage.getItem('darkmode') === 'false') return false;
+            return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        }
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggle = document.getElementById('darkmode-toggle');
+            const sun = document.getElementById('icon-sun');
+            const moon = document.getElementById('icon-moon');
+            const knob = document.getElementById('toggle-knob');
+            if (!toggle || !sun || !moon || !knob) return;
+            let isDark = getDarkModePref();
+            setDarkModeUI(isDark);
+            toggle.addEventListener('click', function () {
+                isDark = !isDark;
+                setDarkModeUI(isDark);
+                localStorage.setItem('darkmode', isDark);
+            });
+        });
+    </script>
     @RenderSection("Scripts", required: false)
 </body>
-
 </html>

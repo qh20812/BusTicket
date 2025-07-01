@@ -27,12 +27,12 @@ public class IndexModel(AppDbContext context) : PageModel
             .Include(t => t.Route)
             .Where(t => t.Status == TripStatus.Scheduled)
             .OrderBy(t => t.DepartureTime)
-            .Take(6)
+            .Take(8)
             .ToListAsync();
 
         var popularTrip = await _context.Routes
             .Where(r => r.Status == RouteStatus.Approved)
-            .Take(6)
+            .Take(8)
             .ToListAsync();
 
         Popular = popularTrip.Select(r => new TripViewModel(new Trip { Route = r, DepartureTime = DateTime.UtcNow }, TimeSpan.Zero)).ToList();
@@ -40,7 +40,7 @@ public class IndexModel(AppDbContext context) : PageModel
         RecentPosts = await _context.Posts
             .Where(p => p.Status == PostStatus.Published)
             .OrderByDescending(p => p.CreatedAt)
-            .Take(3)
+            .Take(4)
             .ToListAsync();
     }
 

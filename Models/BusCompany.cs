@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 namespace BusTicketSystem.Models
 {
     public enum BusCompanyStatus
-    { // SQL: 0: PendingApproval, 1: UnderReview, 2: Active, 3: Inactive, 4: Rejected, 5: Terminated
+    {
         [Display(Name = "Chờ duyệt")]
         PendingApproval = 0,
         [Display(Name = "Đang xem xét")]
@@ -24,8 +24,8 @@ namespace BusTicketSystem.Models
         [Required]
         [StringLength(100)]
         public string CompanyName { get; set; } = string.Empty;
-        public string? Address { get; set; } =  string.Empty;
-        [StringLength(20)] // Tăng giới hạn để khớp với DB VARCHAR(20)
+        public string? Address { get; set; } = string.Empty;
+        [StringLength(20)]
         [Phone]
         public string? Phone { get; set; } = string.Empty;
         [StringLength(100)]
@@ -48,7 +48,7 @@ namespace BusTicketSystem.Models
         public string? ContactPersonPhone { get; set; }
 
         [Required]
-        public BusCompanyStatus Status { get; set; } = BusCompanyStatus.PendingApproval; // Sẽ đặt giá trị cụ thể khi tạo
+        public BusCompanyStatus Status { get; set; } = BusCompanyStatus.PendingApproval;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
@@ -56,18 +56,20 @@ namespace BusTicketSystem.Models
         public DateTime? RejectedAt { get; set; }
         public string? TerminationReason { get; set; }
         public DateTime? TerminatedAt { get; set; }
-        public DateTime? ReviewedAt { get; set; } // Ngày admin bắt đầu xem xét
-        public DateTime? ApprovedAt { get; set; } // Ngày chính thức hoạt động
+        public DateTime? ReviewedAt { get; set; }
+        public DateTime? ApprovedAt { get; set; }
 
-        public ICollection<Bus> Buses { get; set; } // Gỡ bỏ 'required'
-        public ICollection<Driver> Drivers { get; set; } // Gỡ bỏ 'required'
-        public ICollection<Trip> Trips { get; set; } // Gỡ bỏ 'required'
+        public ICollection<Bus> Buses { get; set; }
+        public ICollection<Driver> Drivers { get; set; }
+        public ICollection<Trip> Trips { get; set; }
+        public ICollection<Stop> Stops { get; set; } // Thêm mối quan hệ
 
         public BusCompany()
         {
             Buses = new List<Bus>();
             Drivers = new List<Driver>();
             Trips = new List<Trip>();
+            Stops = new List<Stop>();
         }
     }
 }

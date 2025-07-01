@@ -1,0 +1,49 @@
+@model BusTicketSystem.Pages.ForPartner.TripManage.TripStopInputModel
+
+<div class="row g-3 mb-3 trip-stop-item border rounded p-3 bg-light" data-index="@ViewData["Index"]">
+    <input type="hidden" name="TripInput.TripStops[@ViewData["Index"]].StopId" value="@Model.StopId" />
+    <div class="col-md-2">
+        <label class="form-label">Thứ tự</label>
+        <input type="number" name="TripInput.TripStops[@ViewData["Index"]].StopOrder" value="@Model.StopOrder" class="form-control form-control-sm" required min="1" readonly />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].StopOrder" class="text-danger"></span>
+    </div>
+    <div class="col-md-4">
+        <label class="form-label">Tên trạm</label>
+        <select name="TripInput.TripStops[@ViewData["Index"]].StopId" class="form-select" onchange="loadStopDetails(this, @ViewData["Index"])">
+            <option value="">-- Chọn trạm dừng --</option>
+            @foreach (var stop in ViewData["Stops"] as List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>)
+            {
+                <option value="@stop.Value" selected="@(stop.Value == Model.StopId.ToString() ? "selected" : null)">@stop.Text</option>
+            }
+        </select>
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].StopId" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Vĩ độ</label>
+        <input type="number" step="any" name="TripInput.TripStops[@ViewData["Index"]].Latitude" value="@(Model.Latitude?.ToString() ?? "")" class="form-control form-control-sm" required readonly />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].Latitude" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Kinh độ</label>
+        <input type="number" step="any" name="TripInput.TripStops[@ViewData["Index"]].Longitude" value="@(Model.Longitude?.ToString() ?? "")" class="form-control form-control-sm" required readonly />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].Longitude" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Đến (dự kiến)</label>
+        <input type="time" name="TripInput.TripStops[@ViewData["Index"]].EstimatedArrival" value="@(Model.EstimatedArrival?.ToString("hh\\:mm") ?? "")" class="form-control form-control-sm" />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].EstimatedArrival" class="text-danger"></span>
+    </div>
+    <div class="col-md-3">
+        <label class="form-label">Đi (dự kiến)</label>
+        <input type="time" name="TripInput.TripStops[@ViewData["Index"]].EstimatedDeparture" value="@(Model.EstimatedDeparture?.ToString("hh\\:mm") ?? "")" class="form-control form-control-sm" />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].EstimatedDeparture" class="text-danger"></span>
+    </div>
+    <div class="col-md-5">
+        <label class="form-label">Ghi chú</label>
+        <input type="text" name="TripInput.TripStops[@ViewData["Index"]].Note" value="@Model.Note" class="form-control form-control-sm" maxlength="500" />
+        <span data-valmsg-for="TripInput.TripStops[@ViewData["Index"]].Note" class="text-danger"></span>
+    </div>
+    <div class="col-md-1 d-flex align-items-end">
+        <button type="button" class="btn btn-danger btn-sm remove-trip-stop-btn w-100"><i class="bi bi-x-circle"></i> Xóa</button>
+    </div>
+</div>

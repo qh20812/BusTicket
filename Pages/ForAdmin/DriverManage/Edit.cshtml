@@ -94,15 +94,15 @@
                         <span asp-validation-for="DriverInput.Status" class="text-danger"></span>
                     </div>
                 </div>
-                @* <div class="col-md-6">
-                    <div class="mb-3">
-                        <label asp-for="DriverInput.CompanyId" class="form-label"></label>
-                        <select asp-for="DriverInput.CompanyId" asp-items="Model.Companies" class="form-select">
-                            <option value="">-- Chọn công ty (nếu có) --</option>
-                        </select>
-                        <span asp-validation-for="DriverInput.CompanyId" class="text-danger"></span>
-                    </div>
-                </div> *@
+               <div class="col-md-6">
+    <div class="mb-3">
+        <label asp-for="DriverInput.CompanyId" class="form-label"></label>
+        <select asp-for="DriverInput.CompanyId" asp-items="Model.Companies" class="form-select">
+            <option value="">-- Chọn nhà xe --</option>
+        </select>
+        <span asp-validation-for="DriverInput.CompanyId" class="text-danger"></span>
+    </div>
+</div>
             </div>
 
             <div class="mt-4">

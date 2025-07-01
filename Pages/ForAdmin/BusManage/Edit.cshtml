@@ -51,7 +51,6 @@
                             <option value="Ghế 2 tầng">Ghế 2 tầng</option>
                             <option value="Ghế 1 tầng">Ghế 1 tầng</option>
                         </select>
-                        @* <input asp-for="BusInput.BusType" class="form-control" /> *@
                         <span asp-validation-for="BusInput.BusType" class="text-danger"></span>
                     </div>
                 </div>
@@ -61,7 +60,7 @@
                 <div class="col-md-6">
                     <div class="mb-3">
                         <label asp-for="BusInput.Capacity" class="form-label"></label>
-                        <input asp-for="BusInput.Capacity" class="form-control" type="number" min="1" />
+                        <input asp-for="BusInput.Capacity" class="form-control" type="number" min="1" max="100" />
                         <span asp-validation-for="BusInput.Capacity" class="text-danger"></span>
                     </div>
                 </div>

@@ -38,6 +38,16 @@ namespace BusTicketSystem.Pages.ForAdmin.Posts
             if (existingPost == null)
                 return NotFound();
 
+            // Lấy userId từ claims (nếu cần cập nhật hoặc kiểm tra quyền)
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier);
+            int? userId = null;
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var uid))
+                userId = uid;
+
+            // Nếu muốn kiểm tra quyền chỉnh sửa, có thể kiểm tra userId == existingPost.UserId
+            // Nếu muốn cập nhật UserId cho post, bỏ comment dòng dưới:
+            // if (userId.HasValue) existingPost.UserId = userId.Value;
+
             existingPost.Title = Post.Title;
             existingPost.Content = Post.Content;
             existingPost.Category = Post.Category;

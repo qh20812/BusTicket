@@ -1,0 +1,117 @@
+@page "{id:int}"
+@model BusTicketSystem.Pages.ForAdmin.TripStopsManage.EditModel
+@{
+    Layout = "_AdminLayout";
+    ViewData["Title"] = "Duyệt Trạm dừng";
+}
+
+<div class="header">
+    <div class="left">
+        <h1>@ViewData["Title"]</h1>
+        <ul class="breadcrumb">
+            <li><a href="/ForAdmin/Dashboard/Index" style="text-decoration: none;">Tổng quan</a></li> /
+            <li><a href="/ForAdmin/TripStopsManage/Index" style="text-decoration: none;">Trạm dừng</a></li> /
+            <li><a href="#" class="active" style="text-decoration: none;">Duyệt</a></li>
+        </ul>
+    </div>
+</div>
+
+<div class="bottom-data">
+    <div class="orders">
+        <div class="header">
+            <i class='bx bx-map'></i>
+            <h3>Thông tin Trạm dừng: @Model.StopInput.StopName</h3>
+        </div>
+
+        <form method="post" class="p-3">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+            <input type="hidden" asp-for="StopInput.StopId" />
+            <input type="hidden" asp-for="StopInput.CompanyId" />
+
+            <div class="alert alert-info">
+                Nhà xe đề xuất: <strong>@Model.PartnerCompanyName</strong>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="StopInput.StopName" class="form-label"></label>
+                        <input asp-for="StopInput.StopName" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="StopInput.Address" class="form-label"></label>
+                        <input asp-for="StopInput.Address" class="form-control" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="StopInput.Latitude" class="form-label"></label>
+                        <input asp-for="StopInput.Latitude" class="form-control" readonly />
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label asp-for="StopInput.Longitude" class="form-label"></label>
+                        <input asp-for="StopInput.Longitude" class="form-control" readonly />
+                    </div>
+                </div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StopInput.Status" class="form-label"></label>
+                <select asp-for="StopInput.Status" class="form-select">
+                    <option value="PendingApproval">Chờ duyệt</option>
+                    <option value="Approved">Đã duyệt</option>
+                    <option value="Rejected">Bị từ chối</option>
+                </select>
+                <span asp-validation-for="StopInput.Status" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="rejectionReason" style="@(Model.StopInput.Status == BusTicketSystem.Models.StopStatus.Rejected ? "" : "display:none")">
+                <label for="RejectionReason" class="form-label">Lý do từ chối</label>
+                <textarea id="RejectionReason" name="RejectionReason" class="form-control"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Dùng chung cho hệ thống</label>
+                <input type="checkbox" name="UseForAll" checked />
+                <span class="form-text">Nếu chọn, trạm dừng sẽ được dùng chung cho tất cả nhà xe (CompanyId = null).</span>
+            </div>
+
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary">Lưu</button>
+                <a asp-page="./Index" class="btn btn-secondary">Hủy</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        document.getElementById("StopInput_Status").addEventListener("change", function () {
+            document.getElementById("rejectionReason").style.display = this.value === "Rejected" ? "block" : "none";
+        });
+    </script>
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function (e) {
+            const stopOrders = Array.from(container.querySelectorAll('input[name$=".StopOrder"]'))
+                .map(input => parseInt(input.value))
+                .filter(val => !isNaN(val));
+            const uniqueOrders = new Set(stopOrders);
+            if (uniqueOrders.size !== stopOrders.length) {
+                e.preventDefault();
+                const validationSummary = document.getElementById('mainTripFormValidationSummary');
+                validationSummary.innerHTML = '<div class="text-danger">Thứ tự dừng không được trùng lặp.</div>';
+            }
+        });
+    });
+</script>
+}

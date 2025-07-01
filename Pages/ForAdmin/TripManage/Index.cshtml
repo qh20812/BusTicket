@@ -159,32 +159,20 @@
                                     <i class="bx bx-info-circle" title="Lý do hủy: @trip.CancellationReason" style="cursor:help; color: #dc3545; margin-left: 5px;"></i>
                                 }
                             </td>
-                            <td style="display: flex; align-items: center;">
+                            <td style="display: flex; align-items: center; gap: 0.25rem;">
                                 <a asp-page="./Edit" asp-route-id="@trip.TripId" class="btn btn-sm btn-outline-primary" title="Sửa"><i class="bi bi-pencil-square"></i></a>
-                                @if (trip.CanCancel)
+                                @if (trip.CanApprove)
                                 {
-                                    <button type="button" class="btn btn-sm btn-outline-warning btn-action-modal"
-                                            data-bs-toggle="modal" data-bs-target="#tripActionModal"
-                                            data-trip-id="@trip.TripId" data-route-name="@trip.RouteName" data-action-type="Cancel" data-modal-title="Hủy chuyến đi">
-                                        <i class="bi bi-calendar-x"></i>
-                                    </button>
+                                    <form method="post" asp-page-handler="Approve" asp-route-id="@trip.TripId" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-success" title="Duyệt chuyến đi"><i class="bi bi-check-circle"></i> Duyệt</button>
+                                    </form>
                                 }
-                                @* @if (trip.CanCompleteManually)
-                                {
-                                    <button type="button" class="btn btn-sm btn-outline-success btn-action-modal"
-                                            data-bs-toggle="modal" data-bs-target="#tripActionModal"
-                                            data-trip-id="@trip.TripId" data-route-name="@trip.RouteName" data-action-type="Complete" data-modal-title="Hoàn thành chuyến đi" title="Hoàn thành chuyến đi">
-                                        <i class="bi bi-calendar-check"></i>
-                                    </button>
-                                } *@
                                 @if (trip.CanDelete)
                                 {
                                     <form method="post" asp-page-handler="Delete" asp-route-id="@trip.TripId" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa chuyến đi ID @trip.TripId (@trip.RouteName) không? Hành động này không thể hoàn tác.');">
                                         <button type="submit" class="btn btn-sm btn-outline-danger" title="Xóa"><i class="bi bi-trash"></i></button>
                                     </form>
                                 }
-                                <button type="button" class="btn btn-sm btn-outline-info view-trip-map-btn" data-bs-toggle="modal" data-bs-target="#tripMapModal" data-trip-id="@trip.TripId" title="Xem lộ trình trên bản đồ"><i class="bi bi-geo-alt"></i></button>
-                                <a asp-page="./RouteMap" asp-route-tripId="@trip.TripId" class="btn btn-sm btn-outline-secondary" title="Xem chi tiết điểm dừng"><i class="bi bi-signpost-2"></i></a>
                             </td>
                         </tr>
                     }
@@ -235,8 +223,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <div id="tripMapContainer" style="height: 500px; width: 100%; border-radius: 8px;">
-                </div>
+                <div id="tripMapContainer" style="height: 500px; width: 100%; border-radius: 8px;"></div>
                 <div id="tripRouteInfo" class="mt-2">
                     <p><strong>Khoảng cách:</strong> <span id="mapDistance">N/A</span></p>
                     <p><strong>Thời gian dự kiến:</strong> <span id="mapDuration">N/A</span></p>
@@ -256,6 +243,23 @@
         var actionTypeOnError = "@(TempData["ActionTypeOnError"] as string)";
         document.addEventListener('DOMContentLoaded', function () {
             // JavaScript for tripActionModal remains
+            // Cải thiện UX cho modal bản đồ
+            document.querySelectorAll('.view-trip-map-btn').forEach(button => {
+                button.addEventListener('click', function () {
+                    // Lấy tên lộ trình từ dòng bảng
+                    const tr = button.closest('tr');
+                    const routeNameCell = tr ? tr.querySelector('td:nth-child(2)') : null;
+                    const tripRouteName = routeNameCell ? routeNameCell.textContent.trim() : `ID ${button.getAttribute('data-trip-id')}`;
+                    document.getElementById('tripMapModalLabel').textContent = `Lộ trình Chuyến đi: ${tripRouteName}`;
+                });
+            });
+            // Reset modal khi đóng
+            const tripMapModalElement = document.getElementById('tripMapModal');
+            if (tripMapModalElement) {
+                tripMapModalElement.addEventListener('hidden.bs.modal', function () {
+                    document.getElementById('tripMapModalLabel').textContent = 'Lộ trình Chuyến đi';
+                });
+            }
         });
     </script>
 }

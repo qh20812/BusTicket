@@ -1,0 +1,93 @@
+@page
+@model BusTicketSystem.Pages.HuongDanDatVeModel
+@{
+    ViewData["Title"] = "Hướng Dẫn Đặt Vé";
+    Layout = "_Layout";
+}
+
+<h1 class="text-center my-4 text-primary fw-bold" style="font-size: 2.2rem;">HƯỚNG DẪN ĐẶT VÉ XE TRỰC TUYẾN</h1>
+<div class="container guide-steps mb-5">
+    <div class="row g-4">
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step0.png" class="card-img-top step-img" alt="Bước 1: Chọn điểm đi, điểm đến">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 1: Chọn điểm đi, điểm đến</h5>
+                    <p class="card-text">Trên trang chủ, nhập điểm xuất phát, điểm đến, ngày đi, số lượng vé và nhấn <strong>Tìm chuyến</strong>.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step1.png" class="card-img-top step-img" alt="Bước 2: Xem danh sách chuyến đi">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 2: Xem danh sách chuyến đi</h5>
+                    <p class="card-text">Hệ thống hiển thị các chuyến phù hợp. Xem thông tin chi tiết từng chuyến và chọn chuyến phù hợp nhất.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step2.png" class="card-img-top step-img" alt="Bước 3: Đặt vé">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 3: Đặt vé</h5>
+                    <p class="card-text">Nhấn nút <strong>Đặt vé</strong> hoặc <strong>Xem chi tiết</strong> ở chuyến bạn muốn đi để bắt đầu quá trình đặt vé.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step3.png" class="card-img-top step-img" alt="Bước 4: Nhập thông tin hành khách">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 4: Nếu chọn <strong>Xem chi tiết</strong></h5>
+                    <p class="card-text">Thông tin cụ thể của chuyến đi sẽ được hiển thị. Sau đó nhấn <strong>Đặt vé</strong> để tiếp tục.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step4.png" class="card-img-top step-img" alt="Bước 5: Chọn ghế">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 5: Nhập thông tin</h5>
+                    <p class="card-text">Điền số điện thoại liên hệ và các thông tin cần thiết khác vào form đặt vé.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step5.png" class="card-img-top step-img" alt="Bước 6: Xác nhận đặt vé">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 6: Chọn ghế</h5>
+                    <p class="card-text">Chọn số ghế mong muốn trên sơ đồ xe. Số ghế đã chọn sẽ được đánh dấu màu xanh.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step6.png" class="card-img-top step-img" alt="Bước 7: Thanh toán">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 7: Xem hóa đơn chi tiết</h5>
+                    <p class="card-text">Kiểm tra lại thông tin hóa đơn, đảm bảo mọi thông tin đều chính xác.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step7.png" class="card-img-top step-img" alt="Bước 8: Nhận vé và kiểm tra thông tin">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 8: Thanh toán</h5>
+                    <p class="card-text">Kiểm tra kỹ lại vé, sau đó quét mã QR để hoàn tất thanh toán.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-12 col-md-6 step-block">
+            <div class="card h-100 shadow-sm">
+                <img src="/images/guide/step8.png" class="card-img-top step-img" alt="Bước 9: Hoàn tất đặt vé">
+                <div class="card-body">
+                    <h5 class="card-title text-success">Bước 9: Nhận vé và kiểm tra thông tin</h5>
+                    <p class="card-text">Sau khi đặt vé thành công, bạn sẽ nhận được mã vé và thông tin chi tiết. Kiểm tra lại thông tin và lưu lại mã vé để sử dụng khi lên xe.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

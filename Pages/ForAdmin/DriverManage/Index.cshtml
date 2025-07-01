@@ -16,9 +16,6 @@
             </li>
         </ul>
     </div>
-    <a href="#" class="report" style="text-decoration: none;">
-        <i class="bx bx-cloud-download"></i> Tải CSV
-</a>
 </div>
 
 @if (TempData["SuccessMessage"] != null)
@@ -28,16 +25,19 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
-@if (TempData["ActionError"] != null && !ViewData.ModelState.IsValid)
+@if (TempData["ActionError"] != null)
 {
     <div class="alert alert-danger alert-dismissible fade show" role="alert">
         <strong>Lỗi:</strong> @TempData["ActionError"]
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
-            }
-        </ul>
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        }
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
 }
@@ -273,12 +273,16 @@
                 var actionType = button.getAttribute('data-action-type'); // "Reject" or "Terminate"
                 var modalTitle = button.getAttribute('data-modal-title');
 
+                // Always set hidden input values explicitly on modal show
+                var driverIdInput = actionModalElement.querySelector('#driverIdToActionInputModal');
+                var actionTypeInput = actionModalElement.querySelector('#actionTypeInputModal');
+                if (driverIdInput) driverIdInput.value = driverId;
+                if (actionTypeInput) actionTypeInput.value = actionType;
+
                 actionModalElement.querySelector('#driverActionModalLabel').textContent = modalTitle;
                 actionModalElement.querySelector('#driverNameToActionModal').textContent = driverName;
-                actionModalElement.querySelector('#driverIdToActionInputModal').value = driverId;
-                actionModalElement.querySelector('#actionTypeInputModal').value = actionType;
                 actionModalElement.querySelector('#actionNameModal').textContent = (actionType === "Reject" ? "từ chối" : "sa thải");
-                
+
                 var confirmButton = actionModalElement.querySelector('#confirmActionButton');
                 confirmButton.className = 'btn'; // Reset class
                 confirmButton.classList.add(actionType === "Reject" ? 'btn-warning' : 'btn-danger');
@@ -295,6 +299,23 @@
                 }
             });
 
+            // Always re-bind hidden input values on form submit (in case of ModelState error and modal re-show)
+            var driverActionForm = document.getElementById('driverActionForm');
+            if (driverActionForm) {
+                driverActionForm.addEventListener('submit', function (e) {
+                    var driverIdInput = actionModalElement.querySelector('#driverIdToActionInputModal');
+                    var actionTypeInput = actionModalElement.querySelector('#actionTypeInputModal');
+                    // Try to get from modal data attributes if possible
+                    var driverId = driverIdInput ? driverIdInput.value : '';
+                    var actionType = actionTypeInput ? actionTypeInput.value : '';
+                    // Defensive: if missing, try to get from TempData (for error re-show)
+                    if (!driverId && typeof driverIdOnError !== 'undefined') driverId = driverIdOnError;
+                    if (!actionType && typeof actionTypeOnError !== 'undefined') actionType = actionTypeOnError;
+                    if (driverIdInput) driverIdInput.value = driverId;
+                    if (actionTypeInput) actionTypeInput.value = actionType;
+                });
+            }
+
 
             var driverIdOnError = '@(TempData["ShowActionModalOnError"] as string)';
             var actionTypeOnError = '@(TempData["ActionTypeOnError"] as string)';
@@ -308,10 +329,13 @@
                 } else {
                      actionModalElement.querySelector('#driverActionModalLabel').textContent = (actionTypeOnError === "Reject" ? "Từ chối hồ sơ" : "Sa thải tài xế");
                 }
-                
+                // Always set hidden input values explicitly on error re-show
+                var driverIdInput = actionModalElement.querySelector('#driverIdToActionInputModal');
+                var actionTypeInput = actionModalElement.querySelector('#actionTypeInputModal');
+                if (driverIdInput) driverIdInput.value = driverIdOnError;
+                if (actionTypeInput) actionTypeInput.value = actionTypeOnError;
+
                 actionModalElement.querySelector('#driverNameToActionModal').textContent = driverNameOnError;
-                actionModalElement.querySelector('#driverIdToActionInputModal').value = driverIdOnError;
-                actionModalElement.querySelector('#actionTypeInputModal').value = actionTypeOnError;
                 actionModalElement.querySelector('#actionNameModal').textContent = (actionTypeOnError === "Reject" ? "từ chối" : "sa thải");
 
                 var confirmButton = actionModalElement.querySelector('#confirmActionButton');
@@ -333,7 +357,7 @@
                     alert.style.display = 'none';
                 }
             }, 10000); 
-        }
+        });
     });
     </script>
 }

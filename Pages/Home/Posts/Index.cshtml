@@ -7,8 +7,14 @@
     ViewData["Title"] = "Bài Viết - Tin Tức";
 }
 
-<div class="container mt-4 mb-5">
-    <h1 class="mb-4 text-center" id="latestPosts">Tin Tức & Bài Viết Mới Nhất</h1>
+<div class="container mt-4 mb-5 post-list-container" style="max-width:1200px;">
+    <div class="news-hero-block mb-4 p-4" style="background: linear-gradient(90deg,#e3f2fd 70%,#fff 100%); border-radius: 18px; box-shadow: 0 4px 24px rgba(25,118,210,0.10); display: flex; align-items: center; gap: 32px;">
+        <img src="https://cdn-icons-png.flaticon.com/512/3135/3135765.png" alt="Tin tức" style="width: 90px; height: 90px; object-fit: contain; border-radius: 16px; background: #fff; box-shadow: 0 2px 8px rgba(25,118,210,0.07);">
+        <div style="flex:1;">
+            <h1 class="mb-2" id="latestPosts" style="font-size:2.3rem; font-weight:800; color:#1976D2; letter-spacing:0.5px; text-shadow:0 2px 8px rgba(25,118,210,0.08);">Tin Tức & Bài Viết Mới Nhất</h1>
+            <div style="font-size:1.13rem; color:#333; font-weight:500;">Khám phá các thông tin, kinh nghiệm, ưu đãi và cập nhật mới nhất về dịch vụ xe khách, du lịch, đặt vé và hành trình an toàn.</div>
+        </div>
+    </div>
 
     @if (Model.Posts != null && Model.Posts.Any())
     {
@@ -17,10 +23,10 @@
             {
                 <div class="col">
                     <a asp-page="./Details" asp-route-id="@post.PostId" class="post-card-link" style="text-decoration: none; color: inherit;">
-                        <div class="card h-100 post-card">
+                        <div class="card h-100 post-card" style="transition:box-shadow 0.18s,transform 0.18s;">
                             @if (!string.IsNullOrEmpty(post.ImageUrl))
                             {
-                                <img src="@post.ImageUrl" class="card-img-top post-card-image" alt="@post.Title">
+                                <img src="@post.ImageUrl" class="card-img-top post-card-image" alt="@post.Title" style="border-radius: 0.8rem 0.8rem 0 0;">
                             }
                             else
                             {
@@ -29,20 +35,18 @@
                                 </div>
                             }
                             <div class="card-body post-card-content">
-                                <h5 class="card-title post-card-title">@post.Title</h5>
-                                <p class="card-text post-card-category">
-                                    <span class="badge bg-secondary">@post.Category.GetDisplayName()</span>
+                                <h5 class="card-title post-card-title" style="font-size:1.18rem; font-weight:700; color:#1976D2;">@post.Title</h5>
+                                <p class="card-text post-card-category mb-2">
+                                    <span class="badge post-category-badge">@post.Category.GetDisplayName()</span>
                                 </p>
-                                @* 
-                                // Nếu muốn hiển thị một đoạn tóm tắt nội dung:
-                                string summary = post.Content.Length > 100 ? post.Content.Substring(0, 100) + "..." : post.Content;
-                                <p class="card-text post-card-summary">@Html.Raw(summary)</p> 
-                                *@
+                                @{
+                                    string summary = post.Content.Length > 100 ? post.Content.Substring(0, 100) + "..." : post.Content;
+                                }
+                                <p class="card-text post-card-summary" style="font-size:0.98rem; color:#444;">@Html.Raw(summary)</p>
                             </div>
-                            <div class="card-footer post-card-footer">
+                            <div class="card-footer post-card-footer" style="background:transparent; border-top:1px solid #f1f1f1;">
                                 <small class="text-muted post-card-date">
-                                    Đăng ngày: @post.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
-                                    @* @if(post.User != null) { <span> bởi @post.User.Fullname</span> } *@
+                                    <i class="bi bi-calendar-event me-1"></i> @post.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy")
                                 </small>
                             </div>
                         </div>

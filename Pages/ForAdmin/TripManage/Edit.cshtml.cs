@@ -5,24 +5,25 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
-using System.Globalization;
-using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
+using System.ComponentModel.DataAnnotations;
 
 namespace BusTicketSystem.Pages.ForAdmin.TripManage
 {
     [Authorize(Roles = "Admin")]
     public class EditModel : PageModel
     {
+        private readonly IConfiguration _configuration;
         private readonly AppDbContext _context;
 
-        public EditModel(AppDbContext context)
+        public EditModel(AppDbContext context, IConfiguration configuration)
         {
             _context = context;
+            _configuration = configuration;
         }
-
+        public string MapboxAccessToken => _configuration["Mapbox:AccessToken"] ?? string.Empty;
         [BindProperty]
         public TripInputModel TripInput { get; set; } = new TripInputModel();
 
@@ -31,81 +32,68 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
         public SelectList Drivers { get; set; } = new SelectList(Enumerable.Empty<SelectListItem>());
         public SelectList Companies { get; set; } = new SelectList(Enumerable.Empty<SelectListItem>());
 
-
-        private async Task LoadSelectListsAsync(int? selectedRouteId = null, int? selectedBusId = null, int? selectedDriverId = null, int? selectedCompanyId = null, bool filterDriversByCompany = false)
+        private async Task LoadSelectListsAsync(int? selectedRouteId = null, int? selectedBusId = null, int? selectedDriverId = null, int? selectedCompanyId = null)
         {
             var activeRoutes = await _context.Routes
-                                .OrderBy(r => r.Departure)
-                                .ThenBy(r => r.Destination)
-                                .Select(r => new { r.RouteId, Name = $"{r.Departure} \u2192 {r.Destination} (ID: {r.RouteId})" })
-                                .AsNoTracking() // Thêm AsNoTracking nếu chỉ đọc dữ liệu
-                                .ToListAsync();
+                .Where(r => r.Status == RouteStatus.Approved)
+                .OrderBy(r => r.Departure)
+                .ThenBy(r => r.Destination)
+                .Select(r => new { r.RouteId, Name = $"{r.Departure} \u2192 {r.Destination} (ID: {r.RouteId})" })
+                .AsNoTracking()
+                .ToListAsync();
             Routes = new SelectList(activeRoutes ?? Enumerable.Empty<object>(), "RouteId", "Name", selectedRouteId);
 
-            // Chỉ lấy xe đang hoạt động và chưa được gán cho chuyến nào khác trùng thời gian (logic phức tạp hơn, tạm thời lấy hết xe active)
-            var activeBuses = await _context.Buses
-                                .Where(b => b.Status == BusStatus.Active) // Giả sử Bus có Status
-                                .OrderBy(b => b.LicensePlate)
-                                .Select(b => new { b.BusId, Name = $"{b.LicensePlate} ({b.BusType} - {b.Capacity} ghế)" })
-                                .AsNoTracking()
-                                .ToListAsync();
+            var busQuery = _context.Buses.Where(b => b.Status == BusStatus.Active);
+            if (selectedCompanyId.HasValue)
+            {
+                busQuery = busQuery.Where(b => b.CompanyId == selectedCompanyId.Value);
+            }
+            var activeBuses = await busQuery
+                .OrderBy(b => b.LicensePlate)
+                .Select(b => new { b.BusId, Name = $"{b.LicensePlate} ({b.BusType} - {b.Capacity} ghế)" })
+                .AsNoTracking()
+                .ToListAsync();
             Buses = new SelectList(activeBuses ?? Enumerable.Empty<object>(), "BusId", "Name", selectedBusId);
 
-            IQueryable<Driver> driversQuery = _context.Drivers.Where(d => d.Status == DriverStatus.Active);
-
-            if (filterDriversByCompany && selectedCompanyId.HasValue)
+            var driverQuery = _context.Drivers.Where(d => d.Status == DriverStatus.Active);
+            if (selectedCompanyId.HasValue)
             {
-                driversQuery = driversQuery.Where(d => d.CompanyId == selectedCompanyId.Value);
+                driverQuery = driverQuery.Where(d => d.CompanyId == selectedCompanyId.Value);
             }
-            else if (filterDriversByCompany && !selectedCompanyId.HasValue)
-            {
-                // Nếu filterDriversByCompany là true nhưng không có selectedCompanyId (ví dụ: người dùng xóa chọn nhà xe),
-                // thì sẽ hiển thị danh sách rỗng nếu tất cả tài xế đều thuộc nhà xe nào đó.
-                // Hoặc, có thể hiển thị tất cả tài xế active (hành vi hiện tại nếu filterDriversByCompany = false).
-                // Hiện tại, để đơn giản, nếu không có companyId cụ thể để lọc, sẽ không áp dụng thêm điều kiện lọc CompanyId.
-            }
-
-            var activeDrivers = await driversQuery.OrderBy(d => d.Fullname)
-                                     .Select(d => new { d.DriverId, Name = $"{d.Fullname} (ID: {d.DriverId})" })
-                                     .AsNoTracking()
-                                     .ToListAsync();
+            var activeDrivers = await driverQuery
+                .OrderBy(d => d.Fullname)
+                .Select(d => new { d.DriverId, Name = $"{d.Fullname} (ID: {d.DriverId})" })
+                .AsNoTracking()
+                .ToListAsync();
             Drivers = new SelectList(activeDrivers, "DriverId", "Name", selectedDriverId);
 
             var activeCompanies = await _context.BusCompanies
-                                .Where(c => c.Status == BusCompanyStatus.Active) // Giả sử BusCompany có Status
-                                .OrderBy(c => c.CompanyName)
-                                .Select(c => new { c.CompanyId, c.CompanyName }) // Chọn các thuộc tính cần thiết
-                                .AsNoTracking()
-                                .ToListAsync();
-
-            // Tạo danh sách SelectListItem cho Companies để có thể thêm mục "Không có"
+                .Where(c => c.Status == BusCompanyStatus.Active)
+                .OrderBy(c => c.CompanyName)
+                .Select(c => new { c.CompanyId, c.CompanyName })
+                .AsNoTracking()
+                .ToListAsync();
             var companyListItems = activeCompanies?.Select(c => new SelectListItem
             {
                 Value = c.CompanyId.ToString(),
                 Text = c.CompanyName
             }).ToList() ?? new List<SelectListItem>();
-
-            // Thêm mục "Không có" vào đầu danh sách nếu cần thiết (hoặc để trống optionLabel trong select tag)
-            // Nếu bạn muốn "Không có" là một lựa chọn có giá trị null hoặc 0:
-            // companyListItems.Insert(0, new SelectListItem { Value = "", Text = "Không có" });
-            // Hoặc dựa vào optionLabel trong tag select HTML: <option value="">-- Chọn nhà xe (nếu có) --</option>
-
             Companies = new SelectList(companyListItems, "Value", "Text", selectedCompanyId);
         }
 
         public async Task<IActionResult> OnGetAsync(int? id)
         {
-            if (id == null) // Thêm mới
+            if (id == null)
             {
                 ViewData["Title"] = "Thêm mới Chuyến đi";
-                TripInput = new TripInputModel { DepartureTime = DateTime.Now.Date.AddDays(1).AddHours(8) }; // Mặc định ngày mai, 8h sáng
-                await LoadSelectListsAsync(filterDriversByCompany: TripInput.CompanyId.HasValue, selectedCompanyId: TripInput.CompanyId);
+                TripInput = new TripInputModel { DepartureTime = DateTime.Now.Date.AddDays(1).AddHours(8) };
+                await LoadSelectListsAsync();
             }
-            else // Chỉnh sửa
+            else
             {
                 ViewData["Title"] = "Chỉnh sửa Chuyến đi";
                 var trip = await _context.Trips
-                    .Include(t => t.TripStops.OrderBy(ts => ts.StopOrder)) // Load các điểm dừng và sắp xếp
+                    .Include(t => t.TripStops.OrderBy(ts => ts.StopOrder))
                     .FirstOrDefaultAsync(t => t.TripId == id);
                 if (trip == null) return NotFound();
 
@@ -118,36 +106,50 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
                     CompanyId = trip.CompanyId,
                     DepartureTime = trip.DepartureTime,
                     Price = trip.Price,
-                    InitialAvailableSeats = trip.AvailableSeats.Value, // Hoặc lấy từ Bus.Capacity nếu là logic khởi tạo
+                    InitialAvailableSeats = trip.AvailableSeats ?? 0,
                     Status = trip.Status,
-                    // Ánh xạ TripStop entities sang TripStopInputModel
                     TripStops = trip.TripStops.Select(ts => new TripStopInputModel
                     {
-                        StopId = ts.StopId,
+                        // StopId is not present in TripStopInputModel, so we do not assign it here
                         StopOrder = ts.StopOrder,
-                        StationName = ts.StationName,
-                        Latitude = ts.Latitude,
-                        Longitude = ts.Longitude,
                         EstimatedArrival = ts.EstimatedArrival,
                         EstimatedDeparture = ts.EstimatedDeparture,
                         Note = ts.Note
                     }).ToList()
                 };
-                await LoadSelectListsAsync(trip.RouteId, trip.BusId, trip.DriverId, trip.CompanyId, filterDriversByCompany: trip.CompanyId.HasValue);
+                await LoadSelectListsAsync(trip.RouteId, trip.BusId, trip.DriverId, trip.CompanyId);
             }
             return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
         {
-            if (TripInput.DepartureTime <= DateTime.UtcNow.AddHours(1)) // Phải khởi hành sau ít nhất 1 giờ nữa
+            // Chỉ kiểm tra ràng buộc thời gian khởi hành nếu tạo mới, hoặc sửa nhưng trạng thái KHÔNG phải Completed/Cancelled
+            bool isCreating = TripInput.TripId == 0;
+            bool isCompleting = !isCreating && TripInput.Status == TripStatus.Completed;
+            if (!isCompleting && TripInput.DepartureTime <= DateTime.UtcNow.AddHours(1))
             {
                 ModelState.AddModelError("TripInput.DepartureTime", "Thời gian khởi hành phải sau thời điểm hiện tại ít nhất 1 giờ.");
             }
 
+            if (TripInput.CompanyId.HasValue)
+            {
+                var bus = await _context.Buses.FindAsync(TripInput.BusId);
+                if (bus == null || bus.CompanyId != TripInput.CompanyId)
+                {
+                    ModelState.AddModelError("TripInput.BusId", "Xe được chọn không thuộc nhà xe đã chọn.");
+                }
+
+                var driver = await _context.Drivers.FindAsync(TripInput.DriverId);
+                if (driver == null || driver.CompanyId != TripInput.CompanyId)
+                {
+                    ModelState.AddModelError("TripInput.DriverId", "Tài xế được chọn không thuộc nhà xe đã chọn.");
+                }
+            }
+
             bool busConflict = await _context.Trips.AnyAsync(t => t.BusId == TripInput.BusId && t.TripId != TripInput.TripId &&
                                                                 t.Status == TripStatus.Scheduled &&
-                                                                t.DepartureTime < TripInput.DepartureTime.AddHours(4) && // Giả sử 1 chuyến kéo dài 4h
+                                                                t.DepartureTime < TripInput.DepartureTime.AddHours(4) &&
                                                                 t.DepartureTime.AddHours(4) > TripInput.DepartureTime);
             if (busConflict) ModelState.AddModelError("TripInput.BusId", "Xe này đã có lịch trình bị trùng thời gian.");
 
@@ -163,15 +165,14 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
 
             bool driverConflict = await _context.Trips.AnyAsync(t => t.DriverId == TripInput.DriverId && t.TripId != TripInput.TripId &&
                                                                 t.Status == TripStatus.Scheduled &&
-                                                                t.DepartureTime < TripInput.DepartureTime.AddHours(8) && // Giả sử tài xế cần nghỉ 8h giữa các chuyến
+                                                                t.DepartureTime < TripInput.DepartureTime.AddHours(8) &&
                                                                 t.DepartureTime.AddHours(8) > TripInput.DepartureTime);
             if (driverConflict) ModelState.AddModelError("TripInput.DriverId", "Tài xế này đã có lịch trình bị trùng thời gian.");
 
             if (!ModelState.IsValid)
             {
-                await LoadSelectListsAsync(TripInput.RouteId, TripInput.BusId, TripInput.DriverId, TripInput.CompanyId, filterDriversByCompany: TripInput.CompanyId.HasValue);
+                await LoadSelectListsAsync(TripInput.RouteId, TripInput.BusId, TripInput.DriverId, TripInput.CompanyId);
                 ViewData["Title"] = TripInput.TripId == 0 ? "Thêm mới Chuyến đi" : "Chỉnh sửa Chuyến đi";
-
                 TripInput.TripStops ??= new List<TripStopInputModel>();
                 return Page();
             }
@@ -182,94 +183,111 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             if (TripInput.TripId == 0)
             {
                 var bus = await _context.Buses.FindAsync(TripInput.BusId);
-                // Tạo chuyến đi mới
-#pragma warning disable CS8629 // Nullable value type may be null.
                 var newTrip = new Trip
                 {
-                    RouteId = TripInput.RouteId.Value,
-                    BusId = TripInput.BusId.Value,
-                    DriverId = TripInput.DriverId.Value,
+                    RouteId = TripInput.RouteId!.Value,
+                    BusId = TripInput.BusId!.Value,
+                    DriverId = TripInput.DriverId!.Value,
                     CompanyId = TripInput.CompanyId,
                     DepartureTime = TripInput.DepartureTime,
                     Price = TripInput.Price,
-                    AvailableSeats = bus?.Capacity ?? TripInput.InitialAvailableSeats, // Lấy capacity từ bus nếu có
-                    Status = TripStatus.Scheduled, // Mặc định
+                    AvailableSeats = bus?.Capacity ?? TripInput.InitialAvailableSeats,
+                    Status = TripStatus.Scheduled,
                     CreatedAt = DateTime.UtcNow,
                     UpdatedAt = DateTime.UtcNow
                 };
-#pragma warning restore CS8629 // Nullable value type may be null.
                 _context.Trips.Add(newTrip);
                 await _context.SaveChangesAsync();
                 if (TripInput.TripStops != null)
                 {
                     foreach (var stopInput in TripInput.TripStops)
                     {
-                        _context.TripStops.Add(stopInput.ToTripStop(newTrip.TripId));
+                        // Tạo mới Stop từ các trường nhập trực tiếp
+                        var newStop = new Stop
+                        {
+                            StopName = stopInput.StationName,
+                            Latitude = stopInput.Latitude ?? 0,
+                            Longitude = stopInput.Longitude ?? 0,
+                            Address = null
+                        };
+                        _context.Stops.Add(newStop);
+                        await _context.SaveChangesAsync();
+                        // Lưu TripStop với StopId vừa tạo
+                        var tripStop = new TripStop
+                        {
+                            TripId = newTrip.TripId,
+                            StopId = newStop.StopId,
+                            StopOrder = stopInput.StopOrder,
+                            EstimatedArrival = stopInput.EstimatedArrival,
+                            EstimatedDeparture = stopInput.EstimatedDeparture,
+                            Note = stopInput.Note
+                        };
+                        _context.TripStops.Add(tripStop);
                     }
                 }
                 successMessage = "Đã thêm mới chuyến đi thành công.";
-                // Lấy tên lộ trình cho thông báo
                 var route = await _context.Routes.FindAsync(newTrip.RouteId);
                 notificationMessage = $"Chuyến đi mới ({route?.Departure} - {route?.Destination}) đã được tạo, khởi hành lúc {newTrip.DepartureTime:dd/MM/yyyy HH:mm}.";
             }
-            else // Chỉnh sửa
+            else
             {
                 var tripToUpdate = await _context.Trips.FindAsync(TripInput.TripId);
                 if (tripToUpdate == null) return NotFound();
                 if (tripToUpdate.Status == TripStatus.Completed || tripToUpdate.Status == TripStatus.Cancelled)
                 {
                     TempData["ErrorMessage"] = "Không thể chỉnh sửa chuyến đi đã hoàn thành hoặc đã hủy.";
-                    await LoadSelectListsAsync(TripInput.RouteId, TripInput.BusId, TripInput.DriverId, TripInput.CompanyId, filterDriversByCompany: TripInput.CompanyId.HasValue);
-                    ViewData["Title"] = "Chỉnh sửa Chuyến đi"; // Đặt lại title
-                    TripInput.TripStops ??= new List<TripStopInputModel>(); // Đảm bảo TripStops không null
+                    await LoadSelectListsAsync(TripInput.RouteId, TripInput.BusId, TripInput.DriverId, TripInput.CompanyId);
+                    ViewData["Title"] = "Chỉnh sửa Chuyến đi";
+                    TripInput.TripStops ??= new List<TripStopInputModel>();
                     return Page();
                 }
                 var bus = await _context.Buses.FindAsync(TripInput.BusId);
-
-#pragma warning disable CS8629 // Nullable value type may be null.
-                tripToUpdate.RouteId = TripInput.RouteId.Value;
-#pragma warning restore CS8629 // Nullable value type may be null.
-#pragma warning disable CS8629 // Nullable value type may be null.
-                tripToUpdate.BusId = TripInput.BusId.Value;
-#pragma warning restore CS8629 // Nullable value type may be null.
-#pragma warning disable CS8629 // Nullable value type may be null.
-                tripToUpdate.DriverId = TripInput.DriverId.Value;
-#pragma warning restore CS8629 // Nullable value type may be null.
+                tripToUpdate.RouteId = TripInput.RouteId!.Value;
+                tripToUpdate.BusId = TripInput.BusId!.Value;
+                tripToUpdate.DriverId = TripInput.DriverId!.Value;
                 tripToUpdate.CompanyId = TripInput.CompanyId;
                 tripToUpdate.DepartureTime = TripInput.DepartureTime;
                 tripToUpdate.Price = TripInput.Price;
                 int ticketsSold = await _context.Tickets.CountAsync(t => t.TripId == tripToUpdate.TripId && t.Status == TicketStatus.Booked);
                 tripToUpdate.AvailableSeats = (bus?.Capacity ?? tripToUpdate.AvailableSeats) - ticketsSold;
-
                 tripToUpdate.Status = TripInput.Status;
+                tripToUpdate.CancellationReason = TripInput.CancellationReason;
                 tripToUpdate.UpdatedAt = DateTime.UtcNow;
 
                 _context.Attach(tripToUpdate).State = EntityState.Modified;
 
-                // Xử lý cập nhật TripStops
+                // Xóa hết các TripStop cũ
                 var existingStops = await _context.TripStops.Where(ts => ts.TripId == tripToUpdate.TripId).ToListAsync();
-                var updatedStops = TripInput.TripStops ?? new List<TripStopInputModel>();
-
-                // Xóa các điểm dừng cũ không còn trong danh sách mới
                 foreach (var existingStop in existingStops)
                 {
-                    if (!updatedStops.Any(us => us.StopId == existingStop.StopId && us.StopId != 0))
-                    {
-                        _context.TripStops.Remove(existingStop);
-                    }
+                    _context.TripStops.Remove(existingStop);
                 }
 
-                // Thêm mới hoặc cập nhật các điểm dừng trong danh sách mới
-                foreach (var updatedStopInput in updatedStops)
+                // Thêm lại các TripStop mới
+                var updatedStops = TripInput.TripStops ?? new List<TripStopInputModel>();
+                foreach (var stopInput in updatedStops)
                 {
-                    if (updatedStopInput.StopId == 0) // Thêm mới
+                    // Tạo mới Stop từ các trường nhập trực tiếp
+                    var newStop = new Stop
                     {
-                        _context.TripStops.Add(updatedStopInput.ToTripStop(tripToUpdate.TripId));
-                    }
-                    else // Cập nhật
+                        StopName = stopInput.StationName,
+                        Latitude = stopInput.Latitude ?? 0,
+                        Longitude = stopInput.Longitude ?? 0,
+                        Address = null
+                    };
+                    _context.Stops.Add(newStop);
+                    await _context.SaveChangesAsync();
+                    // Lưu TripStop với StopId vừa tạo
+                    var tripStop = new TripStop
                     {
-                        _context.Entry(updatedStopInput.ToTripStop(tripToUpdate.TripId)).State = EntityState.Modified;
-                    }
+                        TripId = tripToUpdate.TripId,
+                        StopId = newStop.StopId,
+                        StopOrder = stopInput.StopOrder,
+                        EstimatedArrival = stopInput.EstimatedArrival,
+                        EstimatedDeparture = stopInput.EstimatedDeparture,
+                        Note = stopInput.Note
+                    };
+                    _context.TripStops.Add(tripStop);
                 }
                 successMessage = "Đã cập nhật thông tin chuyến đi thành công.";
                 var route = await _context.Routes.FindAsync(tripToUpdate.RouteId);
@@ -278,14 +296,13 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
 
             await _context.SaveChangesAsync();
 
-            // Tạo thông báo
             var notification = new Notification
             {
                 Message = notificationMessage,
                 Category = NotificationCategory.Trip,
                 TargetUrl = Url.Page("./Index"),
                 IconCssClass = "bi bi-signpost-split-fill",
-                RecipientUserId = null // Reverted
+                RecipientUserId = null
             };
             _context.Notifications.Add(notification);
             await _context.SaveChangesAsync();
@@ -301,20 +318,10 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             {
                 return new JsonResult(NotFound("Không tìm thấy lộ trình.")) { StatusCode = 404 };
             }
-            if (!string.IsNullOrEmpty(route.OriginCoordinates) && !string.IsNullOrEmpty(route.DestinationCoordinates))
-            {
-                return new JsonResult(new
-                {
-                    originCoordinates = route.OriginCoordinates,
-                    destinationCoordinates = route.DestinationCoordinates,
-                    originAddress = route.OriginAddress ?? route.Departure,
-                    destinationAddress = route.DestinationAddress ?? route.Destination,
-                    distance = route.Distance,
-                    estimatedDuration = route.EstimatedDuration?.ToString(@"hh\h\ mm\m")
-                });
-            }
             return new JsonResult(new
             {
+                originCoordinates = route.OriginCoordinates,
+                destinationCoordinates = route.DestinationCoordinates,
                 originAddress = route.OriginAddress ?? route.Departure,
                 destinationAddress = route.DestinationAddress ?? route.Destination,
                 distance = route.Distance,
@@ -322,25 +329,54 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
             });
         }
 
-
-
         public async Task<JsonResult> OnGetDriversByCompanyAsync(int? companyId)
         {
-            IQueryable<Driver> query = _context.Drivers.Where(d => d.Status == DriverStatus.Active);
+            var query = _context.Drivers.Where(d => d.Status == DriverStatus.Active);
             if (companyId.HasValue)
             {
                 query = query.Where(d => d.CompanyId == companyId.Value);
             }
-            else
-            {
-                // Nếu không có companyId (ví dụ: người dùng chọn "-- Chọn nhà xe --"),
-                // trả về tất cả tài xế đang hoạt động.
-                // Hoặc bạn có thể quyết định trả về danh sách rỗng hoặc chỉ tài xế chưa thuộc nhà xe nào.
-                // query = query.Where(d => d.CompanyId == null); // Ví dụ: chỉ tài xế chưa có nhà xe
-            }
-            var drivers = await query.OrderBy(d => d.Fullname)
-                                   .Select(d => new { id = d.DriverId, name = $"{d.Fullname} (ID: {d.DriverId})" }).ToListAsync();
+            var drivers = await query
+                .OrderBy(d => d.Fullname)
+                .Select(d => new { id = d.DriverId, name = $"{d.Fullname} (ID: {d.DriverId})" })
+                .ToListAsync();
             return new JsonResult(drivers);
+        }
+        public async Task<JsonResult> OnGetBusesByCompanyAsync(int? companyId)
+        {
+            var query = _context.Buses.Where(b => b.Status == BusStatus.Active);
+            if (companyId.HasValue)
+            {
+                query = query.Where(b => b.CompanyId == companyId.Value);
+            }
+            var buses = await query
+                .OrderBy(b => b.LicensePlate)
+                .Select(b => new { id = b.BusId, name = $"{b.LicensePlate} ({b.BusType} - {b.Capacity} ghế)" })
+                .ToListAsync();
+            return new JsonResult(buses);
+        }
+        public async Task<JsonResult> OnGetRoutesByCompanyAsync(int? companyId)
+        {
+            var query = _context.Routes.Where(r => r.Status == RouteStatus.Approved);
+            if (companyId.HasValue)
+            {
+                query = query.Where(r => r.ProposedByCompanyId == companyId.Value);
+            }
+            var routes = await query
+                .OrderBy(r => r.Departure)
+                .ThenBy(r => r.Destination)
+                .Select(r => new { id = r.RouteId, name = $"{r.Departure} \u2192 {r.Destination} (ID: {r.RouteId})" })
+                .ToListAsync();
+            return new JsonResult(routes);
+        }
+        public async Task<JsonResult> OnGetBusDetailsAsync(int busId)
+        {
+            var bus = await _context.Buses
+                .Where(b => b.BusId == busId && b.Status == BusStatus.Active)
+                .Select(b => new { b.Capacity })
+                .FirstOrDefaultAsync();
+            if (bus == null) return new JsonResult(NotFound("Không tìm thấy xe.")) { StatusCode = 404 };
+            return new JsonResult(bus);
         }
     }
 
@@ -365,7 +401,7 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
 
         [Required(ErrorMessage = "Thời gian khởi hành không được để trống.")]
         [Display(Name = "Thời gian khởi hành")]
-        public DateTime DepartureTime { get; set; } = DateTime.Now.AddDays(1).AddHours(7); // Default
+        public DateTime DepartureTime { get; set; } = DateTime.Now.AddDays(1).AddHours(7);
 
         [Required(ErrorMessage = "Giá vé không được để trống.")]
         [Range(10000, 10000000, ErrorMessage = "Giá vé phải từ 10.000 đến 10.000.000 VNĐ.")]
@@ -373,48 +409,39 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
         public decimal Price { get; set; }
 
         [Required(ErrorMessage = "Số ghế ban đầu không được để trống.")]
-        [Range(1, 70, ErrorMessage = "Số ghế phải từ 1 đến 70.")] // Điều chỉnh giới hạn trên
+        [Range(1, 100, ErrorMessage = "Số ghế phải từ 1 đến 100.")]
         [Display(Name = "Số ghế ban đầu (sẽ lấy theo xe nếu có)")]
         public int InitialAvailableSeats { get; set; }
 
         [Display(Name = "Trạng thái")]
         public TripStatus Status { get; set; } = TripStatus.Scheduled;
 
-        // Các trường cho Google Maps khi tạo/sửa Route (nếu tích hợp sâu hơn)
-        // public string? GMapOriginAddress { get; set; }
-        // public string? GMapDestinationAddress { get; set; }
-
         [Display(Name = "Điểm dừng chân")]
         public List<TripStopInputModel> TripStops { get; set; } = new List<TripStopInputModel>();
 
-        [Display(Name = "Lý do từ chối/hủy")] // Thêm thuộc tính này
+        [Display(Name = "Lý do từ chối/hủy")]
         public string? CancellationReason { get; set; }
     }
 
-    // ViewModel cho từng điểm dừng chân trong form
     public class TripStopInputModel
     {
-        public int StopId { get; set; } // 0 cho điểm dừng mới
+        // Không còn dùng StopId, thay bằng nhập trực tiếp các trường bên dưới
+        [Required(ErrorMessage = "Tên trạm dừng không được để trống.")]
+        [Display(Name = "Tên trạm dừng")]
+        public string StationName { get; set; } = string.Empty;
+
+        [Required(ErrorMessage = "Vĩ độ không được để trống.")]
+        [Display(Name = "Vĩ độ")]
+        public double? Latitude { get; set; }
+
+        [Required(ErrorMessage = "Kinh độ không được để trống.")]
+        [Display(Name = "Kinh độ")]
+        public double? Longitude { get; set; }
 
         [Required(ErrorMessage = "Thứ tự dừng không được để trống.")]
         [Range(1, int.MaxValue, ErrorMessage = "Thứ tự dừng phải lớn hơn 0.")]
         [Display(Name = "Thứ tự")]
         public int StopOrder { get; set; }
-
-        [Required(ErrorMessage = "Tên trạm dừng không được để trống.")]
-        [StringLength(255)]
-        [Display(Name = "Tên trạm")]
-        public string StationName { get; set; } = string.Empty;
-
-        [Required(ErrorMessage = "Vĩ độ không được để trống.")]
-        [Range(-90.0, 90.0, ErrorMessage = "Vĩ độ không hợp lệ.")]
-        [Display(Name = "Vĩ độ")]
-        public double Latitude { get; set; }
-
-        [Required(ErrorMessage = "Kinh độ không được để trống.")]
-        [Range(-180.0, 180.0, ErrorMessage = "Kinh độ không hợp lệ.")]
-        [Display(Name = "Kinh độ")]
-        public double Longitude { get; set; }
 
         [Display(Name = "Đến (dự kiến)")]
         [DataType(DataType.Time)]
@@ -428,23 +455,6 @@ namespace BusTicketSystem.Pages.ForAdmin.TripManage
         [Display(Name = "Ghi chú")]
         public string? Note { get; set; }
 
-        // Helper để chuyển đổi sang entity TripStop
-        public TripStop ToTripStop(int tripId)
-        {
-            return new TripStop
-            {
-                StopId = this.StopId,
-                TripId = tripId,
-                StopOrder = this.StopOrder,
-                StationName = this.StationName,
-                Latitude = this.Latitude,
-                Longitude = this.Longitude,
-                EstimatedArrival = this.EstimatedArrival,
-                EstimatedDeparture = this.EstimatedDeparture,
-                Note = this.Note,
-                // CreatedAt và UpdatedAt sẽ được EF Core hoặc DB xử lý
-            };
-        }
+        // Không dùng nữa, logic tạo TripStop đã chuyển vào OnPostAsync
     }
-
 }
