@@ -6,8 +6,8 @@ namespace BusTicketSystem.Models
     {
         [Display(Name ="Tin tức")]
         News,
-        [Display(Name ="Khuyến mãi")]
-        Promotion,
+        // [Display(Name ="Khuyến mãi")]
+        // Promotion,
         [Display(Name ="Thông báo")]
         Announcement,
         [Display(Name ="Hướng dẫn")]

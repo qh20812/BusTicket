@@ -95,8 +95,23 @@
                     <input type="hidden" id="modalTripId" name="TripId" />
                     <input type="hidden" id="modalQuantity" name="Quantity" />
                     <div class="mb-3">
-                        <label for="guestPhone" class="form-label">Số điện thoại</label>
-                        <input type="tel" class="form-control" id="guestPhone" name="GuestPhone" required>
+                        <label for="guestPhone" class="form-label">Số điện thoại <span class="text-danger">*</span></label>
+                        <input type="tel" class="form-control input-phone" id="guestPhone" name="guestPhone" placeholder="Nhập số điện thoại" required maxlength="15" autocomplete="tel" />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label d-block mb-2">Loại vé <span class="text-danger">*</span></label>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tripType" id="oneWayRadio" value="one-way" checked>
+                            <label class="form-check-label" for="oneWayRadio">Một chiều</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="radio" name="tripType" id="roundTripRadio" value="round-trip">
+                            <label class="form-check-label" for="roundTripRadio">Khứ hồi</label>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="returnDateGroup" style="display:none;">
+                        <label for="returnDateInput" class="form-label">Ngày về <span class="text-danger">*</span></label>
+                        <input type="date" class="form-control date-input" id="returnDateInput" name="returnDate" min="@DateTime.Now.ToString("yyyy-MM-dd")" />
                     </div>
                 </form>
             </div>
@@ -138,6 +153,7 @@
 
 @section Scripts {
     <script>
+
         document.addEventListener('DOMContentLoaded', function () {
             const bookingModal = new bootstrap.Modal(document.getElementById('bookingModal'));
             const seatSelectionModal = new bootstrap.Modal(document.getElementById('seatSelectionModal'));
@@ -148,14 +164,17 @@
             const selectedSeatsDisplay = document.getElementById('selectedSeatsDisplay');
             const selectedSeatCountSpan = document.getElementById('selectedSeatCount');
 
-            let currentTripId = null;
-            let requiredQuantity = 0;
-            let selectedSeats = [];
-            let busCapacity = 0;
-            let bookedSeats = [];
-            let busType = '';
-            let isTwoStory = false;
+            // --- Bổ sung biến cho đồng bộ loại vé/ngày về ---
+            const oneWayRadio = document.getElementById('oneWayRadio');
+            const roundTripRadio = document.getElementById('roundTripRadio');
+            const returnDateGroup = document.getElementById('returnDateGroup');
+            const returnDateInput = document.getElementById('returnDateInput');
 
+            // Lấy giá trị TripType và returnDate từ form tìm vé (nếu có)
+            let initialTripType = '@(Model.TripType ?? "one-way")';
+            let initialReturnDate = '@(Model.ReturnDate?.ToString("yyyy-MM-dd") ?? "")';
+
+            // Khi mở modal đặt vé, đồng bộ loại vé/ngày về từ form tìm vé
             document.querySelectorAll('.book-trip-btn').forEach(button => {
                 button.addEventListener('click', function (e) {
                     e.preventDefault();
@@ -176,15 +195,49 @@
                     updateSeatSelectionDisplay();
                     confirmBookingBtn.disabled = true;
 
-                    // Luôn show modal booking khi click Đặt vé (kể cả khi không đi qua Xem chi tiết)
+                    // --- Đồng bộ loại vé và ngày về khi mở modal ---
+                    if (initialTripType === 'round-trip') {
+                        roundTripRadio.checked = true;
+                        returnDateGroup.style.display = '';
+                        if (initialReturnDate) {
+                            returnDateInput.value = initialReturnDate;
+                        }
+                    } else {
+                        oneWayRadio.checked = true;
+                        returnDateGroup.style.display = 'none';
+                        returnDateInput.value = '';
+                    }
+
                     bookingModal.show();
                 });
             });
 
+            // Hiển thị/ẩn input ngày về khi chọn loại vé
+            oneWayRadio.addEventListener('change', function () {
+                if (this.checked) {
+                    returnDateGroup.style.display = 'none';
+                    returnDateInput.value = '';
+                }
+            });
+            roundTripRadio.addEventListener('change', function () {
+                if (this.checked) {
+                    returnDateGroup.style.display = '';
+                }
+            });
+
             document.getElementById('continueToSeatSelectionBtn').addEventListener('click', async function () {
+                // Kiểm tra hợp lệ số điện thoại, loại vé, ngày về nếu là khứ hồi
                 if (!passengerInfoForm.checkValidity()) {
                     passengerInfoForm.reportValidity();
                     return;
+                }
+                // Nếu chọn khứ hồi mà chưa nhập ngày về thì báo lỗi
+                if (roundTripRadio.checked && !returnDateInput.value) {
+                    returnDateInput.classList.add('is-invalid');
+                    returnDateInput.focus();
+                    return;
+                } else {
+                    returnDateInput.classList.remove('is-invalid');
                 }
 
                 bookingModal.hide();
@@ -354,11 +407,16 @@
                     return;
                 }
                 const guestPhone = document.getElementById('guestPhone').value;
+                // Lấy loại vé và ngày về từ modal
+                const tripType = oneWayRadio.checked ? 'one-way' : 'round-trip';
+                const returnDate = returnDateInput.value;
                 const bookingData = {
                     tripId: currentTripId,
                     selectedSeats: selectedSeats,
                     quantity: requiredQuantity,
-                    guestPhone: guestPhone
+                    guestPhone: guestPhone,
+                    tripType: tripType,
+                    returnDate: returnDate
                 };
 
                 confirmBookingBtn.disabled = true;

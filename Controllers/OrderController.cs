@@ -65,6 +65,31 @@ namespace BusTicketSystem.Controllers
                 return BadRequest("Invalid user ID.");
             }
 
+            // XỬ LÝ GÁN LOẠI VÉ (TicketType) CHO TỪNG VÉ TRONG ĐƠN HÀNG
+            // Giả sử client truyền TripType ("one-way" hoặc "round-trip") và ngày về vào order (nếu có)
+            // Nếu không có property TripType trong Order, bạn cần bổ sung hoặc lấy từ request
+            string tripType = null;
+            if (Request.HasFormContentType && Request.Form.ContainsKey("TripType"))
+            {
+                tripType = Request.Form["TripType"].ToString();
+            }
+            // Nếu Order có property TripType thì dùng: tripType = order.TripType;
+
+            if (order.Tickets != null && order.Tickets.Any())
+            {
+                foreach (var ticket in order.Tickets)
+                {
+                    if (!string.IsNullOrEmpty(tripType) && tripType == "round-trip")
+                    {
+                        ticket.Type = TicketType.RoundTrip;
+                    }
+                    else
+                    {
+                        ticket.Type = TicketType.OneWay;
+                    }
+                }
+            }
+
             _context.Orders.Add(order);
             await _context.SaveChangesAsync();
             return CreatedAtAction(nameof(GetOrder), new { id = order.OrderId }, order);

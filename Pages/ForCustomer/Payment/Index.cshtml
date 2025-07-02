@@ -78,6 +78,30 @@
                         <p class="value-item">@Model.TicketRouteName</p>
                     </div>
                     <div class="invoice-row">
+                        <p class="label-item">Loại vé</p>
+                        <p class="value-item">
+                            @if (Model.TicketType != null)
+                            {
+                                if (Model.TicketType == BusTicketSystem.Models.TicketType.OneWay)
+                                {
+                                    <span>Vé một chiều</span>;
+                                }
+                                else if (Model.TicketType == BusTicketSystem.Models.TicketType.RoundTrip)
+                                {
+                                    <span>Vé khứ hồi</span>;
+                                }
+                                else
+                                {
+                                    <span>Không xác định</span>;
+                                }
+                            }
+                            else
+                            {
+                                <span>Không xác định</span>;
+                            }
+                        </p>
+                    </div>
+                    <div class="invoice-row">
                         <p class="label-item">Thời gian khởi hành</p>
                         <p class="value-item">@Model.TicketDepartureTime</p>
                     </div>

@@ -10,6 +10,12 @@ namespace BusTicketSystem.Models
         Cancelled,
         Used
     }
+
+    public enum TicketType
+    {
+        OneWay,
+        RoundTrip
+    }
     public class Ticket
     {
         [Key]
@@ -26,6 +32,10 @@ namespace BusTicketSystem.Models
         [Required] // Matches SQL DECIMAL(10,2)
         [Column(TypeName = "decimal(10,2)")]
         public decimal Price { get; set; }
+        
+        [Required]
+        public TicketType Type { get; set; } = TicketType.OneWay;
+
         [Required]
         public TicketStatus Status { get; set; } = TicketStatus.Booked;
         public DateTime BookedAt { get; set; } = DateTime.UtcNow;

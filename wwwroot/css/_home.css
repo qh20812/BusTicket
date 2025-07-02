@@ -645,19 +645,33 @@ footer > .columns > div > p {
 
 #chatbot-box {
     position: fixed;
-    bottom: 90px; /* Adjusted position */
+    bottom: 90px;
     right: 24px;
-    width: 320px; /* Slightly smaller width */
-    max-width: 95vw;
+    width: 420px;
+    max-width: 98vw;
+    min-width: 320px;
     background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 6px 24px rgba(0,0,0,0.18);
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(25,118,210,0.18), 0 2px 8px rgba(60,60,60,0.08);
     display: none;
     flex-direction: column;
     pointer-events: auto !important;
     z-index: 999999;
     overflow: hidden;
+    min-height: 420px;
+    max-height: 80vh;
     animation: fadeInUp 0.3s;
+    transition: box-shadow 0.18s, width 0.18s;
+}
+
+@media (max-width: 600px) {
+    #chatbot-box {
+        width: 98vw;
+        right: 1vw;
+        left: 1vw;
+        min-width: unset;
+        border-radius: 10px;
+    }
 }
 
 @keyframes fadeInUp {

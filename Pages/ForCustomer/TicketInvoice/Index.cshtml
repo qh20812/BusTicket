@@ -27,7 +27,7 @@
                                 <div class="ti-ticket">
                                     <p>Họ và tên:</p>
                                     <p>Số điện thoại:</p>
-                            </div>
+                                </div>
                                 <div class="body-ticket">
                                     <p>@Model.Order.User.Fullname</p>
                                     <p>@Model.Order.User.Phone</p>
@@ -71,21 +71,26 @@
                                         }
                                     }
                                 </p>
-                                @if(Model.Order.Status == OrderStatus.Pending){
+                                @if (Model.Order.Status == OrderStatus.Pending)
+                                {
                                     <p style="color: #FBC02D;">Chờ thanh toán</p>
                                 }
-                                else if(Model.Order.Status== OrderStatus.Paid){
+                                else if (Model.Order.Status == OrderStatus.Paid)
+                                {
                                     <p style="color: green;">Thành công</p>
                                 }
-                                else if(Model.Order.Status== OrderStatus.Cancelled){
+                                else if (Model.Order.Status == OrderStatus.Cancelled)
+                                {
                                     <p style="color: red;">Đã hủy</p>
                                 }
-                                else if(Model.Order.Status== OrderStatus.Refunded){
+                                else if (Model.Order.Status == OrderStatus.Refunded)
+                                {
                                     <p style="color: blue;">Đã hoàn tiền</p>
                                 }
                             </div>
                         </div>
-                        @if (Model.Order.OrderTickets.Any()){
+                        @if (Model.Order.OrderTickets.Any())
+                        {
                             <div class="container-invoice">
                                 <div class="header-invoice">
                                     <div class="icon-invoice">
@@ -95,56 +100,128 @@
                                         <i class="bi bi-share-fill"></i>
                                     </div>
                                 </div>
-                            <div class="qr--invoice">
-                                @* chứa mã qr code của vé *@
-                            </div>
-                            <div class="boydy-invoice">
-                                <div class="invoice-row">
-                                    <p class="label-item">Mã đặt vé</p>
-                                    <p class="value-item">@Model.Order.OrderId</p>
+                                <div class="qr--invoice">
+                                    @* chứa mã qr code của vé *@
                                 </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Lộ trình</p>
-                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Departure - @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Destination</p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Thời gian khởi hành</p>
-                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy")</p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Số ghế</p>
-                                    <p class="value-item">
-                                        @if (Model.Order.OrderTickets != null && Model.Order.OrderTickets.Any())
+                                <div class="boydy-invoice">
+                                    <div class="invoice-row">
+                                        <p class="label-item">Mã đặt vé</p>
+                                        <p class="value-item">@Model.Order.OrderId</p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Lộ trình</p>
+                                        <p class="value-item">
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Departure -
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.Destination
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Loại vé</p>
+                                        <p class="value-item">
+                                            @{
+                                                var ticketType = Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Type;
+                                                if (ticketType != null)
+                                                {
+                                                    if (ticketType == BusTicketSystem.Models.TicketType.OneWay)
+                                                    {
+                                                        <span>Vé một chiều</span>
+                                                    }
+                                                    else if (ticketType == BusTicketSystem.Models.TicketType.RoundTrip)
+                                                    {
+                                                        <span>Vé khứ hồi</span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span>Không xác định</span>
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    <span>Không xác định</span>
+                                                }
+                                            }
+                                        </p>
+                                    </div>
+                                    @* Ngày về chỉ hiển thị nếu là vé khứ hồi *@
+                                    @{
+                                        var ticket = Model.Order.OrderTickets.FirstOrDefault()?.Ticket;
+                                        var isRoundTrip = ticket?.Type == BusTicketSystem.Models.TicketType.RoundTrip;
+                                        // Ưu tiên lấy ngày về từ Ticket nếu có, hoặc từ Order nếu bạn lưu ở đó
+                                        DateTime? returnDate = null;
+                                        if (isRoundTrip)
                                         {
-                                            @string.Join(", ", Model.Order.OrderTickets.Select(ot => ot.Ticket?.SeatNumber).Where(sn => !string.IsNullOrEmpty(sn)))
+                                            // Nếu bạn lưu ngày về ở Ticket hoặc Order, lấy ở đây. Ví dụ:
+                                            // returnDate = ticket.ReturnDate;
+                                            // Nếu chưa có, có thể lấy từ ViewModel hoặc Order nếu đã lưu
                                         }
-                                        else { @("N/A") }
-                                    </p>
+                                    }
+                                    @if (isRoundTrip)
+                                    {
+                                        <div class="invoice-row">
+                                            <p class="label-item">Ngày về</p>
+                                            <p class="value-item">@((returnDate.HasValue ? returnDate.Value.ToString("dd/MM/yyyy") : "---"))</p>
+                                        </div>
+                                    }
+                                    <div class="invoice-row">
+                                        <p class="label-item">Thời gian khởi hành</p>
+                                        <p class="value-item">
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy")
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Số ghế</p>
+                                        <p class="value-item">
+                                            @if (Model.Order.OrderTickets != null && Model.Order.OrderTickets.Any())
+                                            {
+                                                @string.Join(", ", Model.Order.OrderTickets.Select(ot => ot.Ticket?.SeatNumber).Where(sn => !string.IsNullOrEmpty(sn)))
+                                            }
+                                            else
+                                            {
+                                                @("N/A")
+                                            }
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Điểm lên xe</p>
+                                        <p class="value-item">
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">
+                                            Quý khách vui lòng có mặt tại Bến xe
+                                            <span style="font-weight: bold;">
+                                                @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress
+                                            </span>
+                                            <span style="color: rgb(214, 2, 2);">
+                                                Trước @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy")
+                                            </span>
+                                            để kiểm tra thông tin trước khi lên xe.
+                                        </p>
+                                        <p class="value-item"></p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Điểm trả khách</p>
+                                        <p class="value-item">
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.DestinationAddress
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Giá vé</p>
+                                        <p class="value-item">
+                                            @Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Price.ToString("N0")đ
+                                        </p>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <p class="label-item">Biển số xe</p>
+                                        <p class="value-item">
+                                            @(Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Bus?.LicensePlate ?? "Đang cập nhật")
+                                        </p>
+                                    </div>
+                                </div> <!-- Close boydy-invoice here -->
+                                <div class="ticket-end" style="display: flex; justify-content: center; align-items: center; width: 100%; margin-top: 12px; padding-left: 5px; padding-right: 5px;">
+                                    <p style="text-align: center; margin-bottom: 0; padding: 5px; padding-left: 10px; padding-right: 10px;">Mang mã vé đến bến xe để đổi vé lên xe trước giờ khởi hành ít nhất 60 phút.</p>
                                 </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Điểm lên xe</p>
-                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress</p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Quý khách vui lòng có mặt tại Bến xe <span style="font-weight: bold;">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.OriginAddress</span> <span style="color: rgb(214, 2, 2);">Trước @(Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.DepartureTime.ToString("HH:mm - dd/MM/yyyy"))</span> để kiểm tra thông tin trước khi lên xe.</p>
-                                    <p class="value-item"></p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Điểm trả khách</p>
-                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Route?.DestinationAddress</p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Giá vé</p>
-                                    <p class="value-item">@Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Price.ToString("N0")đ</p>
-                                </div>
-                                <div class="invoice-row">
-                                    <p class="label-item">Biển số xe</p>
-                                    <p class="value-item">@(Model.Order.OrderTickets.FirstOrDefault()?.Ticket?.Trip?.Bus?.LicensePlate ?? "Đang cập nhật")</p>
-                                </div>
-                            </div>
-                            </div>
-                            <div class="ticket-end">
-                                <p>Mang mã vé đến bến xe để đổi vé lên xe trước giờ khởi hành ít nhất 60 phút.</p>
                             </div>
                         }
                         else
@@ -160,22 +237,16 @@
                     @if (Model.Order.Status == BusTicketSystem.Models.OrderStatus.Pending)
                     {
                         <div class="btn-payment">
-                            <a asp-page="/ForCustomer/Payment/Index" asp-route-orderId="@Model.Order.OrderId"
-                                class="btn-payment-continue"><i class='bx bx-credit-card' style="padding-right: 5px;"></i> Tiến hành Thanh toán</a>
+                            <a asp-page="/ForCustomer/Payment/Index" asp-route-orderId="@Model.Order.OrderId" class="btn-payment-continue">
+                                <i class='bx bx-credit-card' style="padding-right: 5px;"></i> Tiến hành Thanh toán
+                            </a>
                         </div>
                     }
                 </div>
             </div>
         </div>
     }
-    else
-    {
-        <div class="alert alert-warning text-center" role="alert">
-            Không tìm thấy thông tin hóa đơn.
-        </div>
-    }
 </div>
-
 
 @section Scripts {
     @* Thêm bất kỳ script cần thiết nào ở đây, ví dụ: cho tích hợp thanh toán sau này *@

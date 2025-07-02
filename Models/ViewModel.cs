@@ -21,6 +21,9 @@ namespace BusTicketSystem.Models.ViewModels
         public int? AvailableSeats { get; set; }
         public int? Capacity { get; set; }
 
+        // Thêm property để hiển thị loại vé (TicketType) nếu cần
+        public TicketType? TicketType { get; set; }
+
         public string RouteName { get; set; } = "N/A";
         public string BusInfo { get; set; } = "N/A";
         public string DriverName { get; set; } = "N/A";
@@ -74,6 +77,11 @@ namespace BusTicketSystem.Models.ViewModels
             Price = t.Price;
             AvailableSeats = t.AvailableSeats;
             Status = t.Status;
+            // Nếu có vé liên quan, lấy loại vé đầu tiên (nếu cần hiển thị)
+            if (t.Tickets != null && t.Tickets.Any())
+            {
+                TicketType = t.Tickets.First().Type;
+            }
             
             CreatedAt = t.CreatedAt;
             UpdatedAt = t.UpdatedAt;

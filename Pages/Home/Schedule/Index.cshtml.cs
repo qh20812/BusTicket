@@ -211,7 +211,6 @@ namespace BusTicketSystem.Pages.Home.Schedule
                 {
                     var trip = await _context.Trips
                         .Include(t => t.Bus)
-                        // .Include(t => t.Tickets.Where(ti => ti.Status == TicketStatus.Booked || ti.Status == TicketStatus.Used)) // Sẽ query lại sau để đảm bảo tính thời sự
                         .FirstOrDefaultAsync(t => t.TripId == bookingRequest.TripId);
 
                     if (trip == null || trip.Bus == null)
@@ -255,9 +254,13 @@ namespace BusTicketSystem.Pages.Home.Schedule
                         CreatedAt = DateTime.UtcNow,
                         UpdatedAt = DateTime.UtcNow,
                         OrderTickets = new List<OrderTicket>() // Khởi tạo
+                        // Có thể bổ sung lưu ReturnDate vào Order nếu muốn
                     };
                     _context.Orders.Add(order);
                     await _context.SaveChangesAsync(); // Lưu Order để lấy OrderId
+
+                    // Xác định loại vé
+                    var ticketType = bookingRequest.TripType == "round-trip" ? TicketType.RoundTrip : TicketType.OneWay;
 
                     // Tạo Tickets và OrderTickets
                     var ticketsToCreate = new List<Ticket>();
@@ -273,7 +276,8 @@ namespace BusTicketSystem.Pages.Home.Schedule
                             SeatNumber = seatNumber,
                             Price = trip.Price,
                             Status = TicketStatus.Booked,
-                            BookedAt = DateTime.UtcNow
+                            BookedAt = DateTime.UtcNow,
+                            Type = ticketType
                         };
                         ticketsToCreate.Add(ticket);
                     }
@@ -303,8 +307,7 @@ namespace BusTicketSystem.Pages.Home.Schedule
                 catch (Exception ex)
                 {
                     await transaction.RollbackAsync();
-                    // Ghi log lỗi ở đây (ví dụ: _logger.LogError(ex, "Lỗi khi đặt vé");)
-                    System.Diagnostics.Debug.WriteLine($"Lỗi khi đặt vé: {ex.ToString()}"); // Ghi log ra Output window khi debug
+                    System.Diagnostics.Debug.WriteLine($"Lỗi khi đặt vé: {ex.ToString()}");
                     return new JsonResult(new { success = false, message = "Đã xảy ra lỗi máy chủ trong quá trình đặt vé. Vui lòng thử lại." }) { StatusCode = 500 };
                 }
             }
@@ -328,5 +331,7 @@ namespace BusTicketSystem.Pages.Home.Schedule
         [Phone(ErrorMessage = "Số điện thoại không hợp lệ.")]
         public string? GuestPhone { get; set; }
         // Thêm các trường thông tin hành khách khác nếu cần
+        public string? TripType { get; set; } // "one-way" hoặc "round-trip"
+        public DateTime? ReturnDate { get; set; }
     }
 }

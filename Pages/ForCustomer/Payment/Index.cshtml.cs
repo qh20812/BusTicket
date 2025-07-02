@@ -35,6 +35,7 @@ namespace BusTicketSystem.Pages.ForCustomer.Payment
         public string? TicketDestinationAddress { get; set; }
         public decimal? TicketIndividualPrice { get; set; }
         public string? TicketBusLicensePlate { get; set; }
+        public TicketType? TicketType { get; set; }
 
         public async Task<IActionResult> OnGetAsync(int? orderId)
         {
@@ -130,6 +131,7 @@ namespace BusTicketSystem.Pages.ForCustomer.Payment
                 }
                 TicketIndividualPrice = firstTicketInfo?.Price;
                 TicketSeatNumbers = string.Join(", ", order.OrderTickets.Select(ot => ot.Ticket?.SeatNumber).Where(sn => !string.IsNullOrEmpty(sn)));
+                TicketType = firstTicketInfo?.Type;
             }
             AmountToPay = order.TotalAmount;
             ConfirmationUrl = Url.Page("./Index", "ConfirmDemoPayment", new { orderId = OrderId });
